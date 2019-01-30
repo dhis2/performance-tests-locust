@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  locust:
+    restart: always
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    environment:
+      LOCUST_MASTER_BIND_HOST: "127.0.0.1"
+      LOCUST_MASTER_BIND_PORT: "5557"
+      LOCUST_FILE: "/locust-master.py"
+      HOST: "127.0.0.1"
+
+    volumes:
+      - ./locust-master.py:/locust-master.py
+
+    ports:
+      - 5557:5557
+      - 8089:8089
+      - 5558:5558
+
