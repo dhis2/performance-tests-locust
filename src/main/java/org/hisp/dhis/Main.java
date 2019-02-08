@@ -13,7 +13,7 @@ public class Main
     public static void main( String[] args )
     {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        RestAssured.baseURI = "http://play.dhis2.org/2.29";
+        RestAssured.baseURI = "https://play.dhis2.org/dev";
 
         Benchmark benchmark = Benchmark.newInstance();
 
