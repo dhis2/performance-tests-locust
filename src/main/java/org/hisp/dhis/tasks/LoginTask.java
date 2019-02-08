@@ -25,7 +25,7 @@ public class LoginTask
     public void execute()
         throws Exception
     {
-        RestAssured.getRestAssured().authentication = preemptive().basic( "admin", "district" );
+        RestAssured.getRestAssured().authentication = preemptive().basic( "system", "System123" );
 
         Response apiResponse =
             RestAssured.getRestAssured().given()
