@@ -5,7 +5,7 @@ package org.hisp.dhis;
  */
 public class RestAssured
 {
-    private static ThreadLocal<io.restassured.RestAssured> restAssuredThreadLocal = new ThreadLocal<io.restassured.RestAssured>();
+    private static ThreadLocal<io.restassured.RestAssured> restAssuredThreadLocal = new ThreadLocal<>();
 
     public static io.restassured.RestAssured getRestAssured()
     {

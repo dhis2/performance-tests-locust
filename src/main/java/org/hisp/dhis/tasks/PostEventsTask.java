@@ -11,12 +11,17 @@ import static io.restassured.RestAssured.when;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class PostEventsTask extends DhisAbstractTask
+public class PostEventsTask
+    extends
+    DhisAbstractTask
 {
     private JsonObject body;
-    public PostEventsTask( JsonObject body ) {
+
+    public PostEventsTask( JsonObject body )
+    {
         this.body = body;
     }
+
     public int getWeight()
     {
         return 1;
@@ -29,13 +34,11 @@ public class PostEventsTask extends DhisAbstractTask
 
     public void execute()
     {
-        Response response = given()
-            .contentType( ContentType.JSON )
-            .body( body )
-            .when()
-            .post("/api/events").thenReturn();
+        Response response = given().contentType( ContentType.JSON ).body( body ).when().post( "/api/events" )
+            .thenReturn();
 
-        if (response.statusCode() == 200) {
+        if ( response.statusCode() == 200 )
+        {
             recordSuccess( response );
             return;
         }

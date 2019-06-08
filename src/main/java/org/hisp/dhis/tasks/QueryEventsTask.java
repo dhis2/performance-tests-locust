@@ -1,6 +1,5 @@
 package org.hisp.dhis.tasks;
 
-import com.github.myzhan.locust4j.AbstractTask;
 import com.google.gson.JsonObject;
 import io.restassured.response.Response;
 
@@ -9,13 +8,16 @@ import static io.restassured.RestAssured.given;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class QueryEventsTask extends DhisAbstractTask
+public class QueryEventsTask
+    extends
+    DhisAbstractTask
 {
     private String query = "/api/events/";
 
     private JsonObject responseBody;
 
-    public QueryEventsTask(String query) {
+    public QueryEventsTask( String query )
+    {
         this.query += query;
     }
 
@@ -30,14 +32,13 @@ public class QueryEventsTask extends DhisAbstractTask
     }
 
     public void execute()
-        throws Exception
     {
-        Response response = given()
-            .get(query);
+        Response response = given().get( query );
 
         this.responseBody = response.body().as( JsonObject.class );
 
-        if (response.statusCode() == 200) {
+        if ( response.statusCode() == 200 )
+        {
             recordSuccess( response );
             return;
         }
