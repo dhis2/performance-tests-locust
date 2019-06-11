@@ -73,6 +73,12 @@ public class EntitiesCache
         }
     }
 
+    public void loadAll()
+    {
+        this.loadTeiTypeCache();
+        this.loadProgramCache();
+    }
+
     private List<DataElement> getDataElementsFromStage( String programStageUid )
     {
         return getPayload( "/api/programStages/" + programStageUid ).jsonPath()

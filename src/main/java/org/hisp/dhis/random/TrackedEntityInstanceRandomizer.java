@@ -1,5 +1,6 @@
 package org.hisp.dhis.random;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -28,13 +29,11 @@ import static org.hisp.dhis.utils.RandomUtils.getRandomNumberInRange;
 public class TrackedEntityInstanceRandomizer
 {
 
-    private int minEnrollment = 1;
-
-    private int maxEnrollment = 1;
-
     private int maxEvent = 5;
 
     private int minEVent = 1;
+
+    private DateFormat df = new SimpleDateFormat( "yyyy-MM-dd" );
 
     public TrackedEntityInstance create( EntitiesCache cache )
     {
@@ -62,12 +61,12 @@ public class TrackedEntityInstanceRandomizer
         enrollment.setEvents( IntStream.rangeClosed( 1, eventsSize ).mapToObj( i -> {
 
             Event event = new Event();
-            event.setDueDate( "2018-01-10T00:00:00.000" );
+            event.setDueDate( df.format(new Date()) );
             event.setProgram( program.getUid() );
             event.setProgramStage( programStage.getUid() );
             event.setOrgUnit( ou );
             event.setStatus( EventStatus.ACTIVE );
-            event.setEventDate( "2018-01-10T00:00:00.000" );
+            event.setEventDate( df.format(new Date()) );
             event.setFollowup( false );
             event.setDeleted( false );
             event.setAttributeOptionCombo( "" ); // TODO

@@ -28,12 +28,11 @@ public class AddTeiTask
 
     public String getName()
     {
-        return "Add TEI";
+        return "POST /api/trackedEntityInstances";
     }
 
     public void execute()
     {
-
         TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstanceRandomizer().create( this.cache, 5 );
 
         long time = System.currentTimeMillis();

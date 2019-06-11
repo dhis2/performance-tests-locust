@@ -41,13 +41,13 @@ public class Main
 
         RestAssured.baseURI = cfg.targetUri();
         EntitiesCache cache;
+        
         new LoginTask().execute();
 
         if ( !CacheUtils.cacheExists() )
         {
             cache = new EntitiesCache();
-            cache.loadTeiTypeCache();
-            cache.loadProgramCache();
+            cache.loadAll();
             CacheUtils.serializeCache( cache );
         }
         else
@@ -61,9 +61,5 @@ public class Main
         Locust locust = locustSlave.init();
     
         locust.run( new AddTeiTask( 50, cache ) );
-
-
-
     }
-
 }
