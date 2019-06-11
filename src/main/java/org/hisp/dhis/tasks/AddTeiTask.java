@@ -23,7 +23,7 @@ public class AddTeiTask
 
     public int getWeight()
     {
-        return 0;
+        return this.weight;
     }
 
     public String getName()
@@ -42,7 +42,7 @@ public class AddTeiTask
         boolean hasFailed = false;
         try
         {
-            response = given().log().all().contentType( ContentType.JSON ).body( trackedEntityInstances ).when()
+            response = given().contentType( ContentType.JSON ).body( trackedEntityInstances ).when()
                 .post( "/api/trackedEntityInstances" ).thenReturn();
         }
         catch ( Exception e )

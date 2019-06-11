@@ -1,6 +1,5 @@
 package org.hisp.dhis;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -9,7 +8,6 @@ import org.aeonbits.owner.ConfigFactory;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.locust.LocustSlave;
-import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.tasks.AddTeiTask;
 import org.hisp.dhis.tasks.LoginTask;
 
