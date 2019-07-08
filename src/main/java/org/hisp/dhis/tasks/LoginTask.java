@@ -10,7 +10,8 @@ import static io.restassured.RestAssured.preemptive;
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
 public class LoginTask
-    extends DhisAbstractTask
+    extends
+    DhisAbstractTask
 {
     public int getWeight()
     {
@@ -23,16 +24,11 @@ public class LoginTask
     }
 
     public void execute()
-        throws Exception
     {
         RestAssured.getRestAssured().authentication = preemptive().basic( "system", "System123" );
 
-        Response apiResponse =
-            RestAssured.getRestAssured().given()
-                .contentType( ContentType.TEXT )
-                .when()
-                .get( "api/me" )
-                .thenReturn();
+        Response apiResponse = RestAssured.getRestAssured().given().contentType( ContentType.TEXT ).when()
+            .get( "api/me" ).thenReturn();
 
         if ( apiResponse.statusCode() == 200 )
         {

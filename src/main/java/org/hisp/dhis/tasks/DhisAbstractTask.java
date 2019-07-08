@@ -10,7 +10,11 @@ import io.restassured.response.Response;
 public abstract class DhisAbstractTask
     extends AbstractTask
 {
-    public abstract int getWeight();
+    protected int weight;
+
+    public int getWeight() {
+        return this.weight;
+    }
 
     public abstract String getName();
 

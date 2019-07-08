@@ -1,12 +1,11 @@
-FROM python:3.5-alpine
+FROM python:3.6.6-alpine3.8
 
 COPY docker-entrypoint.sh /
 
-RUN  apk --no-cache add --virtual=.build-dep build-base \
-    && apk --no-cache add libzmq \
-    && pip install --no-cache-dir locustio \
-    && apk del .build-dep \
-    && chmod +x /docker-entrypoint.sh
+RUN apk --no-cache add g++ \
+      && apk --no-cache add zeromq-dev \
+      && pip install locustio pyzmq \
+      && chmod +x /docker-entrypoint.sh
 
 
 RUN  mkdir /locust
