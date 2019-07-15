@@ -3,17 +3,19 @@ version: '3'
 services:
   locust:
     restart: always
-    build:
-      dockerfile: ./Dockerfile
-      context: .
+    image: "dhis2/locustio:latest"
     environment:
       LOCUST_MASTER_BIND_HOST: "127.0.0.1"
       LOCUST_MASTER_BIND_PORT: "5557"
       LOCUST_FILE: "/locust-master.py"
       HOST: "127.0.0.1"
+      USERS: ${USERS:-10}
+      HATCH_RATE: ${HATCH_RATE:-1}
+      TIME: ${TIME:-10s}
 
     volumes:
       - ./locust-master.py:/locust-master.py
+      - ./locust:/locust
 
     ports:
       - 5557:5557
