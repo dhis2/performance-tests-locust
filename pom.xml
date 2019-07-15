@@ -41,12 +41,6 @@
     </dependency>
 
     <dependency>
-      <groupId>me.xdrop</groupId>
-      <artifactId>jrand</artifactId>
-      <version>0.2.7-alpha</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>1.18.8</version>

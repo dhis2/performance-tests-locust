@@ -8,7 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import me.xdrop.jrand.JRand;
+import com.vividsolutions.jts.geom.Coordinate;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
@@ -118,7 +119,7 @@ public class TrackedEntityInstanceRandomizer
             {
                 if ( valueType.equals( ValueType.BOOLEAN ) )
                 {
-                    val = JRand.bool().genString();
+                    val = String.valueOf( RandomUtils.getRandomBoolean() );
                 }
                 else
                 {
@@ -129,19 +130,19 @@ public class TrackedEntityInstanceRandomizer
 
             else if ( valueType.isDate() )
             {
-                val = new SimpleDateFormat( "yyyy-MM-dd" ).format( JRand.birthday().gen() );
+                val = new SimpleDateFormat( "yyyy-MM-dd" ).format( RandomUtils.getRandomDate() );
             }
             else if ( valueType.isNumeric() )
             {
-                val = JRand.natural().min( 1 ).max( 10000 ).genString();
+                val = String.valueOf( RandomUtils.getRandomLong( 1, 10000 ) );
             }
             else if ( valueType.isDecimal() )
             {
-                val = JRand.decimal().genString();
+                val = String.valueOf( RandomUtils.getRandomDecimal() );
             }
             else if ( valueType.isText() )
             {
-                val = JRand.word().gen();
+                val = RandomStringUtils.randomAlphabetic(10);
             }
             else if ( valueType.isOrganisationUnit() )
             {
@@ -149,7 +150,8 @@ public class TrackedEntityInstanceRandomizer
             }
             else if ( valueType.isGeo() )
             {
-                val = JRand.coordinates().genString();
+                Coordinate coordinate = RandomUtils.getRandomPoint().getCoordinate();
+                val = coordinate.y + ", " + coordinate.x;
             }
         }
         dataValue.setValue( val );
