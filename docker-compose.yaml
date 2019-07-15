@@ -9,10 +9,11 @@ services:
       LOCUST_MASTER_BIND_PORT: "5557"
       LOCUST_FILE: "/locust-master.py"
       HOST: "127.0.0.1"
+      NO_WEB: ${NO_WEB:-false}
       USERS: ${USERS:-10}
       HATCH_RATE: ${HATCH_RATE:-1}
       TIME: ${TIME:-10s}
-
+   
     volumes:
       - ./locust-master.py:/locust-master.py
       - ./locust:/locust
