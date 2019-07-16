@@ -41,9 +41,9 @@
     </dependency>
 
     <dependency>
-      <groupId>me.xdrop</groupId>
-      <artifactId>jrand</artifactId>
-      <version>0.2.7-alpha</version>
+      <groupId>com.github.javafaker</groupId>
+      <artifactId>javafaker</artifactId>
+      <version>0.18</version>
     </dependency>
 
     <dependency>

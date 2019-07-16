@@ -1,14 +1,6 @@
 package org.hisp.dhis.random;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import me.xdrop.jrand.JRand;
+import com.github.javafaker.Faker;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
@@ -22,9 +14,14 @@ import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.organisationunit.FeatureType;
-import org.hisp.dhis.utils.RandomUtils;
 
-import static org.hisp.dhis.utils.RandomUtils.getRandomNumberInRange;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TrackedEntityInstanceRandomizer
 {
@@ -35,11 +32,13 @@ public class TrackedEntityInstanceRandomizer
 
     private DateFormat df = new SimpleDateFormat( "yyyy-MM-dd" );
 
+    private Faker faker = Faker.instance();
+
     public TrackedEntityInstance create( EntitiesCache cache )
     {
-        Program program = cache.getProgram( RandomUtils.getRandomNumberInRange( 0, cache.getPrograms().size() - 1 ) );
+        Program program = cache.getProgram( faker.number().numberBetween( 0, cache.getPrograms().size() - 1 ) );
         ProgramStage programStage = getRandomProgramStageFromProgram( program );
-        String ou = program.getOrgUnit( RandomUtils.getRandomNumberInRange( 0, program.getOrgUnits().size() - 1 ) );
+        String ou = program.getOrgUnit( faker.number().numberBetween( 0, program.getOrgUnits().size() - 1 ) );
 
         TrackedEntityInstance tei = new TrackedEntityInstance();
         tei.setTrackedEntityType( cache.getTeiType( "Person" ).getUid() );
@@ -57,7 +56,7 @@ public class TrackedEntityInstanceRandomizer
         enrollment.setFollowup( false );
         enrollment.setDeleted( false );
 
-        int eventsSize = RandomUtils.getRandomNumberInRange( minEVent, maxEvent );
+        int eventsSize = faker.number().numberBetween( minEVent, maxEvent );
         enrollment.setEvents( IntStream.rangeClosed( 1, eventsSize ).mapToObj( i -> {
 
             Event event = new Event();
@@ -89,12 +88,12 @@ public class TrackedEntityInstanceRandomizer
     {
         Set<DataValue> dataValues = new HashSet<>();
         int maxSize = max > programStage.getDataElements().size() ? programStage.getDataElements().size() : max;
-        int dataElementsSize = RandomUtils.getRandomNumberInRange( min - 1, maxSize - 1 );
+        int dataElementsSize = faker.number().numberBetween( min - 1, maxSize - 1 );
 
         while ( dataValues.size() < dataElementsSize )
         {
             dataValues.add( withRandomValue( programStage.getDataElements()
-                .get( getRandomNumberInRange( 0, programStage.getDataElements().size() - 1 ) ) ) );
+                .get( faker.number().numberBetween( 0, programStage.getDataElements().size() - 1 ) ) ) );
         }
 
         return dataValues;
@@ -108,7 +107,7 @@ public class TrackedEntityInstanceRandomizer
         String val = null;
         if ( dataElement.getOptionSet() != null && !dataElement.getOptionSet().isEmpty() )
         {
-            val = dataElement.getOptionSet().get( getRandomNumberInRange( 0, dataElement.getOptionSet().size() - 1 ) );
+            val = dataElement.getOptionSet().get( faker.number().numberBetween( 0, dataElement.getOptionSet().size() - 1 ) );
         }
         else
         {
@@ -118,7 +117,7 @@ public class TrackedEntityInstanceRandomizer
             {
                 if ( valueType.equals( ValueType.BOOLEAN ) )
                 {
-                    val = JRand.bool().genString();
+                    val = String.valueOf( faker.bool().bool() );
                 }
                 else
                 {
@@ -129,19 +128,20 @@ public class TrackedEntityInstanceRandomizer
 
             else if ( valueType.isDate() )
             {
-                val = new SimpleDateFormat( "yyyy-MM-dd" ).format( JRand.birthday().gen() );
+                val = new SimpleDateFormat( "yyyy-MM-dd" ).format( faker.date().birthday() );
             }
+
             else if ( valueType.isNumeric() )
             {
-                val = JRand.natural().min( 1 ).max( 10000 ).genString();
+                val = String.valueOf( faker.number().numberBetween( 1, 10000 ) );
             }
             else if ( valueType.isDecimal() )
             {
-                val = JRand.decimal().genString();
+                val = String.valueOf( faker.number().randomDouble( 6, 0, 1000 ) );
             }
             else if ( valueType.isText() )
             {
-                val = JRand.word().gen();
+                val = faker.lorem().characters( 10 );
             }
             else if ( valueType.isOrganisationUnit() )
             {
@@ -149,7 +149,9 @@ public class TrackedEntityInstanceRandomizer
             }
             else if ( valueType.isGeo() )
             {
-                val = JRand.coordinates().genString();
+                String longtitute = faker.address().longitude();
+                String latitude = faker.address().latitude();
+                val = latitude + ", " + longtitute;
             }
         }
         dataValue.setValue( val );
@@ -158,6 +160,6 @@ public class TrackedEntityInstanceRandomizer
 
     private ProgramStage getRandomProgramStageFromProgram( Program program )
     {
-        return program.getStages().get( RandomUtils.getRandomNumberInRange( 0, program.getStages().size() - 1 ) );
+        return program.getStages().get( faker.number().numberBetween( 0, program.getStages().size() - 1 ) );
     }
 }
