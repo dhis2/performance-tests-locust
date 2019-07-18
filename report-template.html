@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style type="text/css">
+      table, th, td, tr { border: 1px solid black; border-collapse: collapse }
+      th {background-color: #add8e6; color: black;}
+
+    </style>
+</head>
+<title>Load Test Report</title>
+<body>
+<h1>Load Test Report</h1>
+<p>Load Test report generated at {{ datetime }}
+</p>
+<h2>Results</h2>
+RPS:<strong>{{ rps }}</strong> Failures: <strong>{{ fails }}</strong>
+</p>
+<h2>Statistics</h2>
+<table>
+    <tr>
+        {% for header in stat_headers %}
+        <th>
+            <p>{{header}}</p>
+        </th>
+        {% endfor %}
+    </tr>
+    <tr>
+        {% for data in stat_data %}
+            <td>
+                {% for value in data %}
+                <p>{{value}}</p>
+                {% endfor %}
+            </td>
+        {% endfor %}
+
+</table>
+<h2>Failures</h2>
+<table>
+    {% for header in e_headers %}
+    <th>
+        <p>{{header}}</p>
+    </th>
+    {% endfor %}
+
+    <tr>
+        {% for data in e_data %}
+        <td>
+            {% for value in data %}
+            <p>{{value}}</p>
+            {% endfor %}
+        </td>
+        {% endfor %}
+</table>
+<h2>Distribution</h2>
+<table>
+    {% for header in dist_headers %}
+    <th>
+        <p>{{header}}</p>
+    </th>
+    {% endfor %}
+
+    <tr>
+        {% for data in dist_data %}
+        <td>
+            {% for value in data %}
+            <p>{{value}}</p>
+            {% endfor %}
+        </td>
+        {% endfor %}
+    <tr>
+</table>
+</body>
+</html>
