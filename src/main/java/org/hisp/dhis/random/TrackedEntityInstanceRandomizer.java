@@ -17,6 +17,7 @@ import org.hisp.dhis.organisationunit.FeatureType;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +26,6 @@ import java.util.stream.IntStream;
 
 public class TrackedEntityInstanceRandomizer
 {
-
     private int maxEvent = 5;
 
     private int minEVent = 1;
@@ -72,6 +72,9 @@ public class TrackedEntityInstanceRandomizer
             event.setDataValues( createDataValues( programStage, 1, 8 ) );
             return event;
         } ).collect( Collectors.toList() ) );
+
+        tei.setEnrollments( Collections.singletonList( enrollment ) );
+
         return tei;
     }
 
@@ -87,7 +90,7 @@ public class TrackedEntityInstanceRandomizer
     private Set<DataValue> createDataValues( ProgramStage programStage, int min, int max )
     {
         Set<DataValue> dataValues = new HashSet<>();
-        int maxSize = max > programStage.getDataElements().size() ? programStage.getDataElements().size() : max;
+        int maxSize = Math.min(max, programStage.getDataElements().size());
         int dataElementsSize = faker.number().numberBetween( min - 1, maxSize - 1 );
 
         while ( dataValues.size() < dataElementsSize )
