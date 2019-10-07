@@ -32,6 +32,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hisp.dhis.common.ValueType;
 
+import java.util.List;
+
 /**
  * @author Luciano Fiandesio
  */
@@ -47,5 +49,10 @@ public class ProgramAttribute
 
     private boolean unique;
 
+    private String pattern;
+
+    private List<String> options;
+
+    public ProgramAttribute() {}
 
 }

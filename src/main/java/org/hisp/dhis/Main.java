@@ -6,10 +6,13 @@ import java.text.SimpleDateFormat;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.locust.LocustSlave;
+import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.tasks.AddTeiTask;
 import org.hisp.dhis.tasks.LoginTask;
+import org.hisp.dhis.utils.CacheUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.myzhan.locust4j.Locust;
@@ -17,7 +20,8 @@ import com.github.myzhan.locust4j.Locust;
 import io.restassured.RestAssured;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.config.RestAssuredConfig;
-import org.hisp.dhis.utils.CacheUtils;
+
+import static org.hisp.dhis.utils.CacheUtils.getCachePath;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -47,6 +51,7 @@ public class Main
 
         if ( !CacheUtils.cacheExists() )
         {
+            System.out.println("cache not found. Hold on while a new cache is created.");
             cache = new EntitiesCache();
             cache.loadAll();
             CacheUtils.serializeCache( cache );
@@ -55,12 +60,24 @@ public class Main
         {
             cache = CacheUtils.deserializeCache();
         }
-        System.out.println( "cache loaded" );
+        System.out.println( "cache loaded from " +  getCachePath() );
 
         LocustSlave locustSlave = LocustSlave.newInstance();
 
         Locust locust = locustSlave.init();
     
         locust.run( new AddTeiTask( 50, cache ) );
+    }
+
+    /**
+     * Utility method to generate a single TEI and dump the result in the console (useful for debugging, etc).
+     */
+    private static void generateTei( EntitiesCache cache ) throws IOException {
+
+        TrackedEntityInstance trackedEntityInstance = new TrackedEntityInstanceRandomizer().create( cache );
+        org.codehaus.jackson.map.ObjectMapper mapper = new org.codehaus.jackson.map.ObjectMapper();
+        DateFormat df = new SimpleDateFormat( "yyyy-MM-dd" );
+        mapper.setDateFormat( df );
+        System.out.println ( mapper.writerWithDefaultPrettyPrinter().writeValueAsString( trackedEntityInstance ) );
     }
 }

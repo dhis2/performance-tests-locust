@@ -41,7 +41,7 @@ public class AddTeiTask
         boolean hasFailed = false;
         try
         {
-            response = given().log().body().contentType( ContentType.JSON ).body( trackedEntityInstances ).when()
+            response = given().contentType( ContentType.JSON ).body( trackedEntityInstances ).when()
                 .post( "/api/trackedEntityInstances" ).thenReturn();
         }
         catch ( Exception e )

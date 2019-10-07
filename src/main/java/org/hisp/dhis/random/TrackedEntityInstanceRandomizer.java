@@ -4,7 +4,6 @@ import static net.andreinc.mockneat.unit.time.LocalDates.localDates;
 import static net.andreinc.mockneat.unit.types.Bools.bools;
 import static net.andreinc.mockneat.unit.types.Doubles.doubles;
 import static net.andreinc.mockneat.unit.types.Ints.ints;
-import static org.hisp.dhis.utils.RandomUtils.createRandomPoint;
 import static org.hisp.dhis.utils.RandomUtils.randomizeSequence;
 
 import java.text.DateFormat;
@@ -28,8 +27,8 @@ import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.organisationunit.FeatureType;
-
-import com.vividsolutions.jts.geom.Point;
+import org.hisp.dhis.textpattern.*;
+import org.springframework.util.StringUtils;
 
 import net.andreinc.mockneat.types.enums.StringType;
 import net.andreinc.mockneat.unit.objects.From;
@@ -51,7 +50,7 @@ public class TrackedEntityInstanceRandomizer
         String ou = getRandomOrgUnitFromProgram( program );
 
         TrackedEntityInstance tei = new TrackedEntityInstance();
-        tei.setTrackedEntityType( cache.getTeiType( "Person" ).getUid() );
+        tei.setTrackedEntityType( program.getEntityType() );
         tei.setInactive( false );
         tei.setDeleted( false );
         tei.setFeatureType( FeatureType.NONE );
@@ -147,8 +146,40 @@ public class TrackedEntityInstanceRandomizer
 
     private List<Attribute> getRandomAttributesList( Program program )
     {
-        return program.getAttributes().stream().map( att -> new Attribute( att.getTrackedEntityAttributeUid(),
-            att.getValueType(), rndValueFrom( att.getValueType() ) ) ).collect( Collectors.toList() );
+        return program.getAttributes().stream().map( att -> {
+            if ( !StringUtils.isEmpty( att.getPattern() ) )
+            {
+                try
+                {
+                    String patternValue = withPattern( TextPatternParser.parse( att.getPattern() ) );
+                    if ( att.getValueType().isNumeric() && patternValue.startsWith( "0" ) )
+                    {
+                        // Numeric type should not start with a 0
+                        patternValue = patternValue.replaceAll( "0", Ints.ints().range( 1, 9 ).get().toString() );
+                    }
+                    return new Attribute( att.getTrackedEntityAttributeUid(), att.getValueType(), patternValue );
+                }
+                catch ( TextPatternParser.TextPatternParsingException e )
+                {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+            else
+            {
+                if ( att.getOptions() == null )
+                {
+                    return new Attribute( att.getTrackedEntityAttributeUid(), att.getValueType(),
+                        rndValueFrom( att.getValueType() ) );
+                }
+                return null;
+//                else
+//                {
+//                    return new Attribute( att.getTrackedEntityAttributeUid(), att.getValueType(),
+//                        From.from( att.getOptions() ).get() );
+//                }
+            }
+        } ).filter( Objects::nonNull ).collect( Collectors.toList() );
     }
 
     private String rndValueFrom( ValueType valueType )
@@ -175,7 +206,7 @@ public class TrackedEntityInstanceRandomizer
 
         else if ( valueType.isNumeric() )
         {
-            val = String.valueOf( ints().range( 1, 10000 ).get() );
+            val = String.valueOf( ints().range( 1, 100000 ).get() );
         }
         else if ( valueType.isDecimal() )
         {
@@ -191,11 +222,40 @@ public class TrackedEntityInstanceRandomizer
         }
         else if ( valueType.isGeo() )
         {
-            Point p = createRandomPoint();
-            val = p.getY() + ", " + p.getY();
+//            Point p = createRandomPoint();
+//            val = p.getY() + ", " + p.getY();
+            val = ""; // TODO
         }
         return val;
     }
 
 
+    private String withPattern( TextPattern textPattern )
+    {
+        return generateValue( textPattern );
+    }
+
+    private String generateValue( TextPattern textPattern )
+    {
+        TextPatternSegment segment = getGeneratedSegment( textPattern );
+
+        if ( segment.getMethod().equals( TextPatternMethod.SEQUENTIAL ) )
+        {
+            return String.format( "%0" + segment.getParameter().length() + "d", Ints.ints().get() );
+        }
+        else if ( segment.getMethod().equals( TextPatternMethod.RANDOM ) )
+        {
+            return TextPatternMethodUtils.generateRandom( new Random(), segment.getParameter() );
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    private TextPatternSegment getGeneratedSegment( TextPattern textPattern )
+    {
+        return textPattern.getSegments().stream().filter( ( tp ) -> tp.getMethod().isGenerated() ).findFirst()
+            .orElse( null );
+    }
 }

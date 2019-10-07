@@ -19,9 +19,10 @@ public class Program
 
     public String getOrgUnit( int index )
     {
-
         return this.orgUnits.get( index );
     }
+
+    private String entityType;
 
     public Program() {
     }
