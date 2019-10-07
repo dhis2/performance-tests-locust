@@ -1,6 +1,19 @@
 package org.hisp.dhis.random;
 
-import com.github.javafaker.Faker;
+import static net.andreinc.mockneat.unit.time.LocalDates.localDates;
+import static net.andreinc.mockneat.unit.types.Bools.bools;
+import static net.andreinc.mockneat.unit.types.Doubles.doubles;
+import static net.andreinc.mockneat.unit.types.Ints.ints;
+import static org.hisp.dhis.utils.RandomUtils.createRandomPoint;
+import static org.hisp.dhis.utils.RandomUtils.randomizeSequence;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
@@ -10,19 +23,18 @@ import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
 import org.hisp.dhis.dxf2.events.event.DataValue;
 import org.hisp.dhis.dxf2.events.event.Event;
+import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.organisationunit.FeatureType;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import com.vividsolutions.jts.geom.Point;
+
+import net.andreinc.mockneat.types.enums.StringType;
+import net.andreinc.mockneat.unit.objects.From;
+import net.andreinc.mockneat.unit.text.Strings;
+import net.andreinc.mockneat.unit.types.Ints;
 
 public class TrackedEntityInstanceRandomizer
 {
@@ -32,13 +44,11 @@ public class TrackedEntityInstanceRandomizer
 
     private DateFormat df = new SimpleDateFormat( "yyyy-MM-dd" );
 
-    private Faker faker = Faker.instance();
-
     public TrackedEntityInstance create( EntitiesCache cache )
     {
-        Program program = cache.getProgram( faker.number().numberBetween( 0, cache.getPrograms().size() - 1 ) );
+        Program program = getRandomProgram( cache );
         ProgramStage programStage = getRandomProgramStageFromProgram( program );
-        String ou = program.getOrgUnit( faker.number().numberBetween( 0, program.getOrgUnits().size() - 1 ) );
+        String ou = getRandomOrgUnitFromProgram( program );
 
         TrackedEntityInstance tei = new TrackedEntityInstance();
         tei.setTrackedEntityType( cache.getTeiType( "Person" ).getUid() );
@@ -46,6 +56,7 @@ public class TrackedEntityInstanceRandomizer
         tei.setDeleted( false );
         tei.setFeatureType( FeatureType.NONE );
         tei.setOrgUnit( ou );
+        tei.setAttributes( getRandomAttributesList( program ) );
 
         Enrollment enrollment = new Enrollment();
         enrollment.setProgram( program.getUid() );
@@ -56,7 +67,7 @@ public class TrackedEntityInstanceRandomizer
         enrollment.setFollowup( false );
         enrollment.setDeleted( false );
 
-        int eventsSize = faker.number().numberBetween( minEVent, maxEvent );
+        int eventsSize = Ints.ints().range( minEVent, maxEvent ).get();
         enrollment.setEvents( IntStream.rangeClosed( 1, eventsSize ).mapToObj( i -> {
 
             Event event = new Event();
@@ -90,13 +101,12 @@ public class TrackedEntityInstanceRandomizer
     private Set<DataValue> createDataValues( ProgramStage programStage, int min, int max )
     {
         Set<DataValue> dataValues = new HashSet<>();
-        int maxSize = Math.min(max, programStage.getDataElements().size());
-        int dataElementsSize = faker.number().numberBetween( min - 1, maxSize - 1 );
-
-        while ( dataValues.size() < dataElementsSize )
+        int numberOfDataValuesToCreate = Ints.ints().range( min, max ).get();
+        List<Integer> indexes = randomizeSequence( programStage.getDataElements().size(), numberOfDataValuesToCreate );
+        
+        for ( Integer index : indexes )
         {
-            dataValues.add( withRandomValue( programStage.getDataElements()
-                .get( faker.number().numberBetween( 0, programStage.getDataElements().size() - 1 ) ) ) );
+            dataValues.add( withRandomValue( programStage.getDataElements().get(index)));
         }
 
         return dataValues;
@@ -110,59 +120,82 @@ public class TrackedEntityInstanceRandomizer
         String val = null;
         if ( dataElement.getOptionSet() != null && !dataElement.getOptionSet().isEmpty() )
         {
-            val = dataElement.getOptionSet().get( faker.number().numberBetween( 0, dataElement.getOptionSet().size() - 1 ) );
+            val = From.from( dataElement.getOptionSet() ).get();
         }
-        else
-        {
+        else {
 
-            ValueType valueType = dataElement.getValueType();
-            if ( valueType.isBoolean() )
-            {
-                if ( valueType.equals( ValueType.BOOLEAN ) )
-                {
-                    val = String.valueOf( faker.bool().bool() );
-                }
-                else
-                {
-                    // TRUE_ONLY
-                    val = "true";
-                }
-            }
-
-            else if ( valueType.isDate() )
-            {
-                val = new SimpleDateFormat( "yyyy-MM-dd" ).format( faker.date().birthday() );
-            }
-
-            else if ( valueType.isNumeric() )
-            {
-                val = String.valueOf( faker.number().numberBetween( 1, 10000 ) );
-            }
-            else if ( valueType.isDecimal() )
-            {
-                val = String.valueOf( faker.number().randomDouble( 6, 0, 1000 ) );
-            }
-            else if ( valueType.isText() )
-            {
-                val = faker.lorem().characters( 10 );
-            }
-            else if ( valueType.isOrganisationUnit() )
-            {
-                val = ""; // TODO
-            }
-            else if ( valueType.isGeo() )
-            {
-                String longtitute = faker.address().longitude();
-                String latitude = faker.address().latitude();
-                val = latitude + ", " + longtitute;
-            }
+            val = rndValueFrom( dataElement.getValueType() );
         }
         dataValue.setValue( val );
         return dataValue;
     }
 
+    private Program getRandomProgram(EntitiesCache cache)
+    {
+        return From.from( cache.getPrograms() ).get();
+    }
+
     private ProgramStage getRandomProgramStageFromProgram( Program program )
     {
-        return program.getStages().get( faker.number().numberBetween( 0, program.getStages().size() - 1 ) );
+        return From.from( program.getStages() ).get();
     }
+
+    private String getRandomOrgUnitFromProgram( Program program )
+    {
+        return From.from( program.getOrgUnits() ).get();
+    }
+
+    private List<Attribute> getRandomAttributesList( Program program )
+    {
+        return program.getAttributes().stream().map( att -> new Attribute( att.getTrackedEntityAttributeUid(),
+            att.getValueType(), rndValueFrom( att.getValueType() ) ) ).collect( Collectors.toList() );
+    }
+
+    private String rndValueFrom( ValueType valueType )
+    {
+        String val = null;
+
+        if ( valueType.isBoolean() )
+        {
+            if ( valueType.equals( ValueType.BOOLEAN ) )
+            {
+                val = String.valueOf( bools().get() );
+            }
+            else
+            {
+                // TRUE_ONLY
+                val = "true";
+            }
+        }
+
+        else if ( valueType.isDate() )
+        {
+            val = localDates().display( DateTimeFormatter.ISO_LOCAL_DATE ).get();
+        }
+
+        else if ( valueType.isNumeric() )
+        {
+            val = String.valueOf( ints().range( 1, 10000 ).get() );
+        }
+        else if ( valueType.isDecimal() )
+        {
+            val = String.valueOf( doubles().range( 100.0, 1000.0 ).get() );
+        }
+        else if ( valueType.isText() )
+        {
+            val = Strings.strings().type( StringType.LETTERS ).get();
+        }
+        else if ( valueType.isOrganisationUnit() )
+        {
+            val = ""; // TODO
+        }
+        else if ( valueType.isGeo() )
+        {
+            Point p = createRandomPoint();
+            val = p.getY() + ", " + p.getY();
+        }
+        return val;
+    }
+
+
 }

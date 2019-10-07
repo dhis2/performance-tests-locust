@@ -15,6 +15,8 @@ public class Program
 
     private List<ProgramStage> stages;
 
+    private List<ProgramAttribute> attributes;
+
     public String getOrgUnit( int index )
     {
 

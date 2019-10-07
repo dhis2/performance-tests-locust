@@ -2,3 +2,7 @@
 target/
 locust/
 venv/
+.settings
+.project
+.classpath
+.factorypath

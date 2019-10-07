@@ -28,6 +28,7 @@ public class Main
 
     public static void main( String[] args )
             throws IOException {
+
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
         // Configure RestAssured mapper to convert any date into DHIS2 format
 

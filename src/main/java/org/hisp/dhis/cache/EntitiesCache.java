@@ -35,7 +35,7 @@ public class EntitiesCache
      * Load all the DHIS2 programs from the target endpoint and builds a graph
      * containing
      * 
-     * program
+     * program -> program attributes
      *   |
      *   |__stages
      *        |
@@ -47,16 +47,15 @@ public class EntitiesCache
     {
         List<String> programUids = getPayload( "/api/programs" ).jsonPath().getList( "programs.id" );
 
-        long t = System.nanoTime();
-
+        // Load Tracker-only programs + stages + data elements + program attributes
         programs = programUids.parallelStream().filter( this::hasProgramRegistration )
             .map( ( String uid ) -> new Program( uid, getOrgUnitsFromProgram( uid ),
                 getStagesFromProgram( uid ).parallelStream()
                     .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ) ) )
-                    .collect( Collectors.toList() ) ) )
+                    .collect( Collectors.toList() ),
+                getTrackerAttributesFromProgram( uid ) ) )
             .collect( Collectors.toList() );
 
-        System.out.println( (double) (System.nanoTime() - t) / 1_000_000_000 );
         // free memory
         programCache = null;
     }
@@ -122,6 +121,28 @@ public class EntitiesCache
         return response.jsonPath().getList( "programStages.id" );
     }
 
+    private List<ProgramAttribute> getTrackerAttributesFromProgram( String programUid )
+    {
+        Response response = programCache.get( programUid );
+        List<ProgramAttribute> programAttributes = new ArrayList<>();
+        List<Map<String, Object>> atts = response.jsonPath().getList( "programTrackedEntityAttributes" );
+
+        for ( Map<String, Object> att : atts )
+        {
+            programAttributes.add( new ProgramAttribute( (String)att.get( "id" ), ValueType.valueOf((String) att.get( "valueType" )),
+                    (String)((Map)att.get( "trackedEntityAttribute" )).get("id"),
+                    getAttributeUniqueness((String) ((Map)att.get( "trackedEntityAttribute" )).get("id")) ) );
+        }
+        return programAttributes;
+
+    }
+
+    private boolean getAttributeUniqueness( String trackerAttributeUid )
+    {
+        return getPayload( "/api/trackedEntityAttributes/" + trackerAttributeUid ).jsonPath().getBoolean( "unique" );
+
+    }
+
     private boolean hasProgramRegistration( String programUid )
     {
         Response response = programCache.get( programUid );
@@ -164,9 +185,5 @@ public class EntitiesCache
     {
         return this.programs;
     }
-
-    public Program getProgram( int index )
-    {
-        return this.programs.get( index );
-    }
+    
 }
