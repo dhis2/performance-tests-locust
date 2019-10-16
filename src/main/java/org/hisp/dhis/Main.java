@@ -68,16 +68,4 @@ public class Main
     
         locust.run( new AddTeiTask( 50, cache ) );
     }
-
-    /**
-     * Utility method to generate a single TEI and dump the result in the console (useful for debugging, etc).
-     */
-    private static void generateTei( EntitiesCache cache ) throws IOException {
-
-        TrackedEntityInstance trackedEntityInstance = new TrackedEntityInstanceRandomizer().create( cache );
-        org.codehaus.jackson.map.ObjectMapper mapper = new org.codehaus.jackson.map.ObjectMapper();
-        DateFormat df = new SimpleDateFormat( "yyyy-MM-dd" );
-        mapper.setDateFormat( df );
-        System.out.println ( mapper.writerWithDefaultPrettyPrinter().writeValueAsString( trackedEntityInstance ) );
-    }
 }
