@@ -58,4 +58,9 @@ public class CacheUtils
     {
         return new File( CACHE_FILE ).exists();
     }
+
+    public static String getCachePath( ) {
+
+        return CACHE_FILE;
+    }
 }

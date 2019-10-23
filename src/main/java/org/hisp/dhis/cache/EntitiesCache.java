@@ -9,11 +9,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.hisp.dhis.common.ValueType;
+import org.springframework.util.StringUtils;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 
 /**
@@ -35,7 +37,7 @@ public class EntitiesCache
      * Load all the DHIS2 programs from the target endpoint and builds a graph
      * containing
      * 
-     * program
+     * program -> program attributes
      *   |
      *   |__stages
      *        |
@@ -47,16 +49,15 @@ public class EntitiesCache
     {
         List<String> programUids = getPayload( "/api/programs" ).jsonPath().getList( "programs.id" );
 
-        long t = System.nanoTime();
-
+        // Load Tracker-only programs + stages + data elements + program attributes
         programs = programUids.parallelStream().filter( this::hasProgramRegistration )
             .map( ( String uid ) -> new Program( uid, getOrgUnitsFromProgram( uid ),
                 getStagesFromProgram( uid ).parallelStream()
                     .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ) ) )
-                    .collect( Collectors.toList() ) ) )
+                    .collect( Collectors.toList() ),
+                getTrackerAttributesFromProgram( uid ) , getTrackedEntityTypeUid( uid )) )
             .collect( Collectors.toList() );
 
-        System.out.println( (double) (System.nanoTime() - t) / 1_000_000_000 );
         // free memory
         programCache = null;
     }
@@ -122,6 +123,57 @@ public class EntitiesCache
         return response.jsonPath().getList( "programStages.id" );
     }
 
+    private List<ProgramAttribute> getTrackerAttributesFromProgram( String programUid )
+    {
+        Response response = programCache.get( programUid );
+        List<ProgramAttribute> programAttributes = new ArrayList<>();
+        List<Map<String, Object>> atts = response.jsonPath().getList( "programTrackedEntityAttributes" );
+
+        for ( Map<String, Object> att : atts )
+        {
+            JsonPath trackedEntityAttribute = getAttributeUniqueness((String) ((Map)att.get( "trackedEntityAttribute" )).get("id"));
+            programAttributes.add( new ProgramAttribute( (String)att.get( "id" ), ValueType.valueOf((String) att.get( "valueType" )),
+                    (String)((Map)att.get( "trackedEntityAttribute" )).get("id"),
+                    trackedEntityAttribute.getBoolean("unique"),
+                    trackedEntityAttribute.getString("pattern"),
+                    getProgramAttributeOptionValues( trackedEntityAttribute )));
+        }
+        return programAttributes;
+
+    }
+
+    private List<String> getProgramAttributeOptionValues( JsonPath trackedEntityAttribute )
+    {
+        String optionSetUid = null;
+        Map optionSet = trackedEntityAttribute.get("optionSet");
+        if (optionSet != null) {
+            optionSetUid = (String) optionSet.get("id");
+        }
+        if ( !StringUtils.isEmpty( optionSetUid ) )
+        {
+            // TODO fill the array list with values from option sets
+            return new ArrayList<>();
+
+        }
+        return null;
+
+    }
+
+    private JsonPath getAttributeUniqueness(String trackerAttributeUid )
+    {
+        return getPayload( "/api/trackedEntityAttributes/" + trackerAttributeUid ).jsonPath();
+
+    }
+
+    private String getTrackedEntityTypeUid( String programUid ) {
+
+        Map map = programCache.get( programUid ).jsonPath().getMap("trackedEntityType");
+        if (map != null) {
+            return (String) map.get("id");
+        }
+        return null;
+    }
+
     private boolean hasProgramRegistration( String programUid )
     {
         Response response = programCache.get( programUid );
@@ -164,9 +216,5 @@ public class EntitiesCache
     {
         return this.programs;
     }
-
-    public Program getProgram( int index )
-    {
-        return this.programs.get( index );
-    }
+    
 }

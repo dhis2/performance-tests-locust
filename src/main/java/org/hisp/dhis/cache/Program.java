@@ -15,11 +15,14 @@ public class Program
 
     private List<ProgramStage> stages;
 
+    private List<ProgramAttribute> attributes;
+
     public String getOrgUnit( int index )
     {
-
         return this.orgUnits.get( index );
     }
+
+    private String entityType;
 
     public Program() {
     }
