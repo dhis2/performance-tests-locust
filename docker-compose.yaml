@@ -4,6 +4,8 @@ services:
   locust:
     restart: always
     image: "dhis2/locustio:latest"
+    build:
+      context: .
     environment:
       LOCUST_MASTER_BIND_HOST: "127.0.0.1"
       LOCUST_MASTER_BIND_PORT: "5557"
