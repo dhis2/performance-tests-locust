@@ -15,7 +15,7 @@ public class AddTeiTask
 {
     private EntitiesCache cache;
 
-    public AddTeiTask( int weight, EntitiesCache entitiesCache )
+    public AddTeiTask(int weight, EntitiesCache entitiesCache)
     {
         this.weight = weight;
         this.cache = entitiesCache;
