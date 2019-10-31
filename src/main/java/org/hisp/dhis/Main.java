@@ -16,6 +16,7 @@ import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.locust.LocustSlave;
 import org.hisp.dhis.tasks.AddTeiTask;
 import org.hisp.dhis.tasks.GetHeavyAnalyticsTask;
+import org.hisp.dhis.tasks.GetHeavyAnalyticsTaskNoRandom;
 import org.hisp.dhis.tasks.LoginTask;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,6 +71,7 @@ public class Main
 
         locust.run(
                 new AddTeiTask( 50, cache ),
+                new GetHeavyAnalyticsTaskNoRandom( 30 ),
                 new GetHeavyAnalyticsTask( 30, cache )
         );
     }
