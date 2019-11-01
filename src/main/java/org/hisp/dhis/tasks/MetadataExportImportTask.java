@@ -1,15 +1,20 @@
 package org.hisp.dhis.tasks;
 
+import static io.restassured.RestAssured.given;
+
+import org.hisp.dhis.tasks.httpUtils.QueryParams;
+
 import com.google.gson.JsonObject;
+
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.hisp.dhis.RestAssured;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
 public class MetadataExportImportTask
-    extends DhisAbstractTask
+    extends
+    DhisAbstractTask
 {
     public int getWeight()
     {
@@ -30,13 +35,22 @@ public class MetadataExportImportTask
 
         long time = System.currentTimeMillis();
 
-        Response response = RestAssured.getRestAssured()
-            .given()
-            .contentType( ContentType.JSON )
-            .body( metadata )
-            .post(
-                "api/metadata.json?async=true&importMode=COMMIT&identifier=UID&importReportMode=ERRORS&preheatMode=REFERENCE&importStrategy=CREATE_AND_UPDATE&atomicMode=ALL&mergeMode=MERGE&flushMode=AUTO&skipSharing=false&skipValidation=false&async=true&inclusionStrategy=NON_NULL" )
-            .thenReturn();
+        QueryParams queryParam = QueryParams.create()
+            .add( "async", "true" )
+            .add( "importMode", "COMMIT" )
+            .add( "identifier", "UID" )
+            .add( "importReportMode", "ERRORS" )
+            .add( "preheatMode", "REFERENCE" )
+            .add( "atomicMode", "ALL" )
+            .add( "mergeMode", "MERGE" )
+            .add( "flushMode", "AUTO" )
+            .add( "skipSharing", "false" )
+            .add( "skipValidation", "false" )
+            .add( "async", "true" )
+            .add( "inclusionStrategy", "NON_NULL" )
+            .add( "importStrategy", "CREATE_AND_UPDATE" );
+
+        Response response = executeQuery(() -> post("/api/metadata", queryParam, metadata));
 
         if ( response.statusCode() != 200 )
         {
@@ -67,11 +81,6 @@ public class MetadataExportImportTask
 
     private Response isCompleted( String url )
     {
-
-        return RestAssured.getRestAssured()
-            .given()
-            .contentType( ContentType.JSON )
-            .get( url )
-            .thenReturn();
+        return given().contentType( ContentType.JSON ).get( url ).thenReturn();
     }
 }

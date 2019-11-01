@@ -1,15 +1,15 @@
 package org.hisp.dhis;
 
+import static org.hisp.dhis.utils.CacheUtils.getCachePath;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.hisp.dhis.cache.EntitiesCache;
-import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.locust.LocustSlave;
-import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.tasks.AddTeiTask;
 import org.hisp.dhis.tasks.LoginTask;
 import org.hisp.dhis.utils.CacheUtils;
@@ -20,8 +20,6 @@ import com.github.myzhan.locust4j.Locust;
 import io.restassured.RestAssured;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.config.RestAssuredConfig;
-
-import static org.hisp.dhis.utils.CacheUtils.getCachePath;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>

@@ -1,10 +1,9 @@
 package org.hisp.dhis.tasks;
 
+import static io.restassured.RestAssured.*;
+
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.hisp.dhis.RestAssured;
-
-import static io.restassured.RestAssured.preemptive;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -25,9 +24,9 @@ public class LoginTask
 
     public void execute()
     {
-        RestAssured.getRestAssured().authentication = preemptive().basic( "system", "System123" );
+        authentication = preemptive().basic( "system", "System123" );
 
-        Response apiResponse = RestAssured.getRestAssured().given().contentType( ContentType.TEXT ).when()
+        Response apiResponse = given().contentType( ContentType.TEXT ).when()
             .get( "api/me" ).thenReturn();
 
         if ( apiResponse.statusCode() == 200 )
