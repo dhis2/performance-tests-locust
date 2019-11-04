@@ -85,17 +85,17 @@
          
   <repositories>
     <repository>
-      <id>github</id>
-      <name>GitHub DHIS2 Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/dhis2</url>
-    </repository>
-    <repository>
       <id>central</id>
       <url>https://repo1.maven.org/maven2</url>
     </repository>
     <repository>
       <id>jcenter</id>
       <url>https://jcenter.bintray.com/</url>
+    </repository>
+    <repository>
+      <id>github</id>
+      <name>GitHub DHIS2 Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/dhis2</url>
     </repository>
     <repository>
       <id>ossrh</id>
