@@ -76,6 +76,11 @@
       <version>1.7</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.hisp.dhis</groupId>
+      <artifactId>api-test-utils</artifactId>
+      <version>1.0-snapshot</version>
+    </dependency>
   </dependencies>
          
   <repositories>
