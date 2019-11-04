@@ -12,6 +12,7 @@ import org.hisp.dhis.locust.LocustSlave;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.tasks.AddTeiTask;
 import org.hisp.dhis.tasks.LoginTask;
+import org.hisp.dhis.tasks.ReserveTrackedEntityAttributeValuesTask;
 import org.hisp.dhis.utils.CacheUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,6 +67,6 @@ public class Main
 
         Locust locust = locustSlave.init();
     
-        locust.run( new AddTeiTask( 50, cache ) );
+        locust.run( new ReserveTrackedEntityAttributeValuesTask( 100 ) );
     }
 }
