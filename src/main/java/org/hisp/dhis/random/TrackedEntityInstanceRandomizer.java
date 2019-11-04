@@ -4,7 +4,7 @@ import static net.andreinc.mockneat.unit.time.LocalDates.localDates;
 import static net.andreinc.mockneat.unit.types.Bools.bools;
 import static net.andreinc.mockneat.unit.types.Doubles.doubles;
 import static net.andreinc.mockneat.unit.types.Ints.ints;
-import static org.hisp.dhis.utils.RandomUtils.randomizeSequence;
+import static org.hisp.dhis.utils.DataRandomizer.randomSequence;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
