@@ -28,6 +28,7 @@ import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.organisationunit.FeatureType;
 import org.hisp.dhis.textpattern.*;
+import org.hisp.dhis.utils.DataRandomizer;
 import org.springframework.util.StringUtils;
 
 import net.andreinc.mockneat.types.enums.StringType;
@@ -101,7 +102,7 @@ public class TrackedEntityInstanceRandomizer
     {
         Set<DataValue> dataValues = new HashSet<>();
         int numberOfDataValuesToCreate = Ints.ints().range( min, max ).get();
-        List<Integer> indexes = randomizeSequence( programStage.getDataElements().size(), numberOfDataValuesToCreate );
+        List<Integer> indexes = DataRandomizer.randomSequence( programStage.getDataElements().size(), numberOfDataValuesToCreate );
         
         for ( Integer index : indexes )
         {

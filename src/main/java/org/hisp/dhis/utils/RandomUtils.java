@@ -39,26 +39,4 @@ public class RandomUtils
                 .display( DateTimeFormatter.ISO_LOCAL_DATE ).get() + " 00:00:00";
     }
 
-    public static List<Integer> randomizeSequence(int collectionSize, int max )
-    {
-        List<Integer> indexes = new ArrayList<>();
-        if ( collectionSize == 1 )
-        {
-            indexes.add( 0 );
-        }
-        else
-        {
-            // create a list of ints from 0 to collection size (0,1,2,3,4...)
-            indexes = IntStream.range( 0, collectionSize - 1 ).boxed()
-                    .collect( Collectors.toCollection( ArrayList::new ) );
-            // randomize the list
-            Collections.shuffle( indexes );
-            if ( max > collectionSize )
-            {
-                max = collectionSize;
-            }
-            indexes = indexes.subList( 0, max - 1 );
-        }
-        return indexes;
-    }
 }
