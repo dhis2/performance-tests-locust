@@ -82,23 +82,6 @@
       <version>1.0.0</version>
     </dependency>
   </dependencies>
-         
-  <repositories>
-    <repository>
-      <id>github</id>
-      <name>GitHub DHIS2 Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/dhis2</url>
-    </repository>
-    <repository>
-      <id>jcenter</id>
-      <url>https://jcenter.bintray.com/</url>
-    </repository>
-    <repository>
-      <id>ossrh</id>
-      <name>Sonatype OSS</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </repository>
-  </repositories>
 
   <build>
     <plugins>
