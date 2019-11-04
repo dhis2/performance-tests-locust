@@ -86,8 +86,8 @@
   <repositories>
     <repository>
       <id>github</id>
-      <name>GitHub ashishchopra Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/ashishchopra</url>
+      <name>GitHub DHIS2 Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/dhis2</url>
     </repository>
     <repository>
       <id>central</id>
