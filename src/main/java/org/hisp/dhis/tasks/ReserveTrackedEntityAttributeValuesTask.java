@@ -38,44 +38,29 @@ public class ReserveTrackedEntityAttributeValuesTask
 
         Response response = null;
 
-        boolean hasFailed = false;
+        String attributeId = new CreateTrackedEntityAttributeTask().executeAndGetId();
 
-        try
-        {
-            String attributeId = new CreateTrackedEntityAttributeTask().executeAndGetId();
-
-            setupResponses = IntStream.range( 0, 10 ).mapToObj( r -> given()
-                    .contentType( ContentType.JSON )
-                    .queryParam( "numberToReserve", 800 )
-                    .when()
-                    .get( "/api/trackedEntityAttributes/" + attributeId + "/generateAndReserve" )
-                    .thenReturn())
-            .collect( Collectors.toList());
-
-            response = given()
+        setupResponses = IntStream.range( 0, 10 ).mapToObj( r -> given()
                 .contentType( ContentType.JSON )
                 .queryParam( "numberToReserve", 800 )
                 .when()
                 .get( "/api/trackedEntityAttributes/" + attributeId + "/generateAndReserve" )
-                .thenReturn();
+                .thenReturn())
+        .collect( Collectors.toList());
 
-        }
-        catch ( Exception e )
-        {
-            recordFailure( System.currentTimeMillis() - time, e.getMessage() );
-            hasFailed = true;
-        }
+        response = given()
+            .contentType( ContentType.JSON )
+            .queryParam( "numberToReserve", 800 )
+            .when()
+            .get( "/api/trackedEntityAttributes/" + attributeId + "/generateAndReserve" )
+            .thenReturn();
 
-        if ( !hasFailed )
-        {
-
-            if (setupResponses.stream().allMatch( r -> r.statusCode() == 200 )) {
-                record( response );
-            } else {
-                Response failureResponse = setupResponses.stream().filter( r -> r.statusCode() != 200 ).findFirst().get();
-                Locust.getInstance().recordFailure( "http", getName() + " SETUP",
-                    System.currentTimeMillis() - time, failureResponse.getBody().print() );
-            }
+    if (setupResponses.stream().allMatch( r -> r.statusCode() == 200 )) {
+            record( response );
+        } else {
+            Response failureResponse = setupResponses.stream().filter( r -> r.statusCode() != 200 ).findFirst().get();
+            Locust.getInstance().recordFailure( "http", getName() + " SETUP",
+                System.currentTimeMillis() - time, failureResponse.getBody().print() );
         }
     }
 

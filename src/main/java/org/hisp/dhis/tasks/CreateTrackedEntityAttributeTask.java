@@ -29,44 +29,29 @@ public class CreateTrackedEntityAttributeTask
         long time = System.currentTimeMillis();
 
         Response response = null;
-        boolean hasFailed = false;
 
-        try
-        {
-
-            GeneratedTrackedEntityAttribute generatedAttribute = new GeneratedTrackedEntityAttribute();
-            generatedAttribute.setName( generatedAttribute.getName() + UUID.randomUUID() );
-            generatedAttribute.setShortName( ""+UUID.randomUUID() );
-            response = given().contentType( ContentType.JSON ).body( generatedAttribute ).when()
-                .post( "/api/trackedEntityAttributes" ).thenReturn();
-            if ( response.getStatusCode() == 201 ) {
-                id = response.jsonPath().get( "response.uid");
-            }
-        }
-        catch ( Exception e )
-        {
-            recordFailure( System.currentTimeMillis() - time, e.getMessage() );
-            hasFailed = true;
+        GeneratedTrackedEntityAttribute generatedAttribute = new GeneratedTrackedEntityAttribute();
+        generatedAttribute.setName( generatedAttribute.getName() + UUID.randomUUID() );
+        generatedAttribute.setShortName( ""+UUID.randomUUID() );
+        response = given().contentType( ContentType.JSON ).body( generatedAttribute ).when()
+            .post( "/api/trackedEntityAttributes" ).thenReturn();
+        if ( response.getStatusCode() == 201 ) {
+            id = response.jsonPath().get( "response.uid");
         }
 
-        if ( !hasFailed )
+        if ( response.statusCode() == 201 )
         {
-            if ( response.statusCode() == 201 )
-            {
-                recordSuccess( response );
-            }
-            else
-            {
-                recordFailure( response );
-            }
+            recordSuccess( response );
+        }
+        else
+        {
+            recordFailure( response );
         }
     }
 
     public String executeAndGetId()
-        throws Exception
     {
         this.execute();
-
         return id;
     }
 }
