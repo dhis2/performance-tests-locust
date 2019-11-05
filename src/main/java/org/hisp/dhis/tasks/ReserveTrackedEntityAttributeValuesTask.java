@@ -73,7 +73,8 @@ public class ReserveTrackedEntityAttributeValuesTask
                 record( response );
             } else {
                 Response failureResponse = setupResponses.stream().filter( r -> r.statusCode() != 200 ).findFirst().get();
-                recordFailure( failureResponse );
+                Locust.getInstance().recordFailure( "http", getName() + " SETUP",
+                    System.currentTimeMillis() - time, failureResponse.getBody().print() );
             }
         }
     }
