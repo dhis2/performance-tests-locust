@@ -2,16 +2,11 @@ package org.hisp.dhis.tasks;
 
 import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
 import static io.restassured.RestAssured.given;
-import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
-import static net.andreinc.mockneat.unit.objects.From.from;
 
 import java.util.List;
-
-import org.hisp.dhis.cache.EntitiesCache;
-import org.hisp.dhis.cache.Program;
 
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -26,7 +21,7 @@ public class GetHeavyAnalyticsTask
     /**
      * Configurable constants
      */
-    private static final String ORG_UNIT = "ou:%s";
+    private static final String ORG_UNIT = "ou:ImspTQPwCqd";
 
     private static final String PERIOD = "pe:LAST_12_MONTHS";
 
@@ -44,34 +39,26 @@ public class GetHeavyAnalyticsTask
             "n0GE1ISYrdM", "nfG18MJZX5o", "nkjlWUMIdHh", "oTOpKabJA1v", "puykO1tbcdi", "qmCKRmVj4WX", "ryFBhJdetdM",
             "sB79w2hiLp8", "sMTMkudvLCD", "tcs5YGnjiKo", "ulgL07PF8rq", "vKWOc4itBo2", "vihpFUg2WTy" ) );
 
-    private static final int API_VERSION = 30;
+    private final int apiVersion;
 
-    private final EntitiesCache entitiesCache;
-
-    public GetHeavyAnalyticsTask( final int weight, final EntitiesCache entitiesCache )
+    public GetHeavyAnalyticsTask(final int weight, final int apiVersion )
     {
         this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        this.apiVersion = apiVersion;
     }
 
     public String getName()
     {
-        return "(random) GET " + query();
+        return "(static) GET " + query();
     }
 
     public void execute()
     {
-        // Assume
-        final Program aRandomProgram = randomProgram();
-        final String aRandomOrgUnitUid = randomOrgUnitUid( aRandomProgram.getOrgUnits() );
-
-        // Warm-up
-        final RequestSpecification request = given().queryParam( "filter", format( ORG_UNIT, aRandomOrgUnitUid ) )
+        // Given
+        final RequestSpecification request = given().queryParam( "filter", ORG_UNIT )
             .queryParam( "dimension", DIMENSIONS ).queryParam( "dimension", PERIOD )
             .queryParam( "displayProperty", DISPLAY_PROPERTY ).queryParam( "skipMeta", SKIP_META )
             .queryParam( "includeNumDen", INCLUDE_NUM_DEN );
-
-        request.get( endpoint() );
 
         // Test
         final Response response = request.get( endpoint() );
@@ -85,12 +72,11 @@ public class GetHeavyAnalyticsTask
         {
             recordFailure( response );
         }
-
     }
 
     private String endpoint()
     {
-        return "/api/" + API_VERSION + "/analytics.json";
+        return "/api/" + apiVersion + "/analytics.json";
     }
 
     private String query()
@@ -98,15 +84,5 @@ public class GetHeavyAnalyticsTask
         final List<String> params = asList( ORG_UNIT, PERIOD, DIMENSIONS, DISPLAY_PROPERTY, valueOf( SKIP_META ),
             valueOf( INCLUDE_NUM_DEN ) );
         return endpoint() + " with params: " + join( " # ", params );
-    }
-
-    private String randomOrgUnitUid( final List<String> programOrgUnits )
-    {
-        return from( programOrgUnits ).get();
-    }
-
-    private Program randomProgram()
-    {
-        return from( entitiesCache.getPrograms() ).get();
     }
 }
