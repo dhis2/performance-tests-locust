@@ -2,7 +2,7 @@ package org.hisp.dhis.locust;
 
 import org.aeonbits.owner.Config;
 
-@Config.Sources({"classpath:locust.properties"})
+@Config.Sources( { "classpath:locust.properties" } )
 public interface LocustConfig
     extends
     Config
@@ -15,4 +15,7 @@ public interface LocustConfig
 
     @Key( "target.baseuri" )
     String targetUri();
+
+    @Key( "analytics.api.version" )
+    int analyticsApiVersion();
 }
