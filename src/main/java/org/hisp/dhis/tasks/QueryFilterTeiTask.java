@@ -50,7 +50,7 @@ public class QueryFilterTeiTask
     @Override
     public String getName()
     {
-        return "Get tracked entity instances query matching filter " + endpoint + query;
+        return "Get TEI's query matching filter " + endpoint + query;
     }
 
     @Override
