@@ -48,7 +48,7 @@ public class FilterTeiTask extends DhisAbstractTask
     @Override
     public String getName()
     {
-        return "Get tracked entity instances matching filter " + endpoint + query;
+        return "Get TEI's matching filter " + endpoint + query;
     }
 
     @Override
