@@ -1,16 +1,9 @@
 package org.hisp.dhis;
 
-import static io.restassured.config.RestAssuredConfig.config;
-import static org.aeonbits.owner.ConfigFactory.create;
-import static org.hisp.dhis.utils.CacheUtils.cacheExists;
-import static org.hisp.dhis.utils.CacheUtils.deserializeCache;
-import static org.hisp.dhis.utils.CacheUtils.getCachePath;
-import static org.hisp.dhis.utils.CacheUtils.serializeCache;
-
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.myzhan.locust4j.Locust;
+import io.restassured.RestAssured;
+import io.restassured.config.ObjectMapperConfig;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.locust.LocustSlave;
@@ -18,12 +11,18 @@ import org.hisp.dhis.tasks.AddTeiTask;
 import org.hisp.dhis.tasks.GetHeavyAnalyticsRandomTask;
 import org.hisp.dhis.tasks.GetHeavyAnalyticsTask;
 import org.hisp.dhis.tasks.LoginTask;
+import org.hisp.dhis.tasks.ReserveTrackedEntityAttributeValuesTask;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.myzhan.locust4j.Locust;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
-import io.restassured.RestAssured;
-import io.restassured.config.ObjectMapperConfig;
+import static io.restassured.config.RestAssuredConfig.config;
+import static org.aeonbits.owner.ConfigFactory.create;
+import static org.hisp.dhis.utils.CacheUtils.cacheExists;
+import static org.hisp.dhis.utils.CacheUtils.deserializeCache;
+import static org.hisp.dhis.utils.CacheUtils.getCachePath;
+import static org.hisp.dhis.utils.CacheUtils.serializeCache;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -72,7 +71,8 @@ public class Main
         locust.run(
                 new AddTeiTask( 50, cache ),
                 new GetHeavyAnalyticsTask( 30, cfg.analyticsApiVersion() ),
-                new GetHeavyAnalyticsRandomTask( 30, cfg.analyticsApiVersion(), cache )
+                new GetHeavyAnalyticsRandomTask( 30, cfg.analyticsApiVersion(), cache ),
+                new ReserveTrackedEntityAttributeValuesTask( 30 )
         );
     }
 }
