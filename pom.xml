@@ -76,26 +76,13 @@
       <version>1.7</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.hisp.dhis</groupId>
+      <artifactId>api-test-utils</artifactId>
+      <version>1.0.0</version>
+    </dependency>
   </dependencies>
-         
-  <repositories>
-    <repository>
-      <id>jcenter</id>
-      <url>https://jcenter.bintray.com/</url>
-    </repository>
-    <repository>
-      <id>ossrh</id>
-      <name>Sonatype OSS</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-         
+
   <build>
     <plugins>
       <plugin>
