@@ -12,7 +12,8 @@ public abstract class DhisAbstractTask
 {
     protected int weight;
 
-    public int getWeight() {
+    public int getWeight()
+    {
         return this.weight;
     }
 

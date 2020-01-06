@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasks;
 
 import com.google.gson.JsonObject;
-import sun.rmi.runtime.Log;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -11,7 +10,8 @@ public class GetAndUpdateEventsTask
 {
     private String query;
 
-    public GetAndUpdateEventsTask(String eventsQuery) {
+    public GetAndUpdateEventsTask( String eventsQuery )
+    {
         this.query = eventsQuery;
     }
 

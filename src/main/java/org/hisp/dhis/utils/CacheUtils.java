@@ -1,14 +1,13 @@
 package org.hisp.dhis.utils;
 
-import java.io.*;
-import java.util.ArrayList;
-
-import org.hisp.dhis.cache.*;
-
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.CollectionSerializer;
+import org.hisp.dhis.cache.*;
+
+import java.io.*;
+import java.util.ArrayList;
 
 public class CacheUtils
 {
@@ -59,7 +58,8 @@ public class CacheUtils
         return new File( CACHE_FILE ).exists();
     }
 
-    public static String getCachePath( ) {
+    public static String getCachePath()
+    {
 
         return CACHE_FILE;
     }

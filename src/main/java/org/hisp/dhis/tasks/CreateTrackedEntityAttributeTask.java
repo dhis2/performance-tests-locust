@@ -1,12 +1,10 @@
 package org.hisp.dhis.tasks;
 
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
+import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.GeneratedTrackedEntityAttribute;
+import org.hisp.dhis.response.dto.ApiResponse;
 
 import java.util.UUID;
-
-import static io.restassured.RestAssured.given;
 
 public class CreateTrackedEntityAttributeTask
     extends
@@ -14,38 +12,45 @@ public class CreateTrackedEntityAttributeTask
 {
     private String id;
 
-    public int getWeight()
+    private String endpoint = "/api/trackedEntityAttributes";
+
+    public CreateTrackedEntityAttributeTask( int weight )
     {
-        return 1;
+        this.weight = weight;
+    }
+
+    public CreateTrackedEntityAttributeTask()
+    {
+        this.weight = 1;
     }
 
     public String getName()
     {
-        return "POST /api/trackedEntityAttribute";
+        return "POST " + endpoint;
     }
 
     public void execute()
     {
         long time = System.currentTimeMillis();
 
-        Response response = null;
-
         GeneratedTrackedEntityAttribute generatedAttribute = new GeneratedTrackedEntityAttribute();
         generatedAttribute.setName( generatedAttribute.getName() + UUID.randomUUID() );
-        generatedAttribute.setShortName( ""+UUID.randomUUID() );
-        response = given().contentType( ContentType.JSON ).body( generatedAttribute ).when()
-            .post( "/api/trackedEntityAttributes" ).thenReturn();
-        if ( response.getStatusCode() == 201 ) {
-            id = response.jsonPath().get( "response.uid");
+        generatedAttribute.setShortName( "" + UUID.randomUUID() );
+
+        ApiResponse response = new RestApiActions( this.endpoint ).post( generatedAttribute );
+
+        if ( response.statusCode() == 201 )
+        {
+            id = response.extractString( "response.uid" );
         }
 
         if ( response.statusCode() == 201 )
         {
-            recordSuccess( response );
+            recordSuccess( response.getRaw() );
         }
         else
         {
-            recordFailure( response );
+            recordFailure( response.getRaw() );
         }
     }
 

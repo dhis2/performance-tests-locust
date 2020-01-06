@@ -13,5 +13,7 @@ public class TeiType
 
     private String name;
 
-    public TeiType() {}
+    public TeiType()
+    {
+    }
 }

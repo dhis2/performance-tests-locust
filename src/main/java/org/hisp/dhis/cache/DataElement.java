@@ -16,6 +16,7 @@ public class DataElement
 
     private List<String> optionSet;
 
-    public DataElement() {
+    public DataElement()
+    {
     }
 }

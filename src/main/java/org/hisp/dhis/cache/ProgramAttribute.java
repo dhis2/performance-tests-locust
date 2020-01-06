@@ -53,6 +53,8 @@ public class ProgramAttribute
 
     private List<String> options;
 
-    public ProgramAttribute() {}
+    public ProgramAttribute()
+    {
+    }
 
 }

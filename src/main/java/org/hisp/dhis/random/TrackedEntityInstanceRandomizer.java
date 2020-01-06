@@ -1,18 +1,9 @@
 package org.hisp.dhis.random;
 
-import static net.andreinc.mockneat.unit.time.LocalDates.localDates;
-import static net.andreinc.mockneat.unit.types.Bools.bools;
-import static net.andreinc.mockneat.unit.types.Doubles.doubles;
-import static net.andreinc.mockneat.unit.types.Ints.ints;
-import static org.hisp.dhis.utils.DataRandomizer.randomSequence;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
+import net.andreinc.mockneat.types.enums.StringType;
+import net.andreinc.mockneat.unit.objects.From;
+import net.andreinc.mockneat.unit.text.Strings;
+import net.andreinc.mockneat.unit.types.Ints;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
@@ -31,10 +22,17 @@ import org.hisp.dhis.textpattern.*;
 import org.hisp.dhis.utils.DataRandomizer;
 import org.springframework.util.StringUtils;
 
-import net.andreinc.mockneat.types.enums.StringType;
-import net.andreinc.mockneat.unit.objects.From;
-import net.andreinc.mockneat.unit.text.Strings;
-import net.andreinc.mockneat.unit.types.Ints;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static net.andreinc.mockneat.unit.time.LocalDates.localDates;
+import static net.andreinc.mockneat.unit.types.Bools.bools;
+import static net.andreinc.mockneat.unit.types.Doubles.doubles;
+import static net.andreinc.mockneat.unit.types.Ints.ints;
 
 public class TrackedEntityInstanceRandomizer
 {
@@ -71,12 +69,12 @@ public class TrackedEntityInstanceRandomizer
         enrollment.setEvents( IntStream.rangeClosed( 1, eventsSize ).mapToObj( i -> {
 
             Event event = new Event();
-            event.setDueDate( df.format(new Date()) );
+            event.setDueDate( df.format( new Date() ) );
             event.setProgram( program.getUid() );
             event.setProgramStage( programStage.getUid() );
             event.setOrgUnit( ou );
             event.setStatus( EventStatus.ACTIVE );
-            event.setEventDate( df.format(new Date()) );
+            event.setEventDate( df.format( new Date() ) );
             event.setFollowup( false );
             event.setDeleted( false );
             event.setAttributeOptionCombo( "" ); // TODO
@@ -103,10 +101,10 @@ public class TrackedEntityInstanceRandomizer
         Set<DataValue> dataValues = new HashSet<>();
         int numberOfDataValuesToCreate = Ints.ints().range( min, max ).get();
         List<Integer> indexes = DataRandomizer.randomSequence( programStage.getDataElements().size(), numberOfDataValuesToCreate );
-        
+
         for ( Integer index : indexes )
         {
-            dataValues.add( withRandomValue( programStage.getDataElements().get(index)));
+            dataValues.add( withRandomValue( programStage.getDataElements().get( index ) ) );
         }
 
         return dataValues;
@@ -122,7 +120,8 @@ public class TrackedEntityInstanceRandomizer
         {
             val = From.from( dataElement.getOptionSet() ).get();
         }
-        else {
+        else
+        {
 
             val = rndValueFrom( dataElement.getValueType() );
         }
@@ -130,7 +129,7 @@ public class TrackedEntityInstanceRandomizer
         return dataValue;
     }
 
-    private Program getRandomProgram(EntitiesCache cache)
+    private Program getRandomProgram( EntitiesCache cache )
     {
         return From.from( cache.getPrograms() ).get();
     }
@@ -229,7 +228,6 @@ public class TrackedEntityInstanceRandomizer
         }
         return val;
     }
-
 
     private String withPattern( TextPattern textPattern )
     {

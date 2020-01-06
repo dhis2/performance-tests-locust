@@ -1,12 +1,8 @@
 package org.hisp.dhis.tasks;
 
 import com.google.gson.JsonObject;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
-
-import static io.restassured.RestAssured.given;
-import static io.restassured.RestAssured.post;
-import static io.restassured.RestAssured.when;
+import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.response.dto.ApiResponse;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -16,6 +12,8 @@ public class PostEventsTask
     DhisAbstractTask
 {
     private JsonObject body;
+
+    private String endpoint = "/api/events";
 
     public PostEventsTask( JsonObject body )
     {
@@ -29,21 +27,21 @@ public class PostEventsTask
 
     public String getName()
     {
-        return "Post events";
+        return "POST " + this.endpoint;
     }
 
     public void execute()
     {
-        Response response = given().contentType( ContentType.JSON ).body( body ).when().post( "/api/events" )
-            .thenReturn();
+        RestApiActions apiActions = new RestApiActions( this.endpoint );
+        ApiResponse response = apiActions.post( body );
 
         if ( response.statusCode() == 200 )
         {
-            recordSuccess( response );
+            recordSuccess( response.getRaw() );
             return;
         }
 
-        recordFailure( response );
+        recordFailure( response.getRaw() );
 
     }
 }

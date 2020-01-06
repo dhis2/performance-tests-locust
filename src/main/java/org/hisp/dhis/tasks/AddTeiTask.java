@@ -1,13 +1,12 @@
 package org.hisp.dhis.tasks;
 
-import static io.restassured.RestAssured.given;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
-
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
+import org.hisp.dhis.response.dto.ApiResponse;
 
 public class AddTeiTask
     extends
@@ -15,35 +14,33 @@ public class AddTeiTask
 {
     private EntitiesCache cache;
 
+    private String endpoint = "/api/trackedEntityInstances";
+
     public AddTeiTask( int weight, EntitiesCache entitiesCache )
     {
         this.weight = weight;
         this.cache = entitiesCache;
     }
 
-    public int getWeight()
-    {
-        return this.weight;
-    }
-
     public String getName()
     {
-        return "POST /api/trackedEntityInstances";
+        return "POST " + this.endpoint;
     }
 
     public void execute()
     {
         TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstanceRandomizer().create( this.cache, 5 );
-
+        Gson gson = new GsonBuilder().setDateFormat( "yyyy-MM-dd" ).create();
+        String json = gson.toJson( trackedEntityInstances );
         long time = System.currentTimeMillis();
 
-        Response response = null;
+        ApiResponse response = null;
         boolean hasFailed = false;
         try
         {
-            response = given().contentType( ContentType.JSON ).body( trackedEntityInstances ).when()
-                .post( "/api/trackedEntityInstances" ).thenReturn();
+            response = new RestApiActions( this.endpoint ).post( trackedEntityInstances );
         }
+
         catch ( Exception e )
         {
             recordFailure( System.currentTimeMillis() - time, e.getMessage() );
@@ -54,11 +51,11 @@ public class AddTeiTask
         {
             if ( response.statusCode() == 200 )
             {
-                recordSuccess( response );
+                recordSuccess( response.getRaw() );
             }
             else
             {
-                recordFailure( response );
+                recordFailure( response.getRaw() );
             }
         }
     }
