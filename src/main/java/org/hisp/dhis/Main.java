@@ -28,18 +28,6 @@ public class Main
     public static void main( String[] args )
         throws IOException
     {
-
-        // Configure RestAssured mapper to convert any date into DHIS2 format
-
-      /* RestAssured.config = new RestAssuredConfig(  )
-            .objectMapperConfig( new ObjectMapperConfig().jackson2ObjectMapperFactory( ( type, s ) -> {
-                ObjectMapper om = new ObjectMapper().findAndRegisterModules();
-
-                DateFormat df = new SimpleDateFormat( "yyyy-MM-dd" );
-                om.setDateFormat( df );
-                return om;
-            } ) );
-*/
         RestAssured.config = config().
             decoderConfig(
                 new DecoderConfig( "UTF-8" )
