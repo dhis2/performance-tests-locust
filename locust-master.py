@@ -38,6 +38,7 @@ def generate_report():
 
     csv.register_dialect('dialect',
                          delimiter = ',',
+                         quotechar='"',
                          quoting=csv.QUOTE_ALL,
                          skipinitialspace=True)
 
@@ -104,6 +105,7 @@ def failures_csv():
             er['method'],
             er['name'],
             er['error'],
+            er['error'].replace("\"", "'"),
             er['occurences'],
         ))
     return "\n".join(rows)
