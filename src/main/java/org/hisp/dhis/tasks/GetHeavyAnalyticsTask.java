@@ -1,15 +1,15 @@
 package org.hisp.dhis.tasks;
 
-import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
-import static io.restassured.RestAssured.given;
-import static java.lang.String.join;
-import static java.lang.String.valueOf;
-import static java.util.Arrays.asList;
+import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.request.QueryParamsBuilder;
+import org.hisp.dhis.response.dto.ApiResponse;
 
 import java.util.List;
 
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
+import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
+import static java.lang.String.join;
+import static java.lang.String.valueOf;
+import static java.util.Arrays.asList;
 
 /**
  * @author Maikel Arabori <maikelarabori@gmail.com>
@@ -27,9 +27,9 @@ public class GetHeavyAnalyticsTask
 
     private static final String DISPLAY_PROPERTY = "NAME";
 
-    private static final boolean SKIP_META = true;
+    private static final String SKIP_META = "true";
 
-    private static final boolean INCLUDE_NUM_DEN = true;
+    private static final String INCLUDE_NUM_DEN = "true";
 
     private static final String DIMENSIONS = "dx:" + join( ";",
         asList( "AUqdhY4mpvp", "EY8gsfEomc0", "EoYar8UxddG", "GQHKiAe3DHR", "GfYjGL16D0W", "JIVMtpjVZqJ", "Lzg9LtG1xg3",
@@ -41,7 +41,7 @@ public class GetHeavyAnalyticsTask
 
     private final int apiVersion;
 
-    public GetHeavyAnalyticsTask(final int weight, final int apiVersion )
+    public GetHeavyAnalyticsTask( final int weight, final int apiVersion )
     {
         this.weight = weight;
         this.apiVersion = apiVersion;
@@ -54,23 +54,29 @@ public class GetHeavyAnalyticsTask
 
     public void execute()
     {
+
         // Given
-        final RequestSpecification request = given().queryParam( "filter", ORG_UNIT )
-            .queryParam( "dimension", DIMENSIONS ).queryParam( "dimension", PERIOD )
-            .queryParam( "displayProperty", DISPLAY_PROPERTY ).queryParam( "skipMeta", SKIP_META )
-            .queryParam( "includeNumDen", INCLUDE_NUM_DEN );
+        RestApiActions restApiActions = new RestApiActions( endpoint() );
+
+        QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder()
+            .add( "filter", ORG_UNIT )
+            .add( "dimension", PERIOD )
+            .add( "displayProperty", DISPLAY_PROPERTY )
+            .add( "skipMeta", SKIP_META )
+            .add( "includeNumDen", INCLUDE_NUM_DEN );
 
         // Test
-        final Response response = request.get( endpoint() );
 
+        ApiResponse response = restApiActions.get( queryParamsBuilder.build() );
         // Assert and record
+
         if ( response.statusCode() == STATUS_CODE_OK )
         {
-            recordSuccess( response );
+            recordSuccess( response.getRaw() );
         }
         else
         {
-            recordFailure( response );
+            recordFailure( response.getRaw() );
         }
     }
 

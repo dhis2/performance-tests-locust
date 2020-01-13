@@ -1,20 +1,15 @@
 package org.hisp.dhis.utils;
 
-import static net.andreinc.mockneat.unit.time.LocalDates.localDates;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
+import static net.andreinc.mockneat.unit.time.LocalDates.localDates;
 
 public class RandomUtils
 {
@@ -36,7 +31,7 @@ public class RandomUtils
     {
         LocalDateTime localDateTime = new Date().toInstant().atZone( ZoneId.systemDefault() ).toLocalDateTime();
         return localDates().future( localDateTime.plusYears( 1 ).toLocalDate() )
-                .display( DateTimeFormatter.ISO_LOCAL_DATE ).get() + " 00:00:00";
+            .display( DateTimeFormatter.ISO_LOCAL_DATE ).get() + " 00:00:00";
     }
 
 }

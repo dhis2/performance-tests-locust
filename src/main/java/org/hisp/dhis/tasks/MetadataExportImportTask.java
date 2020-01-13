@@ -1,9 +1,9 @@
 package org.hisp.dhis.tasks;
 
 import com.google.gson.JsonObject;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
-import org.hisp.dhis.RestAssured;
+import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.request.QueryParamsBuilder;
+import org.hisp.dhis.response.dto.ApiResponse;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -11,9 +11,16 @@ import org.hisp.dhis.RestAssured;
 public class MetadataExportImportTask
     extends DhisAbstractTask
 {
+    private int weight;
+
+    public MetadataExportImportTask( int weight )
+    {
+        this.weight = weight;
+    }
+
     public int getWeight()
     {
-        return 1;
+        return this.weight;
     }
 
     public String getName()
@@ -30,25 +37,34 @@ public class MetadataExportImportTask
 
         long time = System.currentTimeMillis();
 
-        Response response = RestAssured.getRestAssured()
-            .given()
-            .contentType( ContentType.JSON )
-            .body( metadata )
-            .post(
-                "api/metadata.json?async=true&importMode=COMMIT&identifier=UID&importReportMode=ERRORS&preheatMode=REFERENCE&importStrategy=CREATE_AND_UPDATE&atomicMode=ALL&mergeMode=MERGE&flushMode=AUTO&skipSharing=false&skipValidation=false&async=true&inclusionStrategy=NON_NULL" )
-            .thenReturn();
+        QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder()
+            .add( "async", "true" )
+            .add( "importMode", "COMMIT" )
+            .add( "identifier", "UID" )
+            .add( "importReportMode", "ERROR" )
+            .add( "preheatMode", "REFERENCE" )
+            .add( "importStrategy", "CREATE_AND_UPDATE" )
+            .add( "atomicMode", "ALL" )
+            .add( "mergeMode", "MERGE" )
+            .add( "flushMode", "AUTO" )
+            .add( "skipSharing", "false" )
+            .add( "skipValidation", "false" )
+            .add( "inclusionStrategy", "NON_NULL" );
+
+        ApiResponse response = new RestApiActions( "api/metadata" )
+            .post( metadata, queryParamsBuilder );
 
         if ( response.statusCode() != 200 )
         {
-            recordFailure( response );
+            recordFailure( response.getRaw() );
             return;
         }
 
-        String url = response.jsonPath().getString( "response.relativeNotifierEndpoint" );
+        String url = response.extractString( "response.relativeNotifierEndpoint" );
 
         response = isCompleted( url );
 
-        while ( !response.jsonPath().getList( "completed" ).contains( true ) )
+        while ( !response.extractList( "completed" ).contains( true ) )
         {
             Thread.sleep( 100 );
             response = isCompleted( url );
@@ -58,20 +74,15 @@ public class MetadataExportImportTask
 
         if ( response.statusCode() == 200 )
         {
-            recordSuccess( time, response.body().asByteArray().length );
+            recordSuccess( time, response.getRaw().body().asByteArray().length );
             return;
         }
 
-        recordFailure( time, response.body().print() );
+        recordFailure( time, response.getRaw().body().print() );
     }
 
-    private Response isCompleted( String url )
+    private ApiResponse isCompleted( String url )
     {
-
-        return RestAssured.getRestAssured()
-            .given()
-            .contentType( ContentType.JSON )
-            .get( url )
-            .thenReturn();
+        return new RestApiActions( url ).get();
     }
 }

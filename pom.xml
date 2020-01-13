@@ -15,7 +15,7 @@
     <dependency>
       <groupId>com.github.myzhan</groupId>
       <artifactId>locust4j</artifactId>
-      <version>1.0.5</version>
+      <version>1.0.8</version>
     </dependency>
     <dependency>
       <groupId>io.rest-assured</groupId>
@@ -79,7 +79,7 @@
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>api-test-utils</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.2</version>
     </dependency>
   </dependencies>
 

@@ -1,9 +1,9 @@
 package org.hisp.dhis.cache;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -17,13 +17,14 @@ public class Program
 
     private List<ProgramAttribute> attributes;
 
+    private String entityType;
+
+    public Program()
+    {
+    }
+
     public String getOrgUnit( int index )
     {
         return this.orgUnits.get( index );
-    }
-
-    private String entityType;
-
-    public Program() {
     }
 }

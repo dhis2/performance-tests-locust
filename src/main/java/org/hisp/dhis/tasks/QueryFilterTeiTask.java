@@ -28,9 +28,8 @@ package org.hisp.dhis.tasks;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static io.restassured.RestAssured.when;
-
-import io.restassured.response.Response;
+import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.response.dto.ApiResponse;
 
 /**
  * @author David Katuscak (katuscak.d@gmail.com)
@@ -39,12 +38,20 @@ public class QueryFilterTeiTask
     extends
     DhisAbstractTask
 {
-    private String endpoint = "/api/trackedEntityInstances/query.json";
+    private int weight;
+
+    private String endpoint = "/api/trackedEntityInstances/query";
+
     private String query = "?ou=DiszpKrYNg8&attribute=TfdH5KvFmMy&filter=TfdH5KvFmMy:GE:Karoline";
+
+    public QueryFilterTeiTask( int weight )
+    {
+        this.weight = weight;
+    }
 
     public int getWeight()
     {
-        return 1;
+        return this.weight;
     }
 
     @Override
@@ -54,16 +61,17 @@ public class QueryFilterTeiTask
     }
 
     @Override
-    public void execute() throws Exception
+    public void execute()
+        throws Exception
     {
-        Response response = when().get( endpoint + query );
+        ApiResponse response = new RestApiActions( endpoint ).get( query );
 
         if ( response.statusCode() == 200 )
         {
-            recordSuccess( response );
+            recordSuccess( response.getRaw() );
             return;
         }
 
-        recordFailure( response );
+        recordFailure( response.getRaw() );
     }
 }

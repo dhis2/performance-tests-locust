@@ -27,7 +27,7 @@ To configure the environment variables, run:
    
 3. From the root directory of the `performance-test-locust` project execute `docker-compose up` command.
 
-4. Run `Main.main()` method in the `performance-test-locust` project. 
+4. Run `Main.main()` method in `performance-test-locust` project. 
     - You can run it directly via your IDE -> open `Main` class and click on a green arrow next to the `main()` method 
     - or by using the following command: `mvn clean compile exec:java`
     

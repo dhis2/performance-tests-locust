@@ -1,9 +1,8 @@
 package org.hisp.dhis.tasks;
 
 import com.google.gson.JsonObject;
-import io.restassured.response.Response;
-
-import static io.restassured.RestAssured.given;
+import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.response.dto.ApiResponse;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -33,21 +32,21 @@ public class QueryEventsTask
 
     public void execute()
     {
-        Response response = given().get( query );
+        RestApiActions apiActions = new RestApiActions( this.query );
+        ApiResponse response = apiActions.get();
 
-        this.responseBody = response.body().as( JsonObject.class );
+        this.responseBody = response.getBody();
 
         if ( response.statusCode() == 200 )
         {
-            recordSuccess( response );
+            recordSuccess( response.getRaw() );
             return;
         }
 
-        recordFailure( response );
+        recordFailure( response.getRaw() );
     }
 
     public JsonObject executeAndGetBody()
-        throws Exception
     {
         execute();
         return responseBody;
