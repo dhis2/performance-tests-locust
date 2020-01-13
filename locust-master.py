@@ -1,8 +1,9 @@
-from locust import Locust, TaskSet, task, events, runners, stats
-from jinja2 import Environment, FileSystemLoader
-import csv
 import argparse
+import csv
 import datetime
+
+from jinja2 import Environment, FileSystemLoader
+from locust import Locust, TaskSet, task, events, runners
 
 WORK_DIR = '/locust/'
 TEMPLATE_NAME = 'report-template.html'
@@ -37,7 +38,7 @@ def generate_report():
     env = Environment(loader=loader)
 
     csv.register_dialect('dialect',
-                         delimiter = ',',
+                         delimiter=',',
                          quotechar='"',
                          quoting=csv.QUOTE_ALL,
                          skipinitialspace=True)
@@ -62,7 +63,6 @@ def generate_report():
     store_data('_requests.csv', r_headers, r_data)
     store_data('_errors.csv', e_headers, e_data)
     store_data('_distribution.csv', dist_headers, dist_data)
-    print(e_data)
 
     # compute failure rate based on total stats
     if 'Total' in r_data['Name']:
