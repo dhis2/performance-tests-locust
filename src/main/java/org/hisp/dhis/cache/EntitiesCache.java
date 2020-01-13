@@ -1,6 +1,12 @@
 package org.hisp.dhis.cache;
 
-import static io.restassured.RestAssured.given;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import org.hisp.dhis.common.ValueType;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,15 +14,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.hisp.dhis.common.ValueType;
-import org.springframework.util.StringUtils;
-
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
-
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
+import static io.restassured.RestAssured.given;
 
 /**
  * Cache for DHIS2 entities used to generate random data for the load test
@@ -36,14 +34,14 @@ public class EntitiesCache
     /**
      * Load all the DHIS2 programs from the target endpoint and builds a graph
      * containing
-     * 
+     * <p>
      * program -> program attributes
-     *   |
-     *   |__stages
-     *        |
-     *        |__data elements
-     *                  |
-     *                  |__option sets
+     * |
+     * |__stages
+     * |
+     * |__data elements
+     * |
+     * |__option sets
      */
     public void loadProgramCache()
     {
@@ -55,7 +53,7 @@ public class EntitiesCache
                 getStagesFromProgram( uid ).parallelStream()
                     .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ) ) )
                     .collect( Collectors.toList() ),
-                getTrackerAttributesFromProgram( uid ) , getTrackedEntityTypeUid( uid )) )
+                getTrackerAttributesFromProgram( uid ), getTrackedEntityTypeUid( uid ) ) )
             .collect( Collectors.toList() );
 
         // free memory
@@ -131,12 +129,14 @@ public class EntitiesCache
 
         for ( Map<String, Object> att : atts )
         {
-            JsonPath trackedEntityAttribute = getAttributeUniqueness((String) ((Map)att.get( "trackedEntityAttribute" )).get("id"));
-            programAttributes.add( new ProgramAttribute( (String)att.get( "id" ), ValueType.valueOf((String) att.get( "valueType" )),
-                    (String)((Map)att.get( "trackedEntityAttribute" )).get("id"),
-                    trackedEntityAttribute.getBoolean("unique"),
-                    trackedEntityAttribute.getString("pattern"),
-                    getProgramAttributeOptionValues( trackedEntityAttribute )));
+            JsonPath trackedEntityAttribute = getAttributeUniqueness(
+                (String) ((Map) att.get( "trackedEntityAttribute" )).get( "id" ) );
+            programAttributes
+                .add( new ProgramAttribute( (String) att.get( "id" ), ValueType.valueOf( (String) att.get( "valueType" ) ),
+                    (String) ((Map) att.get( "trackedEntityAttribute" )).get( "id" ),
+                    trackedEntityAttribute.getBoolean( "unique" ),
+                    trackedEntityAttribute.getString( "pattern" ),
+                    getProgramAttributeOptionValues( trackedEntityAttribute ) ) );
         }
         return programAttributes;
 
@@ -145,9 +145,10 @@ public class EntitiesCache
     private List<String> getProgramAttributeOptionValues( JsonPath trackedEntityAttribute )
     {
         String optionSetUid = null;
-        Map optionSet = trackedEntityAttribute.get("optionSet");
-        if (optionSet != null) {
-            optionSetUid = (String) optionSet.get("id");
+        Map optionSet = trackedEntityAttribute.get( "optionSet" );
+        if ( optionSet != null )
+        {
+            optionSetUid = (String) optionSet.get( "id" );
         }
         if ( !StringUtils.isEmpty( optionSetUid ) )
         {
@@ -159,17 +160,19 @@ public class EntitiesCache
 
     }
 
-    private JsonPath getAttributeUniqueness(String trackerAttributeUid )
+    private JsonPath getAttributeUniqueness( String trackerAttributeUid )
     {
         return getPayload( "/api/trackedEntityAttributes/" + trackerAttributeUid ).jsonPath();
 
     }
 
-    private String getTrackedEntityTypeUid( String programUid ) {
+    private String getTrackedEntityTypeUid( String programUid )
+    {
 
-        Map map = programCache.get( programUid ).jsonPath().getMap("trackedEntityType");
-        if (map != null) {
-            return (String) map.get("id");
+        Map map = programCache.get( programUid ).jsonPath().getMap( "trackedEntityType" );
+        if ( map != null )
+        {
+            return (String) map.get( "id" );
         }
         return null;
     }
@@ -216,5 +219,5 @@ public class EntitiesCache
     {
         return this.programs;
     }
-    
+
 }

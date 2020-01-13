@@ -1,20 +1,17 @@
 package org.hisp.dhis.tasks;
 
-import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
-import static io.restassured.RestAssured.given;
-import static java.lang.String.format;
-import static java.lang.String.join;
-import static java.lang.String.valueOf;
-import static java.util.Arrays.asList;
-import static net.andreinc.mockneat.unit.objects.From.from;
+import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.request.QueryParamsBuilder;
+import org.hisp.dhis.response.dto.ApiResponse;
 
 import java.util.List;
 
-import org.hisp.dhis.cache.EntitiesCache;
-import org.hisp.dhis.cache.Program;
-
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
+import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
+import static java.lang.String.*;
+import static java.util.Arrays.asList;
+import static net.andreinc.mockneat.unit.objects.From.from;
 
 /**
  * @author Maikel Arabori <maikelarabori@gmail.com>
@@ -32,9 +29,9 @@ public class GetHeavyAnalyticsRandomTask
 
     private static final String DISPLAY_PROPERTY = "NAME";
 
-    private static final boolean SKIP_META = true;
+    private static final String SKIP_META = "true";
 
-    private static final boolean INCLUDE_NUM_DEN = true;
+    private static final String INCLUDE_NUM_DEN = "true";
 
     private static final String DIMENSIONS = "dx:" + join( ";",
         asList( "AUqdhY4mpvp", "EY8gsfEomc0", "EoYar8UxddG", "GQHKiAe3DHR", "GfYjGL16D0W", "JIVMtpjVZqJ", "Lzg9LtG1xg3",
@@ -45,9 +42,10 @@ public class GetHeavyAnalyticsRandomTask
             "sB79w2hiLp8", "sMTMkudvLCD", "tcs5YGnjiKo", "ulgL07PF8rq", "vKWOc4itBo2", "vihpFUg2WTy" ) );
 
     private final EntitiesCache entitiesCache;
+
     private final int apiVersion;
 
-    public GetHeavyAnalyticsRandomTask(final int weight, final int apiVersion, final EntitiesCache entitiesCache )
+    public GetHeavyAnalyticsRandomTask( final int weight, final int apiVersion, final EntitiesCache entitiesCache )
     {
         this.weight = weight;
         this.apiVersion = apiVersion;
@@ -64,22 +62,25 @@ public class GetHeavyAnalyticsRandomTask
         // Given
         final Program aRandomProgram = randomProgram();
         final String aRandomOrgUnitUid = randomOrgUnitUid( aRandomProgram.getOrgUnits() );
-        final RequestSpecification request = given().queryParam( "filter", format( ORG_UNIT, aRandomOrgUnitUid ) )
-            .queryParam( "dimension", DIMENSIONS ).queryParam( "dimension", PERIOD )
-            .queryParam( "displayProperty", DISPLAY_PROPERTY ).queryParam( "skipMeta", SKIP_META )
-            .queryParam( "includeNumDen", INCLUDE_NUM_DEN );
 
-        // Test
-        final Response response = request.get( endpoint() );
+        ApiResponse response = new RestApiActions( "api/analytics" )
+            .get( "", new QueryParamsBuilder()
+                .add( "filter", format( ORG_UNIT, aRandomOrgUnitUid ) )
+                .add( "dimension", DIMENSIONS )
+                .add( "dimension", PERIOD )
+                .add( "displayProperty", DISPLAY_PROPERTY )
+                .add( "skipMeta", SKIP_META )
+                .add( "includeNumDen", INCLUDE_NUM_DEN )
+            );
 
         // Assert and record
         if ( response.statusCode() == STATUS_CODE_OK )
         {
-            recordSuccess( response );
+            recordSuccess( response.getRaw() );
         }
         else
         {
-            recordFailure( response );
+            recordFailure( response.getRaw() );
         }
     }
 

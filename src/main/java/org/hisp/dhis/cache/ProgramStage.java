@@ -13,6 +13,7 @@ public class ProgramStage
 
     private List<DataElement> dataElements;
 
-    public ProgramStage() {
+    public ProgramStage()
+    {
     }
 }

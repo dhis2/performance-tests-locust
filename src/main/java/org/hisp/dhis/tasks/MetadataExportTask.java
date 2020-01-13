@@ -1,8 +1,8 @@
 package org.hisp.dhis.tasks;
 
 import com.google.gson.JsonObject;
-import io.restassured.response.Response;
-import org.hisp.dhis.RestAssured;
+import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.response.dto.ApiResponse;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -11,6 +11,8 @@ public class MetadataExportTask
     extends DhisAbstractTask
 {
     private JsonObject responseBody;
+
+    private String endpoint = "/api/metadata";
 
     public int getWeight()
     {
@@ -25,20 +27,19 @@ public class MetadataExportTask
     public void execute()
         throws Exception
     {
-        Response response = RestAssured.getRestAssured()
-            .given()
-            .get( "api/metadata" )
-            .thenReturn();
+        RestApiActions apiActions = new RestApiActions( endpoint );
 
-        this.responseBody = response.body().as( JsonObject.class );
+        ApiResponse response = apiActions.get();
+
+        this.responseBody = response.getBody();
 
         if ( response.statusCode() != 200 )
         {
-            recordFailure( response );
+            recordFailure( response.getRaw() );
             return;
         }
 
-        recordSuccess( response );
+        recordSuccess( response.getRaw() );
     }
 
     public JsonObject executeAndGetBody()
