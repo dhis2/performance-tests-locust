@@ -3,9 +3,12 @@ pipeline {
 
     environment {
         GIT_URL = "https://github.com/dhis2/performance-tests-locust"
+        GITHUB_CREDS = credentials('github_bot')
+        GITHUB_USERNAME="${GITHUB_CREDS_USR}"
+        GITHUB_TOKEN=credentials('github-token')
         IMAGE_NAME = "dhis2/locustio"
         IMAGE_TAG = "latest"
-        COMPOSE_ARGS = "NO_WEB=true TIME=10s HATCH_RATE=10 USERS=10"
+        COMPOSE_ARGS = "NO_WEB=true TIME=30m HATCH_RATE=5 USERS=30"
         LOCUST_REPORT_DIR = "locust"
         LOCAL_REPORT_DIR = "reports"
         REPORT_FILE = "html_report.html"
@@ -26,7 +29,7 @@ pipeline {
 
         stage('Run tests') {
             steps {
-                sh "mvn clean compile exec:java"
+                sh "mvn -s settings.xml clean compile exec:java"
             }
         }
     }
