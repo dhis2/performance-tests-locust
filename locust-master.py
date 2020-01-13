@@ -62,6 +62,7 @@ def generate_report():
     store_data('_requests.csv', r_headers, r_data)
     store_data('_errors.csv', e_headers, e_data)
     store_data('_distribution.csv', dist_headers, dist_data)
+    print(e_data)
 
     # compute failure rate based on total stats
     if 'Total' in r_data['Name']:
@@ -104,7 +105,6 @@ def failures_csv():
         rows.append('"%s","%s","%s",%i' % (
             er['method'],
             er['name'],
-            er['error'],
             er['error'].replace("\"", "'"),
             er['occurences'],
         ))
