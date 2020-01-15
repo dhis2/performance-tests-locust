@@ -66,15 +66,13 @@ public class Main
 
         locust.run(
             new QueryFilterTeiTask( 3 ),
-            new GetHeavyAnalyticsRandomTask( 1, cfg.analyticsApiVersion(), cache ),
             new GetHeavyAnalyticsTask( 1, cfg.analyticsApiVersion() ),
+            new GetHeavyAnalyticsRandomTask( 1, cfg.analyticsApiVersion(), cache ),
             new AddTeiTask( 5, cache ),
             new FilterTeiTask( 5 ),
             new CreateTrackedEntityAttributeTask( 5 ),
             new MetadataExportImportTask( 1 ),
             new ReserveTrackedEntityAttributeValuesTask( 1 )
-            //new QueryFilterTeiTask( 4 )
-            //new AddTeiTask( 1, cache )
         );
     }
 }
