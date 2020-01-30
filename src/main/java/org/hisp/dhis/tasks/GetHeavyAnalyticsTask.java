@@ -1,5 +1,6 @@
 package org.hisp.dhis.tasks;
 
+import io.restassured.specification.RequestSpecification;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
@@ -7,6 +8,7 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import java.util.List;
 
 import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
+import static io.restassured.RestAssured.given;
 import static java.lang.String.join;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
@@ -61,6 +63,7 @@ public class GetHeavyAnalyticsTask
         QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder()
             .add( "filter", ORG_UNIT )
             .add( "dimension", PERIOD )
+            .add( "dimension", DIMENSIONS )
             .add( "displayProperty", DISPLAY_PROPERTY )
             .add( "skipMeta", SKIP_META )
             .add( "includeNumDen", INCLUDE_NUM_DEN );
@@ -82,7 +85,7 @@ public class GetHeavyAnalyticsTask
 
     private String endpoint()
     {
-        return "/api/" + apiVersion + "/analytics.json";
+        return "/api/" + apiVersion + "/analytics";
     }
 
     private String query()

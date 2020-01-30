@@ -14,7 +14,7 @@ public class ReserveTrackedEntityAttributeValuesTask
     extends
     DhisAbstractTask
 {
-    private String endpoint = "/api/trackedEntityAttribute";
+    private String endpoint = "/api/trackedEntityAttributes";
 
     public ReserveTrackedEntityAttributeValuesTask( int weight )
     {
@@ -23,7 +23,7 @@ public class ReserveTrackedEntityAttributeValuesTask
 
     public String getName()
     {
-        return "POST /api/trackedEntityAttribute/{id}/generateAndReserve";
+        return "POST /api/trackedEntityAttributes/{id}/generateAndReserve";
     }
 
     public void execute()
@@ -38,11 +38,11 @@ public class ReserveTrackedEntityAttributeValuesTask
         String attributeId = new CreateTrackedEntityAttributeTask().executeAndGetId();
 
         setupResponses = IntStream.range( 0, 10 ).mapToObj( r ->
-            trackedEntityAttributeActions.get( attributeId + "/generateAndResenve",
+            trackedEntityAttributeActions.get( attributeId + "/generateAndReserve",
                 new QueryParamsBuilder().add( "numberToReserve", "800" ) ) )
             .collect( Collectors.toList() );
 
-        response = trackedEntityAttributeActions.get( attributeId + "/generateAndResenve",
+        response = trackedEntityAttributeActions.get( attributeId + "/generateAndReserve",
             new QueryParamsBuilder().add( "numberToReserve", "800" ) );
 
         if ( setupResponses.stream().allMatch( r -> r.statusCode() == 200 ) )

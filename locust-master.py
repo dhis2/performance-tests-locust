@@ -1,8 +1,9 @@
-from locust import Locust, TaskSet, task, events, runners, stats
-from jinja2 import Environment, FileSystemLoader
-import csv
 import argparse
+import csv
 import datetime
+
+from jinja2 import Environment, FileSystemLoader
+from locust import Locust, TaskSet, task, events, runners
 
 WORK_DIR = '/locust/'
 TEMPLATE_NAME = 'report-template.html'
@@ -37,7 +38,8 @@ def generate_report():
     env = Environment(loader=loader)
 
     csv.register_dialect('dialect',
-                         delimiter = ',',
+                         delimiter=',',
+                         quotechar='"',
                          quoting=csv.QUOTE_ALL,
                          skipinitialspace=True)
 
@@ -103,7 +105,7 @@ def failures_csv():
         rows.append('"%s","%s","%s",%i' % (
             er['method'],
             er['name'],
-            er['error'],
+            er['error'].replace("\"", "'"),
             er['occurences'],
         ))
     return "\n".join(rows)

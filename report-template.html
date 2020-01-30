@@ -3,9 +3,25 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <style type="text/css">
-      table, th, td, tr { border: 1px solid black; border-collapse: collapse }
-      th {background-color: #add8e6; color: black;}
-
+        .container {
+          display:flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+        }
+        .row {
+          height: 50px;
+          padding: 10px;
+          max-width: 900px;
+          overflow: scroll;
+          overflow-y: auto;
+          overflow-x: auto;
+          border: 1px solid black; border-collapse: collapse
+        }
+        .header {
+          background-color: #add8e6;
+          color: black;
+          font-weight: 900;
+        }
     </style>
 </head>
 <title>Load Test Report</title>
@@ -17,58 +33,46 @@
 RPS:<strong>{{ rps }}</strong> Failures: <strong>{{ fails }}</strong>
 </p>
 <h2>Statistics</h2>
-<table>
-    <tr>
-        {% for header in stat_headers %}
-        <th>
-            <p>{{header}}</p>
-        </th>
+<div class="container">
+    {% for row in stat_data %}
+    <div class="column">
+        <div class="header row">{{stat_headers[loop.index0]}}</div>
+        {% for value in row %}
+        <div class="row">
+            <div class="cell">{{value}}</div>
+        </div>
         {% endfor %}
-    </tr>
-    <tr>
-        {% for data in stat_data %}
-            <td>
-                {% for value in data %}
-                <p>{{value}}</p>
-                {% endfor %}
-            </td>
-        {% endfor %}
-
-</table>
-<h2>Failures</h2>
-<table>
-    {% for header in e_headers %}
-    <th>
-        <p>{{header}}</p>
-    </th>
+    </div>
     {% endfor %}
+</div>
 
-    <tr>
-        {% for data in e_data %}
-        <td>
-            {% for value in data %}
-            <p>{{value}}</p>
-            {% endfor %}
-        </td>
-        {% endfor %}
-</table>
 <h2>Distribution</h2>
-<table>
-    {% for header in dist_headers %}
-    <th>
-        <p>{{header}}</p>
-    </th>
-    {% endfor %}
-
-    <tr>
-        {% for data in dist_data %}
-        <td>
-            {% for value in data %}
-            <p>{{value}}</p>
-            {% endfor %}
-        </td>
+<div class="container">
+    {% for row in dist_data %}
+    <div class="column">
+        <div class="header row">{{dist_headers[loop.index0]}}</div>
+        {% for value in row %}
+        <div class="row">
+            {{value}}
+        </div>
         {% endfor %}
-    <tr>
-</table>
+    </div>
+    {% endfor %}
+</div>
+
+<h2>Failures</h2>
+<div class="container">
+    {% for row in e_data %}
+    <div class="column">
+        <div class="header row">{{e_headers[loop.index0]}}</div>
+        {% for value in row %}
+        <div class="row">
+            <div class="cell">{{value}}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
 </body>
 </html>
