@@ -244,7 +244,7 @@ public class TrackedEntityInstanceRandomizer
         }
         else if ( segment.getMethod().equals( TextPatternMethod.RANDOM ) )
         {
-            return TextPatternMethodUtils.generateRandom( new Random(), segment.getParameter() );
+            return TextPatternMethodUtils.generateRandom( new Random(), segment.getParameter() ) ;
         }
         else
         {

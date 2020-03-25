@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks;
+package org.hisp.dhis.tasks.tracker.tei;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,6 +43,7 @@ public class AddTeiTask
 
         catch ( Exception e )
         {
+
             recordFailure( System.currentTimeMillis() - time, e.getMessage() );
             hasFailed = true;
         }
