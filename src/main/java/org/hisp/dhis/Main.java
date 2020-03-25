@@ -11,6 +11,10 @@ import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.locust.LocustSlave;
 import org.hisp.dhis.tasks.*;
+import org.hisp.dhis.tasks.tracker.tei.AddTeiTask;
+import org.hisp.dhis.tasks.tracker.tei.FilterTeiTask;
+import org.hisp.dhis.tasks.tracker.tei.GetAndUpdateTeiTask;
+import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
 
 import java.io.IOException;
 
@@ -71,8 +75,10 @@ public class Main
             new AddTeiTask( 5, cache ),
             new FilterTeiTask( 5 ),
             new CreateTrackedEntityAttributeTask( 5 ),
-            new MetadataExportImportTask( 1 ),
-            new ReserveTrackedEntityAttributeValuesTask( 1 )
+            //new MetadataExportImportTask( 1 ),
+            new ReserveTrackedEntityAttributeValuesTask( 1 ),
+            new GetAndUpdateEventsTask( 2, "?orgUnit=DiszpKrYNg8" ),
+            new GetAndUpdateTeiTask( 2, cache )
         );
     }
 }

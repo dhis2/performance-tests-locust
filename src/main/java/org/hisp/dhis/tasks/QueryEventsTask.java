@@ -11,13 +11,15 @@ public class QueryEventsTask
     extends
     DhisAbstractTask
 {
-    private String query = "/api/events/";
+    private RestApiActions apiActions = new RestApiActions( "/api/events" );
+
+    private String query;
 
     private JsonObject responseBody;
 
     public QueryEventsTask( String query )
     {
-        this.query += query;
+        this.query = query;
     }
 
     public int getWeight()
@@ -27,13 +29,12 @@ public class QueryEventsTask
 
     public String getName()
     {
-        return "Get events " + this.query;
+        return "GET events " + this.query;
     }
 
     public void execute()
     {
-        RestApiActions apiActions = new RestApiActions( this.query );
-        ApiResponse response = apiActions.get();
+        ApiResponse response = apiActions.get(this.query);
 
         this.responseBody = response.getBody();
 

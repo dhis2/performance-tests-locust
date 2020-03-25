@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks;
+package org.hisp.dhis.tasks.tracker.tei;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -7,6 +7,7 @@ import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.tasks.DhisAbstractTask;
 
 public class AddTeiTask
     extends
@@ -43,6 +44,7 @@ public class AddTeiTask
 
         catch ( Exception e )
         {
+
             recordFailure( System.currentTimeMillis() - time, e.getMessage() );
             hasFailed = true;
         }
