@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.response.dto.ApiResponse;
 
+import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
+
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
@@ -35,7 +37,7 @@ public class PostEventsTask
         RestApiActions apiActions = new RestApiActions( this.endpoint );
         ApiResponse response = apiActions.post( body );
 
-        if ( response.statusCode() == 200 )
+        if ( response.statusCode() == STATUS_CODE_OK )
         {
             recordSuccess( response.getRaw() );
             return;
