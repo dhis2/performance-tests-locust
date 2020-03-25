@@ -7,6 +7,7 @@ import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.tasks.DhisAbstractTask;
 
 public class AddTeiTask
     extends

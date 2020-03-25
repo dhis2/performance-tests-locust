@@ -10,14 +10,10 @@ public class GetAndUpdateEventsTask
 {
     private String query;
 
-    public GetAndUpdateEventsTask( String eventsQuery )
+    public GetAndUpdateEventsTask( int weight, String eventsQuery )
     {
+        this.weight = weight;
         this.query = eventsQuery;
-    }
-
-    public int getWeight()
-    {
-        return 1;
     }
 
     public String getName()
@@ -26,7 +22,6 @@ public class GetAndUpdateEventsTask
     }
 
     public void execute()
-        throws Exception
     {
         new LoginTask().execute();
 

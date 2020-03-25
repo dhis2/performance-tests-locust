@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,7 +46,6 @@ public class TrackedEntityInstanceRandomizer
     public TrackedEntityInstance create( EntitiesCache cache )
     {
         Program program = getRandomProgram( cache );
-        ProgramStage programStage = getRandomProgramStageFromProgram( program );
         String ou = getRandomOrgUnitFromProgram( program );
 
         TrackedEntityInstance tei = new TrackedEntityInstance();
@@ -56,10 +56,26 @@ public class TrackedEntityInstanceRandomizer
         tei.setOrgUnit( ou );
         tei.setAttributes( getRandomAttributesList( program ) );
 
+        Enrollment enrollment = createEnrollment( program, ou );
+        tei.setEnrollments( Collections.singletonList( enrollment ) );
+
+        return tei;
+    }
+
+    public Enrollment createEnrollment(EntitiesCache cache) {
+        Program program = getRandomProgram( cache );
+        String ou = getRandomOrgUnitFromProgram( program );
+
+        return createEnrollment( program, ou );
+    }
+
+    public Enrollment createEnrollment(Program program, String ou) {
+        ProgramStage programStage = getRandomProgramStageFromProgram( program );
+
         Enrollment enrollment = new Enrollment();
         enrollment.setProgram( program.getUid() );
         enrollment.setOrgUnit( ou );
-        enrollment.setEnrollmentDate( new Date() );
+        enrollment.setEnrollmentDate( new Date(  ) );
         enrollment.setIncidentDate( new Date() );
         enrollment.setStatus( EnrollmentStatus.ACTIVE );
         enrollment.setFollowup( false );
@@ -82,9 +98,7 @@ public class TrackedEntityInstanceRandomizer
             return event;
         } ).collect( Collectors.toList() ) );
 
-        tei.setEnrollments( Collections.singletonList( enrollment ) );
-
-        return tei;
+        return enrollment;
     }
 
     public TrackedEntityInstances create( EntitiesCache cache, int size )

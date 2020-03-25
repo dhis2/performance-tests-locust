@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks;
+package org.hisp.dhis.tasks.tracker.tei;
 
 /*
  * Copyright (c) 2004-2019, University of Oslo
@@ -30,6 +30,7 @@ package org.hisp.dhis.tasks;
 
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.tasks.DhisAbstractTask;
 
 /**
  * @author David Katuscak (katuscak.d@gmail.com)

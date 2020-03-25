@@ -9,13 +9,18 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class GetTeiTask extends DhisAbstractTask
+public class GetTeisTask
+    extends DhisAbstractTask
 {
     private JsonObject responseBody;
 
-    private RestApiActions teiActions = new RestApiActions( "/trackedEntityInstances" );
+    private RestApiActions teiActions = new RestApiActions( "/api/trackedEntityInstances" );
 
-    public GetTeiTask( int weight ) {
+    public GetTeisTask( ) {
+        this.weight = 1;
+    }
+
+    public GetTeisTask( int weight ) {
         this.weight = weight;
     }
 
