@@ -1,8 +1,9 @@
-FROM python:3.6.6-alpine3.8
+FROM python:3.6-alpine
 
 RUN apk --no-cache add g++ \
-      && apk --no-cache add zeromq-dev \
-      && pip install locustio==0.11.0 pyzmq Jinja2 \
+        libffi-dev \
+        zeromq \
+      && pip install locustio==0.13.0 pyzmq Jinja2 \
       && mkdir /locust \
       && mkdir /templates
 
