@@ -1,22 +1,23 @@
 package org.hisp.dhis.tasks.tracker.tei;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import io.restassured.http.ContentType;
-import net.andreinc.mockneat.unit.types.Ints;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
-import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
+import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.Tei;
+import org.hisp.dhis.random.EnrollmentRandomizer;
+import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
-import org.hisp.dhis.tasks.GetAndUpdateEventsTask;
+import org.hisp.dhis.utils.DataRandomizer;
 import org.hisp.dhis.utils.JsonParserUtils;
 
-import java.util.Collections;
+import com.google.gson.JsonObject;
+
+import io.restassured.http.ContentType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -25,8 +26,8 @@ public class GetAndUpdateTeiTask
     extends DhisAbstractTask
 {
     private RestApiActions teiActions = new RestApiActions( "/api/trackedEntityInstances" );
-
     private EntitiesCache entitiesCache;
+
     public GetAndUpdateTeiTask( int weight, EntitiesCache cache ) {
         this.weight = weight;
         this.entitiesCache = cache;
@@ -35,23 +36,37 @@ public class GetAndUpdateTeiTask
     @Override
     public String getName()
     {
-        return "PUT /trackedEntityInstances";
+        return "PUT /trackedEntityInstances/$id";
     }
 
     @Override
     public void execute()
-        throws Exception
     {
-        JsonArray teis = new GetTeisTask( ).executeAndGetBody().getAsJsonArray( "trackedEntityInstances" );
+        List<Tei> teis = new ArrayList<>(  );
+        Program program = new Program(  );
 
-        JsonObject tei = teis.get( Ints.ints().range( 0, teis.getAsJsonArray().size() ).get() ).getAsJsonObject();
+        // Some programs in cache doesn't necessarily have TEIs.
+        while(teis == null || teis.size() == 0) {
+            program = entitiesCache.getPrograms().get( DataRandomizer.randomIntInRange( 0, entitiesCache.getPrograms().size() ) );
 
-        Enrollment enrollment = new TrackedEntityInstanceRandomizer().createEnrollment( entitiesCache );
+            teis = entitiesCache.getTeis().get( program.getUid() );
+        }
 
-        JsonObject enrollmentJson = JsonParserUtils.toJsonObject( enrollment );
-        tei.getAsJsonArray( "enrollments" ).add( enrollmentJson );
+        List<Attribute> attributes = new TrackedEntityInstanceRandomizer(  ).getRandomAttributesList( program );
 
-        ApiResponse response = teiActions.update( tei.get("trackedEntityInstance").getAsString(), tei, ContentType.JSON.toString() );
+        Tei tei = teis.get( DataRandomizer.randomIntInRange( 0, teis.size() ) );
+
+        // get full tei body
+
+        JsonObject teiBody = new GetTeiTask( tei.getUid() ).executeAndGetBody();
+
+        teiBody.add( "attributes", JsonParserUtils.toJsonObject( attributes ) );
+
+
+        // update
+
+        ApiResponse response = teiActions.update( tei.getUid(), teiBody,
+            ContentType.JSON.toString() );
 
         if ( response.statusCode() == 200 )
         {
@@ -63,4 +78,5 @@ public class GetAndUpdateTeiTask
         }
 
     }
+
 }
