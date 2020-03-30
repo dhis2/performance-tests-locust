@@ -3,6 +3,7 @@ package org.hisp.dhis.cache;
 import static io.restassured.RestAssured.given;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -114,24 +115,17 @@ public class EntitiesCache
                 }
             } );
         }
-        //int teiSize = teis.values().stream().map(List::size).mapToInt(Integer::intValue).sum();
-        System.out.println( "teis by program" );
-        for ( String s : teis.keySet() )
-        {
-            System.out.println( "program: " + s + " - teis: " + teis.get( s ).size() );
-        }
-
     }
 
     public void loadAll()
     {
         this.loadTeiTypeCache();
-        System.out.println("Tracked Entity Types loaded in cache [" + this.teiTypes.size() + "]");
+        System.out.println( "Tracked Entity Types loaded in cache [" + this.teiTypes.size() + "]" );
         this.loadProgramCache();
-        System.out.println("Programs loaded in cache [" + this.programs.size() + "]");
+        System.out.println( "Programs loaded in cache [" + this.programs.size() + "]" );
         this.loadTeiCache();
-        System.out.println("Tracked Entity Instances loaded in cache [" + this.teis.size() + "]");
-
+        System.out.println( "Tracked Entity Instances loaded in cache ["
+            + this.teis.values().stream().mapToInt( Collection::size ).sum() + "]" );
     }
 
     private List<DataElement> getDataElementsFromStage( String programStageUid )

@@ -145,11 +145,6 @@ public class TrackedEntityInstanceRandomizer
                         rndValueFrom( att.getValueType() ) );
                 }
                 return null;
-                // else
-                // {
-                // return new Attribute( att.getTrackedEntityAttributeUid(), att.getValueType(),
-                // From.from( att.getOptions() ).get() );
-                // }
             }
         } ).filter( Objects::nonNull ).collect( Collectors.toList() );
     }

@@ -45,7 +45,7 @@ public class AddEventsTask
         }
         catch ( Exception e )
         {
-            System.out.println("An error occurred while creating a random event: " + e.getMessage());
+            System.out.println( "An error occurred while creating a random event: " + e.getMessage() );
         }
         return null;
     }

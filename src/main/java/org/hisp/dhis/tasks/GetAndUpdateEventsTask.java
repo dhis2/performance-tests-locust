@@ -19,7 +19,7 @@ public class GetAndUpdateEventsTask
     @Override
     public String getName()
     {
-        return "POST events";
+        return "Get and update events task";
     }
 
     public void execute()
