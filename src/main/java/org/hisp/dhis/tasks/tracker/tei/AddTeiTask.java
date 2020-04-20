@@ -31,8 +31,7 @@ public class AddTeiTask
     public void execute()
     {
         TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstanceRandomizer().create( this.cache, 5 );
-        Gson gson = new GsonBuilder().setDateFormat( "yyyy-MM-dd" ).create();
-        String json = gson.toJson( trackedEntityInstances );
+
         long time = System.currentTimeMillis();
 
         ApiResponse response = null;
@@ -41,10 +40,8 @@ public class AddTeiTask
         {
             response = new RestApiActions( this.endpoint ).post( trackedEntityInstances );
         }
-
         catch ( Exception e )
         {
-
             recordFailure( System.currentTimeMillis() - time, e.getMessage() );
             hasFailed = true;
         }
