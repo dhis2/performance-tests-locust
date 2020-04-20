@@ -5,13 +5,13 @@ import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.List;
 
 import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
 import static java.lang.String.*;
 import static java.util.Arrays.asList;
-import static net.andreinc.mockneat.unit.objects.From.from;
 
 /**
  * @author Maikel Arabori <maikelarabori@gmail.com>
@@ -98,11 +98,11 @@ public class GetHeavyAnalyticsRandomTask
 
     private String randomOrgUnitUid( final List<String> programOrgUnits )
     {
-        return from( programOrgUnits ).get();
+        return DataRandomizer.randomElementFromList( programOrgUnits );
     }
 
     private Program randomProgram()
     {
-        return from( entitiesCache.getPrograms() ).get();
+        return DataRandomizer.randomElementFromList( entitiesCache.getPrograms() );
     }
 }

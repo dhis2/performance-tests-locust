@@ -7,3 +7,4 @@ venv/
 .classpath
 .factorypath
 performance-tests.iml
+__pycache__

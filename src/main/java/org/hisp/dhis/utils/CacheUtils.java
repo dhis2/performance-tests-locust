@@ -13,7 +13,7 @@ public class CacheUtils
 {
     private static String TMP = System.getProperty( "java.io.tmpdir" );
 
-    private static String CACHE_FILE = TMP + System.getProperty( "file.separator" ) + "locust-cache.dat";
+    public static String CACHE_FILE = TMP + System.getProperty( "file.separator" ) + "locust-cache.dat";
 
     private static Kryo kryo;
 
@@ -53,6 +53,15 @@ public class CacheUtils
 
     }
 
+    public static EntitiesCache createAndSerializeCache()
+            throws IOException
+    {
+        EntitiesCache cache = new EntitiesCache();
+        cache.loadAll();
+        serializeCache( cache );
+        return cache;
+    }
+
     public static boolean cacheExists()
     {
         return new File( CACHE_FILE ).exists();
@@ -60,7 +69,6 @@ public class CacheUtils
 
     public static String getCachePath()
     {
-
         return CACHE_FILE;
     }
 }

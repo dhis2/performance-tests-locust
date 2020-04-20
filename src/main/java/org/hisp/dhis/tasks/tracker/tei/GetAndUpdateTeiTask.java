@@ -6,6 +6,12 @@ import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.Tei;
 import org.hisp.dhis.random.EnrollmentRandomizer;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
+
+import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
+import org.hisp.dhis.random.EnrollmentRandomizer;
+import org.hisp.dhis.random.EventRandomizer;
+import org.hisp.dhis.random.RandomizerContext;
+
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
@@ -19,6 +25,11 @@ import io.restassured.http.ContentType;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+import io.restassured.http.ContentType;
+
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
@@ -26,6 +37,9 @@ public class GetAndUpdateTeiTask
     extends DhisAbstractTask
 {
     private RestApiActions teiActions = new RestApiActions( "/api/trackedEntityInstances" );
+
+    private EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer();
+
     private EntitiesCache entitiesCache;
 
     public GetAndUpdateTeiTask( int weight, EntitiesCache cache ) {
@@ -58,6 +72,10 @@ public class GetAndUpdateTeiTask
 
         // get full tei body
 
+        JsonObject tei = teis.get( DataRandomizer.randomIntInRange( 0, teis.getAsJsonArray().size() ) )
+            .getAsJsonObject();
+
+
         JsonObject teiBody = new GetTeiTask( tei.getUid() ).executeAndGetBody();
 
         teiBody.add( "attributes", JsonParserUtils.toJsonObject( attributes ) );
@@ -65,7 +83,7 @@ public class GetAndUpdateTeiTask
 
         // update
 
-        ApiResponse response = teiActions.update( tei.getUid(), teiBody,
+        ApiResponse response = teiActions.update( tei.get( "trackedEntityInstance" ).getAsString(), tei,
             ContentType.JSON.toString() );
 
         if ( response.statusCode() == 200 )
