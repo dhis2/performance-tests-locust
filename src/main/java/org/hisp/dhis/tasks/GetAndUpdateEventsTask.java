@@ -16,6 +16,7 @@ public class GetAndUpdateEventsTask
         this.query = eventsQuery;
     }
 
+    @Override
     public String getName()
     {
         return "Get and update events task";
