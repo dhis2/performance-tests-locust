@@ -72,10 +72,6 @@ public class GetAndUpdateTeiTask
 
         // get full tei body
 
-        JsonObject tei = teis.get( DataRandomizer.randomIntInRange( 0, teis.getAsJsonArray().size() ) )
-            .getAsJsonObject();
-
-
         JsonObject teiBody = new GetTeiTask( tei.getUid() ).executeAndGetBody();
 
         teiBody.add( "attributes", JsonParserUtils.toJsonObject( attributes ) );
@@ -83,7 +79,7 @@ public class GetAndUpdateTeiTask
 
         // update
 
-        ApiResponse response = teiActions.update( tei.get( "trackedEntityInstance" ).getAsString(), tei,
+        ApiResponse response = teiActions.update( tei.getUid(), teiBody,
             ContentType.JSON.toString() );
 
         if ( response.statusCode() == 200 )

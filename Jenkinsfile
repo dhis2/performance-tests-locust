@@ -14,8 +14,8 @@ pipeline {
         LOCUST_REPORT_DIR = "locust"
         LOCAL_REPORT_DIR = "reports"
         REPORT_FILE = "html_report.html"
-        INSTANCE_HOST = "giocare.dhis2.org"
-        INSTANCE_NAME = "perf_dev"
+        INSTANCE_HOST = "test.performance.dhis2.org"
+        INSTANCE_NAME = "dev"
     }
 
     triggers {
@@ -30,19 +30,27 @@ pipeline {
         }
 
         stage('Update performance test instance') {
-            awx.resetWar("$AWX_BOT_CREDENTIALS", "${INSTANCE_HOST}", "${INSTANCE_NAME}")
+            steps {
+                script {
+                    awx.resetWar("$AWX_BOT_CREDENTIALS", "${INSTANCE_HOST}", "${INSTANCE_NAME}")
+                }
+            }
         }
 
         stage('Start locust') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                sh "${COMPOSE_ARGS} docker-compose up -d"
+                script {
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "${COMPOSE_ARGS} docker-compose up -d"
+                }
             }
         }
 
         stage('Run tests') {
             steps {
-                sh "mvn -s settings.xml clean compile exec:java"
+                script {
+                    sh "mvn -s settings.xml clean compile exec:java"
+                }
             }
         }
     }
