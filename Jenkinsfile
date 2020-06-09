@@ -49,7 +49,7 @@ pipeline {
         stage('Run tests') {
             steps {
                 script {
-                    sh "mvn -s settings.xml clean compile exec:java -Dtarget.baseuri=$INSTANCE_HOST/$INSTANCE_NAME"
+                    sh "mvn -s settings.xml clean compile exec:java -Dtarget.baseuri=https://$INSTANCE_HOST/$INSTANCE_NAME"
                 }
             }
         }
