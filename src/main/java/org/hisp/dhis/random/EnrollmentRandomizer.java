@@ -29,6 +29,7 @@ package org.hisp.dhis.random;
  */
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -92,6 +93,7 @@ public class EnrollmentRandomizer
 
         enrollment.setEvents( IntStream.rangeClosed( 1, eventsSize )
             .mapToObj( i -> eventRandomizer.create( cache, ctx ) )
+            .filter( Objects::nonNull )
             .collect( Collectors.toList() ) );
 
         return enrollment;

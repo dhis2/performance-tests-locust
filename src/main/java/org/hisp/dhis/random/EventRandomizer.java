@@ -31,6 +31,7 @@ package org.hisp.dhis.random;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,7 @@ import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.ProgramStage;
+import org.hisp.dhis.cache.Tei;
 import org.hisp.dhis.dxf2.events.event.DataValue;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.event.EventStatus;
@@ -83,8 +85,16 @@ public class EventRandomizer
         event.setDataValues( createDataValues( programStage, 1, 8 ) );
         if ( !ctx.isSkipTeiInEvent() )
         {
-            String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( program.getUid() ) ).getUid();
-            event.setTrackedEntityInstance( teiUid );
+            try
+            {
+                String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( program.getUid() ) )
+                    .getUid();
+                event.setTrackedEntityInstance( teiUid );
+            }
+            catch ( Exception e )
+            {
+                return null;
+            }
         }
         return event;
     }
@@ -110,14 +120,16 @@ public class EventRandomizer
         dataValue.setDataElement( dataElement.getUid() );
         dataValue.setProvidedElsewhere( false );
         String val;
-        if ( dataElement.getOptionSet() != null && !dataElement.getOptionSet().isEmpty() )
-        {
-            val = DataRandomizer.randomElementFromList( dataElement.getOptionSet() );
-        }
-        else
-        {
-            val = rndValueFrom( dataElement.getValueType() );
-        }
+        // TODO commenting out logic to generate a random value for an option set, since it's not working properly
+        //        if ( dataElement.getOptionSet() != null && !dataElement.getOptionSet().isEmpty() )
+//        {
+//            val = DataRandomizer.randomElementFromList( dataElement.getOptionSet() );
+//        }
+//        else
+//        {
+
+//        }
+        val = rndValueFrom( dataElement.getValueType() );
         dataValue.setValue( val );
         return dataValue;
     }
