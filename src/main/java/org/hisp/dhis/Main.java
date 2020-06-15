@@ -78,9 +78,7 @@ public class Main
         }
         System.out.println( "cache loaded from " + getCachePath() );
 
-        LocustSlave locustSlave = LocustSlave.newInstance();
-
-        Locust locust = locustSlave.init();
+        Locust locust = LocustSlave.newInstance().init();
 
         locust.run(
                 new QueryFilterTeiTask( 3 ),
