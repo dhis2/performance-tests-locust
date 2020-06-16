@@ -26,7 +26,13 @@ public class CreateTrackedEntityAttributeTask
 
     public String getName()
     {
-        return "POST " + endpoint;
+        return endpoint;
+    }
+
+    @Override
+    public String getType()
+    {
+        return "POST";
     }
 
     public void execute()

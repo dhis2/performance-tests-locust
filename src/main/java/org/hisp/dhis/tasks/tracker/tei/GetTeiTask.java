@@ -22,7 +22,13 @@ public class GetTeiTask
     @Override
     public String getName()
     {
-        return "GET /trackedEntityInstances/$id";
+        return "/trackedEntityInstances/$id";
+    }
+
+    @Override
+    public String getType()
+    {
+        return "GET";
     }
 
     @Override

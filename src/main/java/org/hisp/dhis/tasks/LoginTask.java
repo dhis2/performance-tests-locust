@@ -23,6 +23,12 @@ public class LoginTask
         return "Authenticate";
     }
 
+    @Override
+    public String getType()
+    {
+        return "http";
+    }
+
     public void execute()
     {
         RestAssured.getRestAssured().authentication = preemptive().basic( "system", "System123" );

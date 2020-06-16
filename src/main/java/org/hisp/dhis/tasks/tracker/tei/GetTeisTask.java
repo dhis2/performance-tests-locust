@@ -27,7 +27,13 @@ public class GetTeisTask
     @Override
     public String getName()
     {
-        return "GET /trackedEntityInstances";
+        return "/trackedEntityInstances";
+    }
+
+    @Override
+    public String getType()
+    {
+        return "GET";
     }
 
     @Override

@@ -1,9 +1,9 @@
-package org.hisp.dhis.tasks;
+package org.hisp.dhis.tasks.analytics;
 
-import io.restassured.specification.RequestSpecification;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.tasks.DhisAbstractTask;
 
 import java.util.List;
 
@@ -52,6 +52,12 @@ public class GetHeavyAnalyticsTask
     public String getName()
     {
         return "(static) GET " + query();
+    }
+
+    @Override
+    public String getType()
+    {
+        return "GET";
     }
 
     public void execute()

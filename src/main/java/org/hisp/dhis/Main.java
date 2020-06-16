@@ -1,34 +1,30 @@
 package org.hisp.dhis;
 
-import static io.restassured.config.RestAssuredConfig.config;
-import static org.aeonbits.owner.ConfigFactory.create;
-import static org.hisp.dhis.utils.CacheUtils.*;
-
-import java.io.IOException;
-
-import org.hisp.dhis.cache.EntitiesCache;
-import org.hisp.dhis.locust.LocustConfig;
-import org.hisp.dhis.locust.LocustSlave;
-import org.hisp.dhis.tasks.AddEventsTask;
-import org.hisp.dhis.tasks.CreateTrackedEntityAttributeTask;
-import org.hisp.dhis.tasks.GetAndUpdateEventsTask;
-import org.hisp.dhis.tasks.GetHeavyAnalyticsRandomTask;
-import org.hisp.dhis.tasks.GetHeavyAnalyticsTask;
-import org.hisp.dhis.tasks.LoginTask;
-
 import com.github.myzhan.locust4j.Locust;
 import com.google.gson.GsonBuilder;
-
 import io.restassured.RestAssured;
 import io.restassured.config.DecoderConfig;
 import io.restassured.config.EncoderConfig;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.mapper.ObjectMapperType;
-import org.hisp.dhis.tasks.ReserveTrackedEntityAttributeValuesTask;
+import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.locust.LocustConfig;
+import org.hisp.dhis.locust.LocustSlave;
+import org.hisp.dhis.tasks.*;
+import org.hisp.dhis.tasks.analytics.GetHeavyAnalyticsRandomTask;
+import org.hisp.dhis.tasks.analytics.GetHeavyAnalyticsTask;
+import org.hisp.dhis.tasks.tracker.events.AddEventsTask;
+import org.hisp.dhis.tasks.tracker.events.GetAndUpdateEventsTask;
 import org.hisp.dhis.tasks.tracker.tei.AddTeiTask;
 import org.hisp.dhis.tasks.tracker.tei.FilterTeiTask;
 import org.hisp.dhis.tasks.tracker.tei.GetAndUpdateTeiTask;
 import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
+
+import java.io.IOException;
+
+import static io.restassured.config.RestAssuredConfig.config;
+import static org.aeonbits.owner.ConfigFactory.create;
+import static org.hisp.dhis.utils.CacheUtils.*;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -92,6 +88,8 @@ public class Main
                 new GetAndUpdateEventsTask( 2, "?orgUnit=DiszpKrYNg8" ),
                 new GetAndUpdateTeiTask( 2, cache ),
                 new AddEventsTask(3, cache)
+
         );
+        //locust.run( new AddEventsTask( 2, cache ) );
     }
 }

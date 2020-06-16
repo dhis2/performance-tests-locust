@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks;
+package org.hisp.dhis.tasks.tracker.events;
 
 import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
 
@@ -17,6 +17,7 @@ import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -46,7 +47,13 @@ public class AddEventsTask
     @Override
     public String getName()
     {
-        return "POST /api/events";
+        return endpoint;
+    }
+
+    @Override
+    public String getType()
+    {
+        return "POST";
     }
 
     private Event createRandomEvent()
