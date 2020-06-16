@@ -1,9 +1,7 @@
-FROM python:3.6-alpine
+FROM python:3.8-alpine
 
-RUN apk --no-cache add g++ \
-        libffi-dev \
-        zeromq \
-      && pip install locustio==0.13.0 pyzmq Jinja2 \
+RUN apk --no-cache add g++ zeromq-dev libffi-dev file make musl-dev
+RUN pip install locust==1.0.3 pyzmq Jinja2 \
       && mkdir /locust \
       && mkdir /templates
 
@@ -19,3 +17,5 @@ EXPOSE 5557
 EXPOSE 5558
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
+ENV PYTHONUNBUFFERED=1

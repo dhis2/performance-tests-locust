@@ -35,7 +35,7 @@ import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
  */
 public class Main
 {
-    private static LocustConfig cfg = create( LocustConfig.class );
+    private static final LocustConfig cfg = create( LocustConfig.class );
 
     public static void main( String[] args )
         throws IOException
@@ -79,7 +79,6 @@ public class Main
         System.out.println( "cache loaded from " + getCachePath() );
 
         Locust locust = LocustSlave.newInstance().init();
-
 
         locust.run(
                 new QueryFilterTeiTask( 3 ),

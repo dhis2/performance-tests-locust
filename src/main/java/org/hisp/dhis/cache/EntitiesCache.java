@@ -4,9 +4,9 @@ import static io.restassured.RestAssured.given;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.google.common.collect.Lists;
 
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
@@ -80,52 +81,61 @@ public class EntitiesCache
         }
     }
 
+    /**
+     * Create a map where [key] -> Program UID, [value] -> List of Tei
+     */
     public void loadTeiCache()
     {
-        this.teis = new ConcurrentHashMap<>();
+        this.teis = new HashMap<>();
+
+        Map<String, List<Tei>> tempMap = new HashMap<>();
+
         for ( Program program : this.programs )
         {
-            List<String> orgUnits = program.getOrgUnits();
-            orgUnits.parallelStream().forEach( ou -> {
-                // -- fetch a list of teis for each program + ou
+            List<List<String>> partitions = Lists.partition( program.getOrgUnits(), 500);
+
+            partitions.forEach( p -> {
+                final String ous = String.join( ";", p);
                 List<Map> payload = getPayload(
-                    "/api/trackedEntityInstances?ou=" + ou + "&program=" + program.getUid() ).jsonPath()
+                        "/api/trackedEntityInstances?ou=" + ous + "&pageSize=50&program=" + program.getUid() ).jsonPath()
                         .getList( "trackedEntityInstances" );
-                int count = 0;
+
+                // -- create a List of Tei for the current Program and OU
                 List<Tei> teisFromProgram = new ArrayList<>();
+
                 for ( Map map : payload )
                 {
-                    if ( count <= 10 ) // -- only add 10 teis for each ou
-                    {
-                        teisFromProgram.add( new Tei( (String) map.get( "trackedEntityInstance" ), program.getUid() ) );
-                        count++;
-                    } else {
-                        break;
-                    }
+                    teisFromProgram.add( new Tei( (String) map.get( "trackedEntityInstance" ), program.getUid() ) );
                 }
-                List<Tei> teis = this.teis.get( program.getUid() );
-                if ( teis != null && teis.size() != 0 )
+
+                if ( teis.containsKey( program.getUid() ) )
                 {
+                    List<Tei> teis = this.teis.get( program.getUid() );
                     teis.addAll( teisFromProgram );
-                    this.teis.replace( program.getUid(), teis );
                 }
                 else
                 {
-                    this.teis.put( program.getUid(), teisFromProgram );
+                    teis.put( program.getUid(), teisFromProgram );
                 }
-            } );
+            });
         }
     }
 
     public void loadAll()
     {
         this.loadTeiTypeCache();
-        System.out.println( "Tracked Entity Types loaded in cache [" + this.teiTypes.size() + "]" );
+        System.out.println("33%");
         this.loadProgramCache();
-        System.out.println( "Programs loaded in cache [" + this.programs.size() + "]" );
+        System.out.println("66%");
         this.loadTeiCache();
+        System.out.println("100%");
+        // remove programs without tei
+        this.programs = programs.stream().filter( p -> teis.containsKey( p.getUid() ) ).collect( Collectors.toList() );
+
+        System.out.println( "Tracked Entity Types loaded in cache [" + this.teiTypes.size() + "]" );
+        System.out.println( "Programs loaded in cache [" + this.programs.size() + "]" );
         System.out.println( "Tracked Entity Instances loaded in cache ["
-            + this.teis.values().stream().mapToInt( Collection::size ).sum() + "]" );
+                + this.teis.values().stream().mapToInt( Collection::size ).sum() + "]" );
     }
 
     private List<DataElement> getDataElementsFromStage( String programStageUid )

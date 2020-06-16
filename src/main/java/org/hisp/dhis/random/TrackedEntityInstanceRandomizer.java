@@ -115,7 +115,7 @@ public class TrackedEntityInstanceRandomizer
         return null;
     }
 
-    private List<Attribute> getRandomAttributesList( Program program )
+    public List<Attribute> getRandomAttributesList( Program program )
     {
         return program.getAttributes().stream().map( att -> {
             if ( !StringUtils.isEmpty( att.getPattern() ) )

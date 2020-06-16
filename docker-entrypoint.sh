@@ -5,7 +5,7 @@ set -e
 ADDITIONAL_OPTS=""
 
 if [ "$NO_WEB" = true ]; then
-    ADDITIONAL_OPTS="$ADDITIONAL_OPTS --no-web --csv=dhis -c $USERS -r $HATCH_RATE"
+    ADDITIONAL_OPTS="$ADDITIONAL_OPTS --headless --csv=dhis -c $USERS -r $HATCH_RATE"
     if [ ! -z "$TIME" ]; then
         ADDITIONAL_OPTS="$ADDITIONAL_OPTS -t $TIME "
     fi
