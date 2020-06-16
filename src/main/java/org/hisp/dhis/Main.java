@@ -35,7 +35,7 @@ import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
  */
 public class Main
 {
-    private static LocustConfig cfg = create( LocustConfig.class );
+    private static final LocustConfig cfg = create( LocustConfig.class );
 
     public static void main( String[] args )
         throws IOException
