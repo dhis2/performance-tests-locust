@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
+import com.google.gson.JsonParseException;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.dxf2.events.event.Event;
@@ -18,6 +20,7 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hisp.dhis.utils.JsonParserUtils;
 
 /**
  * @author Luciano Fiandesio <luciano@dhis2.org>
