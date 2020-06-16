@@ -5,6 +5,7 @@ import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.JsonParseException;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.dxf2.events.event.Event;
@@ -14,6 +15,7 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hisp.dhis.utils.JsonParserUtils;
 
 /**
  * @author Luciano Fiandesio <luciano@dhis2.org>
@@ -63,18 +65,7 @@ public class AddEventsTask
             }
         }
         
-        RestApiActions apiActions = new RestApiActions( this.endpoint );
-
-        ApiResponse response = apiActions.post( new EventWrapper( rndEvents ) );
-
-        if ( response.statusCode() == STATUS_CODE_OK )
-        {
-            recordSuccess( response.getRaw() );
-        }
-        else
-        {
-            recordFailure( response.getRaw() );
-        }
+        new PostEventsTask( JsonParserUtils.toJsonObject( new EventWrapper( rndEvents ) ).getAsJsonObject() ).execute();
     }
 
     // We need to wrap the list of events with a root element
