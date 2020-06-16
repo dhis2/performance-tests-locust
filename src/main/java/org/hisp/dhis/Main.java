@@ -90,6 +90,5 @@ public class Main
                 new AddEventsTask(3, cache)
 
         );
-        //locust.run( new AddEventsTask( 2, cache ) );
     }
 }
