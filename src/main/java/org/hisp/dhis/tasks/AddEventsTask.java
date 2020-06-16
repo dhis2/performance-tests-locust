@@ -43,7 +43,7 @@ public class AddEventsTask
     @Override
     public String getName()
     {
-        return "POST events";
+        return "POST /api/events";
     }
 
     private Event createRandomEvent()
