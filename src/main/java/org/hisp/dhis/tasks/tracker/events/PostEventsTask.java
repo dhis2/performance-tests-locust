@@ -1,8 +1,9 @@
-package org.hisp.dhis.tasks;
+package org.hisp.dhis.tasks.tracker.events;
 
 import com.google.gson.JsonObject;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.tasks.DhisAbstractTask;
 
 import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
 
@@ -29,7 +30,13 @@ public class PostEventsTask
 
     public String getName()
     {
-        return "POST " + this.endpoint;
+        return this.endpoint;
+    }
+
+    @Override
+    public String getType()
+    {
+        return "POST";
     }
 
     public void execute()

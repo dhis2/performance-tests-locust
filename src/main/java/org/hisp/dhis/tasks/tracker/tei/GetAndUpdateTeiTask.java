@@ -50,7 +50,13 @@ public class GetAndUpdateTeiTask
     @Override
     public String getName()
     {
-        return "PUT /trackedEntityInstances/$id";
+        return "/trackedEntityInstances/$id";
+    }
+
+    @Override
+    public String getType()
+    {
+        return "PUT";
     }
 
     @Override

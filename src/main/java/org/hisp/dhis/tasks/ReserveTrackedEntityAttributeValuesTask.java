@@ -23,7 +23,13 @@ public class ReserveTrackedEntityAttributeValuesTask
 
     public String getName()
     {
-        return "POST /api/trackedEntityAttributes/{id}/generateAndReserve";
+        return "/api/trackedEntityAttributes/{id}/generateAndReserve";
+    }
+
+    @Override
+    public String getType()
+    {
+        return "POST";
     }
 
     public void execute()

@@ -28,6 +28,12 @@ public class MetadataExportImportTask
         return "Metadata export/import";
     }
 
+    @Override
+    public String getType()
+    {
+        return "https";
+    }
+
     public void execute()
         throws Exception
     {

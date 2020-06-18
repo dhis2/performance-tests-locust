@@ -25,7 +25,13 @@ public class AddTeiTask
 
     public String getName()
     {
-        return "POST " + this.endpoint;
+        return this.endpoint;
+    }
+
+    @Override
+    public String getType()
+    {
+        return "POST";
     }
 
     public void execute()

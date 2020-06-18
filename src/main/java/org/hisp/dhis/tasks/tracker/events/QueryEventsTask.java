@@ -1,8 +1,9 @@
-package org.hisp.dhis.tasks;
+package org.hisp.dhis.tasks.tracker.events;
 
 import com.google.gson.JsonObject;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.tasks.DhisAbstractTask;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -29,7 +30,13 @@ public class QueryEventsTask
 
     public String getName()
     {
-        return "GET events " + this.query;
+        return "/events" + this.query;
+    }
+
+    @Override
+    public String getType()
+    {
+        return "GET";
     }
 
     public void execute()

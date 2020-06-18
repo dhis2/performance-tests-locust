@@ -50,7 +50,13 @@ public class FilterTeiTask
     @Override
     public String getName()
     {
-        return "Get TEI's matching filter " + endpoint + query;
+        return "TEI's matching filter " + endpoint + query;
+    }
+
+    @Override
+    public String getType()
+    {
+        return "GET";
     }
 
     @Override

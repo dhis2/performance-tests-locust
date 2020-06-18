@@ -24,6 +24,12 @@ public class MetadataExportTask
         return "Export all metadata";
     }
 
+    @Override
+    public String getType()
+    {
+        return "GET";
+    }
+
     public void execute()
         throws Exception
     {

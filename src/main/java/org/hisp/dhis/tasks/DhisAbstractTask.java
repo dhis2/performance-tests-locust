@@ -20,27 +20,29 @@ public abstract class DhisAbstractTask
 
     public abstract String getName();
 
+    public abstract String getType();
+
     public abstract void execute()
         throws Exception;
 
     public void recordSuccess( Response response )
     {
-        Locust.getInstance().recordSuccess( "http", getName(), response.getTime(),
+        Locust.getInstance().recordSuccess( getType(), getName(), response.getTime(),
             response.getBody().asByteArray().length );
     }
 
     public void recordSuccess( long time, long length )
     {
-        Locust.getInstance().recordSuccess( "http", getName(), time, length );
+        Locust.getInstance().recordSuccess( getType(), getName(), time, length );
     }
 
     public void recordFailure( long time, String message )
     {
-        Locust.getInstance().recordFailure( "http", getName(), time, message );
+        Locust.getInstance().recordFailure( getType(), getName(), time, message );
     }
 
     public void recordFailure( Response response )
     {
-        Locust.getInstance().recordFailure( "http", getName(), response.getTime(), response.getBody().print() );
+        Locust.getInstance().recordFailure( getType(), getName(), response.getTime(), response.getBody().print() );
     }
 }

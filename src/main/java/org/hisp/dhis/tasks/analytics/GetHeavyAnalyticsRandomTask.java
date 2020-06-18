@@ -1,10 +1,11 @@
-package org.hisp.dhis.tasks;
+package org.hisp.dhis.tasks.analytics;
 
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.List;
@@ -55,6 +56,12 @@ public class GetHeavyAnalyticsRandomTask
     public String getName()
     {
         return "(random) GET " + query();
+    }
+
+    @Override
+    public String getType()
+    {
+        return "GET";
     }
 
     public void execute()
