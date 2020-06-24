@@ -53,7 +53,9 @@ public class EntitiesCache
                 getStagesFromProgram( uid ).parallelStream()
                     .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ) ) )
                     .collect( Collectors.toList() ),
-                getTrackerAttributesFromProgram( uid ), getTrackedEntityTypeUid( uid ) ) )
+
+                getTrackerAttributesFromProgram( uid ),
+                getTrackedEntityTypeUid( uid ) ) )
             .collect( Collectors.toList() );
 
         // free memory
@@ -64,7 +66,9 @@ public class EntitiesCache
     {
         this.teiTypes = new ArrayList<>();
 
-        List<Map> payload = getPayload( "/api/trackedEntityTypes" ).jsonPath().getList( "trackedEntityTypes" );
+        Response payload1 = getPayload( "/api/trackedEntityTypes" );
+        JsonPath jsonPath = payload1.jsonPath();
+        List<Map> payload = jsonPath.getList( "trackedEntityTypes" );
 
         for ( Map map : payload )
         {
@@ -132,7 +136,8 @@ public class EntitiesCache
             JsonPath trackedEntityAttribute = getAttributeUniqueness(
                 (String) ((Map) att.get( "trackedEntityAttribute" )).get( "id" ) );
             programAttributes
-                .add( new ProgramAttribute( (String) att.get( "id" ), ValueType.valueOf( (String) att.get( "valueType" ) ),
+                .add( new ProgramAttribute( (String) att.get( "id" ),
+                    ValueType.valueOf( (String) att.get( "valueType" ) ),
                     (String) ((Map) att.get( "trackedEntityAttribute" )).get( "id" ),
                     trackedEntityAttribute.getBoolean( "unique" ),
                     trackedEntityAttribute.getString( "pattern" ),
@@ -181,13 +186,26 @@ public class EntitiesCache
     {
         Response response = programCache.get( programUid );
 
-        return response.jsonPath().getBoolean( "registration" );
+        JsonPath jsonPath = response.jsonPath();
+        return jsonPath.getBoolean( "registration" );
     }
 
     private List<String> getOrgUnitsFromProgram( String programUid )
     {
         Response response = programCache.get( programUid );
         return response.jsonPath().getList( "organisationUnits.id" );
+    }
+
+    public Program getProgramFromCache( String programUid )
+    {
+        for ( Program cacheProgram : getPrograms() )
+        {
+            if ( cacheProgram.getUid().equals( programUid ) )
+            {
+                return cacheProgram;
+            }
+        }
+        return null;
     }
 
     private Response getProgram( String programUid )

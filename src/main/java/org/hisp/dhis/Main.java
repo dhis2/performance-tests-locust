@@ -7,20 +7,28 @@ import io.restassured.config.DecoderConfig;
 import io.restassured.config.EncoderConfig;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.mapper.ObjectMapperType;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.locust.LocustSlave;
-import org.hisp.dhis.tasks.*;
-import org.hisp.dhis.tasks.tracker.tei.AddTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.FilterTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.GetAndUpdateTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
+import org.hisp.dhis.tasks.LoginTask;
+import org.hisp.dhis.tasks.tracker.EventImporSyncTask;
+import org.hisp.dhis.tasks.tracker.MetadataImportTask;
+import org.hisp.dhis.tasks.tracker.SetupEventImportTask;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static io.restassured.config.RestAssuredConfig.config;
 import static org.aeonbits.owner.ConfigFactory.create;
-import static org.hisp.dhis.utils.CacheUtils.*;
+import static org.hisp.dhis.utils.CacheUtils.cacheExists;
+import static org.hisp.dhis.utils.CacheUtils.deserializeCache;
+import static org.hisp.dhis.utils.CacheUtils.getCachePath;
+import static org.hisp.dhis.utils.CacheUtils.serializeCache;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -32,17 +40,32 @@ public class Main
     public static void main( String[] args )
         throws IOException
     {
-        RestAssured.config = config().
-            decoderConfig(
-                new DecoderConfig( "UTF-8" )
-            ).encoderConfig(
-            new EncoderConfig( "UTF-8", "UTF-8" )
-        ).objectMapperConfig(
-            new ObjectMapperConfig()
-                .defaultObjectMapperType( ObjectMapperType.GSON )
-                .gsonObjectMapperFactory( ( type, s ) -> new GsonBuilder().setDateFormat( "yyyy-MM-dd" ).create() )
+        try
+        {
+            run();
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+            System.out.println( "error:  " + e.getMessage() );
+        }
+    }
 
-        );
+    public static void run()
+        throws Exception
+    {
+        RestAssured.config = config()
+            .decoderConfig( new DecoderConfig( "UTF-8" ) )
+            .encoderConfig( new EncoderConfig( "UTF-8", "UTF-8" ) )
+
+            .objectMapperConfig( new ObjectMapperConfig()
+                .defaultObjectMapperType( ObjectMapperType.GSON )
+                .gsonObjectMapperFactory( ( type, s ) -> new GsonBuilder()
+                    .addDeserializationExclusionStrategy( new SuperclassExclusionStrategy() )
+                    .addSerializationExclusionStrategy( new SuperclassExclusionStrategy() )
+                    .setDateFormat( "yyyy-MM-dd" )
+                    .create() )
+            );
 
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
@@ -64,21 +87,27 @@ public class Main
         }
         System.out.println( "cache loaded from " + getCachePath() );
 
-        LocustSlave locustSlave = LocustSlave.newInstance();
+        new MetadataImportTask( "metadata_8879.json" ).execute();
 
+        String programId = "E8o1E9tAppy";
+        Program program = cache.getProgramFromCache( programId );
+
+        Map<String, String> idMap = makeRandomIdMap( 5 );
+
+        new SetupEventImportTask( idMap, program, cache ).execute();
+
+        LocustSlave locustSlave = LocustSlave.newInstance();
         Locust locust = locustSlave.init();
 
         locust.run(
-            new QueryFilterTeiTask( 3 ),
-            new GetHeavyAnalyticsTask( 1, cfg.analyticsApiVersion() ),
-            new GetHeavyAnalyticsRandomTask( 1, cfg.analyticsApiVersion(), cache ),
-            new AddTeiTask( 5, cache ),
-            new FilterTeiTask( 5 ),
-            new CreateTrackedEntityAttributeTask( 5 ),
-            //new MetadataExportImportTask( 1 ),
-            new ReserveTrackedEntityAttributeValuesTask( 1 ),
-            new GetAndUpdateEventsTask( 2, "?orgUnit=DiszpKrYNg8" ),
-            new GetAndUpdateTeiTask( 2, cache )
+            new EventImporSyncTask( idMap, program, cache )
         );
+    }
+
+    private static Map<String, String> makeRandomIdMap( int size )
+    {
+        return IntStream.rangeClosed( 1, size )
+            .mapToObj( value -> Pair.of( CodeGenerator.generateUid(), CodeGenerator.generateUid() ) ).
+                collect( Collectors.toMap( Pair::getLeft, Pair::getRight ) );
     }
 }

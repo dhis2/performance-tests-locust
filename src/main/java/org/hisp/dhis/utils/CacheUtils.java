@@ -13,7 +13,7 @@ public class CacheUtils
 {
     private static String TMP = System.getProperty( "java.io.tmpdir" );
 
-    private static String CACHE_FILE = TMP + System.getProperty( "file.separator" ) + "locust-cache.dat";
+    private static String CACHE_FILE = "./" + System.getProperty( "file.separator" ) + "locust-cache.dat";
 
     private static Kryo kryo;
 

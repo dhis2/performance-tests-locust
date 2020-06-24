@@ -11,11 +11,30 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
+
+
+  <repositories>
+<!--    <repository>-->
+<!--      <id>github</id>-->
+<!--      <name>GitHub DHIS2 Apache Maven Packages</name>-->
+<!--      <url>https://maven.pkg.github.com/dhis2/api-test-utils</url>-->
+<!--    </repository>-->
+    <repository>
+      <id>jcenter</id>
+      <url>https://jcenter.bintray.com/</url>
+    </repository>
+    <repository>
+      <id>ossrh</id>
+      <name>Sonatype OSS</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>com.github.myzhan</groupId>
       <artifactId>locust4j</artifactId>
-      <version>1.0.8</version>
+      <version>1.0.9</version>
     </dependency>
     <dependency>
       <groupId>io.rest-assured</groupId>
@@ -37,8 +56,16 @@
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-dxf2</artifactId>
-      <version>2.33.1-SNAPSHOT</version>
+      <version>2.35-SNAPSHOT</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.hisp.dhis</groupId>
+      <artifactId>dhis-service-tracker</artifactId>
+      <version>2.35-SNAPSHOT</version>
+    </dependency>
+
+
 
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -79,8 +106,15 @@
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>api-test-utils</artifactId>
-      <version>1.1.1</version>
+      <version>1.1.2</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>2.13.1</version>
+    </dependency>
+
   </dependencies>
 
   <build>
