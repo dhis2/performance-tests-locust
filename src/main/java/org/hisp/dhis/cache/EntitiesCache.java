@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.hisp.dhis.common.ValueType;
 import org.springframework.util.StringUtils;
 
@@ -19,6 +20,7 @@ import static io.restassured.RestAssured.given;
 /**
  * Cache for DHIS2 entities used to generate random data for the load test
  */
+@Slf4j
 public class EntitiesCache
 {
     // Holds the rest-assured Response object containing the full Program object
@@ -30,6 +32,8 @@ public class EntitiesCache
     private List<Program> programs;
 
     private List<TeiType> teiTypes;
+
+    private List<CategoryOptionCombo> categoryOptionCombos;
 
     /**
      * Load all the DHIS2 programs from the target endpoint and builds a graph
@@ -80,6 +84,24 @@ public class EntitiesCache
     {
         this.loadTeiTypeCache();
         this.loadProgramCache();
+        this.loadCategoryOptionCombos();
+    }
+
+    private void loadCategoryOptionCombos()
+    {
+        this.categoryOptionCombos = new ArrayList<>();
+
+        Response payload1 = getPayload( "/api/categoryOptionCombos" );
+        JsonPath jsonPath = payload1.jsonPath();
+        List<Map> payload = jsonPath.getList( "categoryOptionCombos" );
+
+        for ( Map map : payload )
+        {
+            categoryOptionCombos
+                .add( new CategoryOptionCombo( (String) map.get( "id" ), (String) map.get( "displayName" ) ) );
+        }
+
+        log.info( "loadCategoryOptionCombos;" + this.categoryOptionCombos );
     }
 
     private List<DataElement> getDataElementsFromStage( String programStageUid )
@@ -196,16 +218,17 @@ public class EntitiesCache
         return response.jsonPath().getList( "organisationUnits.id" );
     }
 
-    public Program getProgramFromCache( String programUid )
+    public Program getValidProgramFromCache()
+        throws Exception
     {
         for ( Program cacheProgram : getPrograms() )
         {
-            if ( cacheProgram.getUid().equals( programUid ) )
+            if ( cacheProgram.getStages().size() > 0 && cacheProgram.getAttributes().size() > 0 )
             {
                 return cacheProgram;
             }
         }
-        return null;
+        throw new Exception( "Could not fint a compatible program in the metadata" );
     }
 
     private Response getProgram( String programUid )
@@ -238,4 +261,18 @@ public class EntitiesCache
         return this.programs;
     }
 
+    public CategoryOptionCombo loadDefaultCategoryOptionCombo()
+        throws Exception
+    {
+        List<CategoryOptionCombo> categoryOptionCombos = this.categoryOptionCombos;
+        for ( CategoryOptionCombo categoryOptionCombo : categoryOptionCombos )
+        {
+            if ( categoryOptionCombo.getDisplayName().equals( "default" ) )
+            {
+                return categoryOptionCombo;
+            }
+        }
+
+        throw new Exception( "Could not find a default Category Option Combo" );
+    }
 }

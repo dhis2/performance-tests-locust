@@ -4,6 +4,7 @@ import net.andreinc.mockneat.types.enums.StringType;
 import net.andreinc.mockneat.unit.objects.From;
 import net.andreinc.mockneat.unit.text.Strings;
 import net.andreinc.mockneat.unit.types.Ints;
+import org.hisp.dhis.cache.CategoryOptionCombo;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
@@ -42,7 +43,8 @@ public class EventRandomizer
 {
     private DateFormat df = new SimpleDateFormat( "yyyy-MM-dd" );
 
-    private Event makeEvent( String teiUid, String enrollId, Program program, String ou, ProgramStage programStage )
+    private Event makeEvent( String teiUid, String enrollId, Program program, String ou, ProgramStage programStage,
+        CategoryOptionCombo defaultCategoryCombo )
     {
 
         String[] teiEnrol = teiUid.split( ";" );
@@ -60,12 +62,13 @@ public class EventRandomizer
         event.setCreatedAt( df.format( new Date() ) );
         event.setFollowUp( false );
         event.setDeleted( false );
-        event.setAttributeOptionCombo( "HllvX50cXC0" );
+        event.setAttributeOptionCombo( defaultCategoryCombo.getUid() );
 //            event.setDataValues( createDataValues( programStage, 1, 8 ) );
         return event;
     }
 
-    public TrackerBundleParams createBundle( Map<String, String> teiEnMap, Program program, EntitiesCache cache )
+    public TrackerBundleParams createBundle( Map<String, String> teiEnMap, Program program,
+        CategoryOptionCombo defaultCategoryCombo, EntitiesCache cache )
     {
         ProgramStage programStage = getRandomProgramStageFromProgram( program );
         String ou = getRandomOrgUnitFromProgram( program );
@@ -73,7 +76,7 @@ public class EventRandomizer
         Set<Map.Entry<String, String>> entries = teiEnMap.entrySet();
         for ( Map.Entry<String, String> entry : entries )
         {
-            list.add( makeEvent( entry.getKey(), entry.getValue(), program, ou, programStage ) );
+            list.add( makeEvent( entry.getKey(), entry.getValue(), program, ou, programStage ,defaultCategoryCombo) );
         }
 
         TrackerBundleParams params = new TrackerBundleParams();

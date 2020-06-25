@@ -8,6 +8,7 @@ import io.restassured.config.EncoderConfig;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.mapper.ObjectMapperType;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hisp.dhis.cache.CategoryOptionCombo;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.common.CodeGenerator;
@@ -54,6 +55,7 @@ public class Main
     public static void run()
         throws Exception
     {
+
         RestAssured.config = config()
             .decoderConfig( new DecoderConfig( "UTF-8" ) )
             .encoderConfig( new EncoderConfig( "UTF-8", "UTF-8" ) )
@@ -89,18 +91,20 @@ public class Main
 
         new MetadataImportTask( "metadata_8879.json" ).execute();
 
-        String programId = "E8o1E9tAppy";
-        Program program = cache.getProgramFromCache( programId );
+        Program program = cache.getValidProgramFromCache();
+        CategoryOptionCombo defaultCategoryCombo = cache.loadDefaultCategoryOptionCombo();
 
         Map<String, String> idMap = makeRandomIdMap( 5 );
 
         new SetupEventImportTask( idMap, program, cache ).execute();
 
+        //new EventImporSyncTask( idMap, program, defaultCategoryCombo, cache ).execute();
+
         LocustSlave locustSlave = LocustSlave.newInstance();
         Locust locust = locustSlave.init();
 
         locust.run(
-            new EventImporSyncTask( idMap, program, cache )
+            new EventImporSyncTask( idMap, program,defaultCategoryCombo, cache )
         );
     }
 

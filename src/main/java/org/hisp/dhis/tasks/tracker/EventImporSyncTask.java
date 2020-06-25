@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.hisp.dhis.SuperclassExclusionStrategy;
 import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.cache.CategoryOptionCombo;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.random.EventRandomizer;
@@ -22,6 +23,8 @@ import java.util.Map;
 public class EventImporSyncTask
     extends DhisAbstractTask
 {
+    private final CategoryOptionCombo defaultCategoryCombo;
+
     private Program program;
 
     private int weight;
@@ -30,11 +33,13 @@ public class EventImporSyncTask
 
     private Map<String, String> teiEnMap;
 
-    public EventImporSyncTask( Map<String, String> teiEnMap, Program program, EntitiesCache entitiesCache )
+    public EventImporSyncTask( Map<String, String> teiEnMap, Program program,
+        CategoryOptionCombo defaultCategoryCombo, EntitiesCache entitiesCache )
     {
         this.cache = entitiesCache;
         this.teiEnMap = teiEnMap;
         this.program = program;
+        this.defaultCategoryCombo = defaultCategoryCombo;
     }
 
     public int getWeight()
@@ -52,7 +57,7 @@ public class EventImporSyncTask
         new LoginTask().execute();
 
         TrackerBundleParams trackerBundleParams = new EventRandomizer()
-            .createBundle( teiEnMap, program, this.cache );
+            .createBundle( teiEnMap, program, this.defaultCategoryCombo, this.cache );
 
         String json = getJson( trackerBundleParams );
 
