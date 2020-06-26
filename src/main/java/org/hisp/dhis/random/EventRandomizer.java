@@ -63,7 +63,7 @@ public class EventRandomizer
         event.setFollowUp( false );
         event.setDeleted( false );
         event.setAttributeOptionCombo( defaultCategoryCombo.getUid() );
-//            event.setDataValues( createDataValues( programStage, 1, 8 ) );
+            event.setDataValues( createDataValues( programStage, 1, 8 ) );
         return event;
     }
 

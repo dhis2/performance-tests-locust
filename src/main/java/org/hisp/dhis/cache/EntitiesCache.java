@@ -55,7 +55,8 @@ public class EntitiesCache
         programs = programUids.parallelStream().filter( this::hasProgramRegistration )
             .map( ( String uid ) -> new Program( uid, getOrgUnitsFromProgram( uid ),
                 getStagesFromProgram( uid ).parallelStream()
-                    .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ) ) )
+                    .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ),
+                        getStageInstanceRepeatableStatus( psUid ) ) )
                     .collect( Collectors.toList() ),
 
                 getTrackerAttributesFromProgram( uid ),
@@ -102,6 +103,13 @@ public class EntitiesCache
         }
 
         log.info( "loadCategoryOptionCombos;" + this.categoryOptionCombos );
+    }
+
+    private boolean getStageInstanceRepeatableStatus( String programStageUid )
+    {
+        Response response = getPayload( "/api/programStages/" + programStageUid );
+
+        return Boolean.parseBoolean( response.jsonPath().getString( "repeatable" ) );
     }
 
     private List<DataElement> getDataElementsFromStage( String programStageUid )
