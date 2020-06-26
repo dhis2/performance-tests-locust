@@ -2,7 +2,8 @@ package org.hisp.dhis.locust;
 
 import org.aeonbits.owner.Config;
 
-@Config.Sources( { "classpath:locust.properties" } )
+@org.aeonbits.owner.Config.LoadPolicy( org.aeonbits.owner.Config.LoadType.MERGE )
+@Config.Sources( { "system:properties", "system:env", "classpath:locust.properties" } )
 public interface LocustConfig
     extends
     Config

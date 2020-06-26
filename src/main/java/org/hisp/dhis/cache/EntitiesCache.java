@@ -91,7 +91,7 @@ public class EntitiesCache
     {
         this.categoryOptionCombos = new ArrayList<>();
 
-        Response payload1 = getPayload( "/api/categoryOptionCombos" );
+        Response payload1 = getPayload( "/api/categoryOptionCombos?pageSize=300" );
         JsonPath jsonPath = payload1.jsonPath();
         List<Map> payload = jsonPath.getList( "categoryOptionCombos" );
 

@@ -89,7 +89,7 @@ public class Main
         }
         System.out.println( "cache loaded from " + getCachePath() );
 
-        new MetadataImportTask( "metadata_8879.json" ).execute();
+        //new MetadataImportTask( "metadata_8879.json" ).execute();
 
         Program program = cache.getValidProgramFromCache();
         CategoryOptionCombo defaultCategoryCombo = cache.loadDefaultCategoryOptionCombo();

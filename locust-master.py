@@ -3,7 +3,7 @@ import csv
 import datetime
 
 from jinja2 import Environment, FileSystemLoader
-from locust import Locust, TaskSet, task, events, runners
+from locust import User, TaskSet, task, events, runners
 
 WORK_DIR = '/locust/'
 TEMPLATE_NAME = 'report-template.html'
@@ -22,12 +22,12 @@ class MyTaskSet(TaskSet):
         pass
 
 
-class Dummy(Locust):
+class Dummy(User):
     task_set = MyTaskSet
     min_wait = 5000
     max_wait = 10000
 
-
+@events.quitting.add_listener
 def handle_quit(**kw):
     generate_report()
 
@@ -110,5 +110,3 @@ def failures_csv():
         ))
     return "\n".join(rows)
 
-
-events.quitting += handle_quit
