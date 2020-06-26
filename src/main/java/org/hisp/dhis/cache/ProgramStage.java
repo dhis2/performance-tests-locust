@@ -13,6 +13,8 @@ public class ProgramStage
 
     private List<DataElement> dataElements;
 
+    private boolean repeatable;
+
     public ProgramStage()
     {
     }

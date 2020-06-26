@@ -221,14 +221,21 @@ public class EntitiesCache
     public Program getValidProgramFromCache()
         throws Exception
     {
-        for ( Program cacheProgram : getPrograms() )
+        for ( Program p : getPrograms() )
         {
-            if ( cacheProgram.getStages().size() > 0 && cacheProgram.getAttributes().size() > 0 )
+            if ( p.getStages().size() > 0 && p.getAttributes().size() > 0 )
             {
-                return cacheProgram;
+                for ( ProgramStage ps : p.getStages() )
+                {
+                    if ( ps.isRepeatable() )
+                    {
+                        return p;
+                    }
+                }
+                return p;
             }
         }
-        throw new Exception( "Could not fint a compatible program in the metadata" );
+        throw new Exception( "Could not find a compatible program in the metadata" );
     }
 
     private Response getProgram( String programUid )
