@@ -240,7 +240,6 @@ public class EntitiesCache
                         return p;
                     }
                 }
-                return p;
             }
         }
         throw new Exception( "Could not find a compatible program in the metadata" );

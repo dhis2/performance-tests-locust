@@ -53,6 +53,7 @@ public class EventImporSyncTask
     }
 
     public void execute()
+        throws Exception
     {
         new LoginTask().execute();
 

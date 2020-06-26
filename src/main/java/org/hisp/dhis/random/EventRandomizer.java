@@ -69,6 +69,7 @@ public class EventRandomizer
 
     public TrackerBundleParams createBundle( Map<String, String> teiEnMap, Program program,
         CategoryOptionCombo defaultCategoryCombo, EntitiesCache cache )
+        throws Exception
     {
         ProgramStage programStage = getRandomProgramStageFromProgram( program );
         String ou = getRandomOrgUnitFromProgram( program );
@@ -129,9 +130,17 @@ public class EventRandomizer
     }
 
     private ProgramStage getRandomProgramStageFromProgram( Program program )
+        throws Exception
     {
         List<ProgramStage> stages = program.getStages();
-        return From.from( stages ).get();
+        for ( ProgramStage stage : stages )
+        {
+            if ( stage.isRepeatable() )
+            {
+                return stage;
+            }
+        }
+        throw new Exception( "Could not find a repeatable stage!" );
     }
 
     private String getRandomOrgUnitFromProgram( Program program )
