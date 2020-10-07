@@ -77,17 +77,17 @@ public class Main
         Locust locust = LocustSlave.newInstance().init();
 
         locust.run(
-                new QueryFilterTeiTask( 3 ),
-                new GetHeavyAnalyticsTask( 1, cfg.analyticsApiVersion() ),
-                new GetHeavyAnalyticsRandomTask( 1, cfg.analyticsApiVersion(), cache ),
-                new AddTeiTask( 5, cache ),
-                new FilterTeiTask( 5 ),
-                new CreateTrackedEntityAttributeTask( 5 ),
-                //new MetadataExportImportTask( 1 ),
-                new ReserveTrackedEntityAttributeValuesTask( 1 ),
-                new GetAndUpdateEventsTask( 2, "?orgUnit=DiszpKrYNg8" ),
-                new GetAndUpdateTeiTask( 2, cache ),
-                new AddEventsTask(3, cache)
+            new QueryFilterTeiTask( 3 ),
+            new GetHeavyAnalyticsTask( 1, cfg.analyticsApiVersion() ),
+            new GetHeavyAnalyticsRandomTask( 1, cfg.analyticsApiVersion(), cache ),
+//                new AddTeiTask( 5, cache ),
+//                new FilterTeiTask( 5 ),
+//                new CreateTrackedEntityAttributeTask( 5 ),
+            new MetadataExportImportTask( 1 )
+//                new ReserveTrackedEntityAttributeValuesTask( 1 ),
+//                new GetAndUpdateEventsTask( 2, "?orgUnit=DiszpKrYNg8" ),
+//                new GetAndUpdateTeiTask( 2, cache ),
+//                new AddEventsTask(3, cache)
 
         );
     }
