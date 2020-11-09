@@ -7,6 +7,7 @@ jobs:
   publish:
     env:
       IMAGE_NAME: "dhis2/locustio:latest"
+      DOCKER_BUILDKIT: 1
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -18,7 +19,7 @@ jobs:
       env:
         GITHUB_USERNAME: x-access-token
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: DOCKER_BUILDKIT=1 docker build --cache-from $IMAGE_NAME -t $IMAGE_NAME --build-arg BUILDKIT_INLINE_CACHE=1 ./docker
+      run: docker build --cache-from $IMAGE_NAME -t $IMAGE_NAME --build-arg BUILDKIT_INLINE_CACHE=1 ./docker
 
     - name: Test image
       timeout-minutes: 3
