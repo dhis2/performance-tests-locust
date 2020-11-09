@@ -1,9 +1,7 @@
 name: Publish image
 
 on:
-  push:
-    paths:
-      - 'docker/*'
+  pull_request
 
 jobs:
   publish:
@@ -17,7 +15,7 @@ jobs:
     - name: Create image
       run: |
         docker pull $IMAGE_NAME
-        DOCKER_BUILDKIT=1 docker build --cache-from $IMAGE_NAME -t $IMAGE_NAME --build-arg BUILDKIT_INLINE_CACHE=1 ./docker
+        docker build --cache-from $IMAGE_NAME -t $IMAGE_NAME --build-arg BUILDKIT_INLINE_CACHE=1 ./docker
 
     - name: Test image
       timeout-minutes: 3
