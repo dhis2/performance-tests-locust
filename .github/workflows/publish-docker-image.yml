@@ -5,8 +5,8 @@ on:
 
 jobs:
   publish:
-  env:
-    IMAGE_NAME: "dhis2/locustio:latest"
+    env:
+      IMAGE_NAME: "dhis2/locustio:latest"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
