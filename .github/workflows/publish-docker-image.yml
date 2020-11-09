@@ -22,6 +22,10 @@ jobs:
         docker images
         DOCKER_BUILDKIT=1 docker build --cache-from $IMAGE_NAME -t $IMAGE_NAME --build-arg BUILDKIT_INLINE_CACHE=1 ./docker
 
+
+    - name: Publish image
+      run: docker push $IMAGE_NAME
+
     - name: Test image
       timeout-minutes: 3
       run: |
