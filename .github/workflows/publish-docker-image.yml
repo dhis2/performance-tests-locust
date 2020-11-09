@@ -29,6 +29,4 @@ jobs:
       run: |
         echo ${{ secrets.DHIS2_BOT_DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DHIS2_BOT_DOCKER_HUB_USERNAME }} --password-stdin
         docker push $IMAGE_NAME
-
-
-
+        
