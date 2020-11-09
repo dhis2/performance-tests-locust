@@ -3,7 +3,7 @@ name: Publish image
 on:
   pull_request:
     paths:
-      - '../../docker/*'
+      - 'docker/*'
 
 jobs:
   build:
