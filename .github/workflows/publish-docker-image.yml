@@ -20,6 +20,6 @@ jobs:
     - name: Test image
       run: |
         docker run --publish 8089:8089 --detach --name locust $IMAGE_NAME
-        bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8089)" != "200" ]]; do sleep 5; done'
+        bash -c 'while [[ "$(curl -o /dev/null -w ''%{http_code}'' localhost:8089)" != "200" ]]; do sleep 5; done'
 
 
