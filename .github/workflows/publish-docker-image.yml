@@ -11,6 +11,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Pull image
+      run: docker pull $IMAGE_NAME
+      
     - name: Create image
       env:
         GITHUB_USERNAME: x-access-token
@@ -18,6 +21,7 @@ jobs:
       run: docker build -t $IMAGE_NAME ./docker
 
     - name: Test image
+      timeout-minutes: 3
       run: |
         docker run --publish 8089:8089 --detach --name locust $IMAGE_NAME
         bash -c 'while [[ "$(curl -o /dev/null -w ''%{http_code}'' localhost:8089)" != "200" ]]; do sleep 5; done'
