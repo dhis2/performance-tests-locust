@@ -1,7 +1,9 @@
 name: Publish image
 
 on:
-  pull_request
+  push:
+    paths:
+      - 'docker/*'
 
 jobs:
   publish:
