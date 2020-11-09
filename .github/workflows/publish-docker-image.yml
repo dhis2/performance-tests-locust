@@ -4,7 +4,9 @@ on:
   pull_request
 
 jobs:
-  build:
+  env:
+    IMAGE_NAME: "dhis2/locustio:latest"
+  publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -13,7 +15,6 @@ jobs:
       env:
         GITHUB_USERNAME: x-access-token
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        IMAGE_NAME: "dhis2/locustio:latest"
       run: docker build -t $IMAGE_NAME ./docker
 
     - name: Test image
