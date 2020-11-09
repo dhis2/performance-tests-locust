@@ -1,0 +1,25 @@
+name: Build
+
+on:
+  pull_request:
+    paths:
+      - './docker/*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Create image
+      env:
+        GITHUB_USERNAME: x-access-token
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        IMAGE_NAME: "dhis2/locustio:latest"
+      run: docker build -t $IMAGE_NAME ./docker
+
+    - name: Test image
+      run: |
+        docker run --publish 8089:8089 --detach --name locust $IMAGE_NAME
+
+

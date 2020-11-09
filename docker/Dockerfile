@@ -5,8 +5,8 @@ RUN pip install locust==1.0.3 pyzmq Jinja2 \
       && mkdir /locust \
       && mkdir /templates
 
-COPY docker-entrypoint.sh /
-COPY report-template.html /templates
+COPY ./docker-entrypoint.sh /
+COPY ./report-template.html /templates
 RUN chmod +x /docker-entrypoint.sh \
     && chmod +r /templates/report-template.html
 
