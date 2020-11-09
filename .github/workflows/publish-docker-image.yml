@@ -4,9 +4,9 @@ on:
   pull_request
 
 jobs:
+  publish:
   env:
     IMAGE_NAME: "dhis2/locustio:latest"
-  publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
