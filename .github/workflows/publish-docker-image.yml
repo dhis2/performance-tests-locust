@@ -12,8 +12,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Pull image
-
     - name: Create image
       env:
         GITHUB_USERNAME: x-access-token
