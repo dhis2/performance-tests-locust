@@ -17,6 +17,7 @@ jobs:
         GITHUB_USERNAME: x-access-token
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        echo $(docker version)
         DOCKER_BUILDKIT=1 docker pull $IMAGE_NAME
         DOCKER_BUILDKIT=1 docker build --cache-from $IMAGE_NAME -t $IMAGE_NAME --build-arg BUILDKIT_INLINE_CACHE=1 ./docker
 
