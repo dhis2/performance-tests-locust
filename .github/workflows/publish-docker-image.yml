@@ -18,7 +18,7 @@ jobs:
       env:
         GITHUB_USERNAME: x-access-token
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: docker build --pull --cache-from $IMAGE_NAME -t $IMAGE_NAME ./docker
+      run: docker build --pull --cache-from docker.io/$IMAGE_NAME -t $IMAGE_NAME ./docker
 
     - name: Test image
       timeout-minutes: 3
