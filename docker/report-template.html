@@ -61,7 +61,7 @@ RPS:<strong>{{ rps }}</strong> Failures: <strong>{{ fails }}</strong>
 </div>
 
 <h2>Failures</h2>
-<div class="container">
+<div class="container" id="failures">
     {% for row in e_data %}
     <div class="column">
         <div class="header row">{{e_headers[loop.index0]}}</div>
