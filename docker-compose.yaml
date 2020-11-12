@@ -9,7 +9,6 @@ services:
     environment:
       LOCUST_MASTER_NODE_HOST: "127.0.0.1"
       LOCUST_MASTER_NODE_PORT: "5557"
-      LOCUST_FILE: "/locust-master.py"
       HOST: "127.0.0.1"
       NO_WEB: ${NO_WEB:-false}
       USERS: ${USERS:-10}
@@ -17,7 +16,6 @@ services:
       TIME: ${TIME:-10s}
    
     volumes:
-      - ./locust-master.py:/locust-master.py
       - ./locust:/locust
 
     ports:

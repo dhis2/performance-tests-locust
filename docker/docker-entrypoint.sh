@@ -11,7 +11,7 @@ if [ "$NO_WEB" = true ]; then
     fi
 fi
 
-LOCUST_OPTS="-f $LOCUST_FILE --master --host=$HOST $ADDITIONAL_OPTS"
+LOCUST_OPTS="-f ${LOCUST_FILE} --master --host=$HOST $ADDITIONAL_OPTS"
 
 cd /locust
 locust ${LOCUST_OPTS}
