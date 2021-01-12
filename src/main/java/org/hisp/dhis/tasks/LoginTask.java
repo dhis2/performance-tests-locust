@@ -13,6 +13,16 @@ public class LoginTask
     extends
     DhisAbstractTask
 {
+    private String username;
+
+    private String password;
+
+    public LoginTask( String username, String password )
+    {
+        this.username = username;
+        this.password = password;
+    }
+
     public int getWeight()
     {
         return 1;
@@ -31,7 +41,7 @@ public class LoginTask
 
     public void execute()
     {
-        RestAssured.getRestAssured().authentication = preemptive().basic( "system", "System123" );
+        RestAssured.getRestAssured().authentication = preemptive().basic( username, password );
 
         Response apiResponse = RestAssured.getRestAssured().given().contentType( ContentType.TEXT ).when()
             .get( "api/me" ).thenReturn();

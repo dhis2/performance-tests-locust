@@ -19,4 +19,10 @@ public interface LocustConfig
 
     @Key( "analytics.api.version" )
     int analyticsApiVersion();
+
+    @Key( "user.admin.username" )
+    String adminUsername();
+
+    @Key( "user.admin.password" )
+    String adminPassword();
 }

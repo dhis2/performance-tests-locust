@@ -2,7 +2,6 @@ package org.hisp.dhis.tasks.tracker.events;
 
 import com.google.gson.JsonObject;
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.tasks.LoginTask;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -32,7 +31,7 @@ public class GetAndUpdateEventsTask
 
     public void execute()
     {
-        new LoginTask().execute();
+        //new LoginTask().execute();
 
         JsonObject events = new QueryEventsTask( query ).executeAndGetBody();
 

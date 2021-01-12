@@ -1,25 +1,19 @@
 package org.hisp.dhis.cache;
 
-import static io.restassured.RestAssured.given;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.hisp.dhis.common.ValueType;
-import org.springframework.util.StringUtils;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
+import org.aeonbits.owner.ConfigFactory;
+import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.locust.LocustConfig;
+import org.hisp.dhis.response.dto.ApiResponse;
+import org.springframework.util.StringUtils;
 
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Cache for DHIS2 entities used to generate random data for the load test
@@ -29,7 +23,7 @@ public class EntitiesCache
     // Holds the rest-assured Response object containing the full Program object
     // payload
 
-    private transient LoadingCache<String, Response> programCache = Caffeine.newBuilder().maximumSize( 100 )
+    private transient LoadingCache<String, ApiResponse> programCache = Caffeine.newBuilder().maximumSize( 100 )
         .expireAfterWrite( 1, TimeUnit.HOURS ).build( this::getProgram );
 
     private List<Program> programs;
@@ -37,6 +31,20 @@ public class EntitiesCache
     private List<TeiType> teiTypes;
 
     private Map<String, List<Tei>> teis;
+
+    private List<User> users;
+
+    private List<DataSet> dataSets;
+
+    public static <T> List<T> randomElementsFromList( List<T> list, int elements )
+    {
+        Collections.shuffle( list );
+        if ( elements > list.size() - 1 )
+        {
+            elements = list.size() - 1;
+        }
+        return list.subList( 0, elements );
+    }
 
     /**
      * Load all the DHIS2 programs from the target endpoint and builds a graph
@@ -52,13 +60,14 @@ public class EntitiesCache
      */
     public void loadProgramCache()
     {
-        List<String> programUids = getPayload( "/api/programs" ).jsonPath().getList( "programs.id" );
+        List<String> programUids = getPayload( "/api/programs" ).extractList( "programs.id" );
 
         // Load Tracker-only programs + stages + data elements + program attributes
         programs = programUids.parallelStream().filter( this::hasProgramRegistration )
             .map( ( String uid ) -> new Program( uid, getOrgUnitsFromProgram( uid ),
                 getStagesFromProgram( uid ).parallelStream()
-                    .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ), getStageInstanceRepeatableStatus( psUid ) ) )
+                    .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ),
+                        getStageInstanceRepeatableStatus( psUid ) ) )
                     .collect( Collectors.toList() ),
                 getTrackerAttributesFromProgram( uid ), getTrackedEntityTypeUid( uid ) ) )
             .collect( Collectors.toList() );
@@ -67,13 +76,63 @@ public class EntitiesCache
         programCache = null;
     }
 
+    public void loadUserCache()
+    {
+        users = new ArrayList<>();
+        users = getPayload(
+            "/api/users?filter=organisationUnits.level:eq:5&filter=displayName:like:uio&fields=id,organisationUnits~pluck,userCredentials[username]&pageSize=10" )
+            .extractList( "users", User.class );
 
+        // if there are no dummy users, use only default specified in locust conf
+        if ( users.isEmpty() )
+        {
+            System.out.println( "No dummy users, only default user will be added to the cache" );
+            LocustConfig config = ConfigFactory.create( LocustConfig.class );
+            users = getPayload( String.format(
+                "/api/users?filter=userCredentials.username:eq:%s&fields=id,organisationUnits~pluck,userCredentials[username]",
+                config.adminUsername() ) ).extractList( "users", User.class );
+            users.get( 0 ).getUserCredentials().setPassword( config.adminPassword() );
+        }
+    }
+
+    public void loadDataSetsCache()
+    {
+        dataSets = new ArrayList<>();
+        List<JsonObject> sets = getPayload( "/api/dataSets?fields=periodType,dataSetElements[dataElement[*]],id" )
+            .extractList( "dataSets", JsonObject.class );
+
+        // filter out data sets without monthly period, since generation is not yet supported
+        sets.parallelStream().filter( p -> {
+            return p.get( "periodType" ).getAsString().equalsIgnoreCase( "Monthly" );
+        } ).forEach( set -> {
+            JsonObject obj = set.getAsJsonObject();
+
+            List<DataElement> dataElements = new ArrayList<>();
+            obj.get( "dataSetElements" ).getAsJsonArray().forEach( p -> {
+                JsonObject de = p.getAsJsonObject().get( "dataElement" ).getAsJsonObject();
+
+                List<String> optionSets = new ArrayList<>();
+
+                if ( de.get( "optionSet" ) != null )
+                {
+                    optionSets.add( de.get( "optionSet" ).getAsJsonObject().get( "id" ).getAsString() );
+                }
+
+                dataElements.add( new DataElement( de.get( "id" ).getAsString(),
+                    ValueType.valueOf( de.get( "valueType" ).getAsString() ),
+                    optionSets ) );
+            } );
+
+            dataSets.add( new DataSet( obj.get( "id" ).getAsString(), dataElements ) );
+        } );
+
+    }
 
     public void loadTeiTypeCache()
     {
         this.teiTypes = new ArrayList<>();
 
-        List<Map> payload = getPayload( "/api/trackedEntityTypes" ).jsonPath().getList( "trackedEntityTypes" );
+        List<Map> payload = getPayload( "/api/trackedEntityTypes" ).extractList( "trackedEntityTypes" );
 
         for ( Map map : payload )
         {
@@ -92,13 +151,21 @@ public class EntitiesCache
 
         for ( Program program : this.programs )
         {
-            List<List<String>> partitions = Lists.partition( program.getOrgUnits(), 500);
+            //List<List<String>> partitions = Lists.partition( program.getOrgUnits(), 500);
+            if ( program.getOrgUnits().size() == 0 )
+            {
+                System.out.println( String.format( "Program %s doesn't have any org units", program.getUid() ) );
+                return;
+            }
+
+            List<String> orgUnits = randomElementsFromList( program.getOrgUnits(), 1000 );
+            List<List<String>> partitions = Lists.partition( orgUnits, 250 );
 
             partitions.forEach( p -> {
-                final String ous = String.join( ";", p);
+                final String ous = String.join( ";", p );
                 List<Map> payload = getPayload(
-                        "/api/trackedEntityInstances?ou=" + ous + "&pageSize=50&program=" + program.getUid() ).jsonPath()
-                        .getList( "trackedEntityInstances" );
+                    "/api/trackedEntityInstances?ou=" + ous + "&pageSize=50&program=" + program.getUid() )
+                    .extractList( "trackedEntityInstances" );
 
                 // -- create a List of Tei for the current Program and OU
                 List<Tei> teisFromProgram = new ArrayList<>();
@@ -123,50 +190,61 @@ public class EntitiesCache
 
     public void loadAll()
     {
+        this.loadDataSetsCache();
+        System.out.println( "Data sets cache loaded" );
+
+        this.loadUserCache();
+        System.out.println( "User cache loaded" );
+
         this.loadTeiTypeCache();
-        System.out.println("33%");
+        System.out.println( "TEI type cache loaded" );
+
         this.loadProgramCache();
-        System.out.println("66%");
+        System.out.println( "Program cache loaded" );
+
         this.loadTeiCache();
-        System.out.println("100%");
+        System.out.println( "Tei cache loaded" );
+
         // remove programs without tei
         this.programs = programs.stream().filter( p -> teis.containsKey( p.getUid() ) ).collect( Collectors.toList() );
 
         System.out.println( "Tracked Entity Types loaded in cache [" + this.teiTypes.size() + "]" );
         System.out.println( "Programs loaded in cache [" + this.programs.size() + "]" );
         System.out.println( "Tracked Entity Instances loaded in cache ["
-                + this.teis.values().stream().mapToInt( Collection::size ).sum() + "]" );
+            + this.teis.values().stream().mapToInt( Collection::size ).sum() + "]" );
+        System.out.println( "Data sets loaded in cache [" + this.dataSets.size() + "]" );
+        System.out.println( "Users loaded in cache [" + this.users.size() + "]" );
     }
 
     private List<DataElement> getDataElementsFromStage( String programStageUid )
     {
-        return getPayload( "/api/programStages/" + programStageUid ).jsonPath()
-            .getList( "programStageDataElements.dataElement.id" ).parallelStream()
+        return getPayload( "/api/programStages/" + programStageUid ).extractList( "programStageDataElements.dataElement.id" )
+            .parallelStream()
             .map( uid -> getDataElement( (String) uid ) ).collect( Collectors.toList() );
     }
 
     private DataElement getDataElement( String dataElementUid )
     {
-        Response response = getPayload( "/api/dataElements/" + dataElementUid );
+        ApiResponse response = getPayload( "/api/dataElements/" + dataElementUid );
 
-        return new DataElement( dataElementUid, ValueType.valueOf( response.jsonPath().get( "valueType" ) ),
+        return new DataElement( dataElementUid, ValueType.valueOf( response.extractString( "valueType" ) ),
             dataElementHasOptionSet( response )
-                ? getValuesFromOptionSet( response.jsonPath().getString( "optionSet.id" ) )
+                ? getValuesFromOptionSet( response.extractString( "optionSet.id" ) )
                 : null );
     }
 
     private boolean getStageInstanceRepeatableStatus( String programStageUid )
     {
-        Response response = getPayload( "/api/programStages/" + programStageUid );
+        ApiResponse response = getPayload( "/api/programStages/" + programStageUid );
 
-        return Boolean.parseBoolean( response.jsonPath().getString( "repeatable" ) );
+        return Boolean.parseBoolean( response.extractString( "repeatable" ) );
     }
 
     private List<String> getValuesFromOptionSet( String optionSetUid )
     {
         List<String> optionValues = new ArrayList<>();
-        Response response = getPayload( "/api/optionSets/" + optionSetUid );
-        List<Map> options = response.jsonPath().getList( "options" );
+        ApiResponse response = getPayload( "/api/optionSets/" + optionSetUid );
+        List<Map> options = response.extractList( "options" );
         for ( Map optionMap : options )
         {
             optionValues.add( getOptionSetValue( (String) optionMap.get( "id" ) ) );
@@ -177,45 +255,45 @@ public class EntitiesCache
 
     private String getOptionSetValue( String optionSetValueId )
     {
-        Response response = getPayload( "/api/options/" + optionSetValueId );
-        return response.jsonPath().getString( "displayName" );
+        ApiResponse response = getPayload( "/api/options/" + optionSetValueId );
+        return response.extractString( "displayName" );
     }
 
     private List<String> getStagesFromProgram( String programUid )
     {
-        Response response = programCache.get( programUid );
+        ApiResponse response = programCache.get( programUid );
 
-        return response.jsonPath().getList( "programStages.id" );
+        return response.extractList( "programStages.id" );
     }
 
     private List<ProgramAttribute> getTrackerAttributesFromProgram( String programUid )
     {
-        Response response = programCache.get( programUid );
+        ApiResponse response = programCache.get( programUid );
         List<ProgramAttribute> programAttributes = new ArrayList<>();
-        List<Map<String, Object>> atts = response.jsonPath().getList( "programTrackedEntityAttributes" );
+        List<Map<String, Object>> atts = response.extractList( "programTrackedEntityAttributes" );
 
         for ( Map<String, Object> att : atts )
         {
-            JsonPath trackedEntityAttribute = getAttributeUniqueness(
+            ApiResponse trackedEntityAttribute = getAttributeUniqueness(
                 (String) ((Map) att.get( "trackedEntityAttribute" )).get( "id" ) );
             programAttributes
                 .add( new ProgramAttribute( (String) att.get( "id" ), ValueType.valueOf( (String) att.get( "valueType" ) ),
                     (String) ((Map) att.get( "trackedEntityAttribute" )).get( "id" ),
-                    trackedEntityAttribute.getBoolean( "unique" ),
-                    trackedEntityAttribute.getString( "pattern" ),
+                    trackedEntityAttribute.extractObject( "unique", Boolean.class ),
+                    trackedEntityAttribute.extractString( "pattern" ),
                     getProgramAttributeOptionValues( trackedEntityAttribute ) ) );
         }
         return programAttributes;
 
     }
 
-    private List<String> getProgramAttributeOptionValues( JsonPath trackedEntityAttribute )
+    private List<String> getProgramAttributeOptionValues( ApiResponse trackedEntityAttribute )
     {
         String optionSetUid = null;
-        Map optionSet = trackedEntityAttribute.get( "optionSet" );
+        JsonObject optionSet = trackedEntityAttribute.extractJsonObject( "optionSet" );
         if ( optionSet != null )
         {
-            optionSetUid = (String) optionSet.get( "id" );
+            optionSetUid = optionSet.get( "id" ).getAsString();
         }
         if ( !StringUtils.isEmpty( optionSetUid ) )
         {
@@ -227,14 +305,14 @@ public class EntitiesCache
 
     }
 
-    private JsonPath getAttributeUniqueness( String trackerAttributeUid )
+    private ApiResponse getAttributeUniqueness( String trackerAttributeUid )
     {
-        return getPayload( "/api/trackedEntityAttributes/" + trackerAttributeUid ).jsonPath();
+        return getPayload( "/api/trackedEntityAttributes/" + trackerAttributeUid );
     }
 
     private String getTrackedEntityTypeUid( String programUid )
     {
-        Map map = programCache.get( programUid ).jsonPath().getMap( "trackedEntityType" );
+        Map map = programCache.get( programUid ).extractObject( "trackedEntityType", Map.class );
         if ( map != null )
         {
             return (String) map.get( "id" );
@@ -244,25 +322,25 @@ public class EntitiesCache
 
     private boolean hasProgramRegistration( String programUid )
     {
-        Response response = programCache.get( programUid );
+        ApiResponse response = programCache.get( programUid );
 
-        return response.jsonPath().getBoolean( "registration" );
+        return response.extractObject( "registration", Boolean.class );
     }
 
     private List<String> getOrgUnitsFromProgram( String programUid )
     {
-        Response response = programCache.get( programUid );
-        return response.jsonPath().getList( "organisationUnits.id" );
+        ApiResponse response = programCache.get( programUid );
+        return response.extractList( "organisationUnits.id" );
     }
 
-    private Response getProgram( String programUid )
+    private ApiResponse getProgram( String programUid )
     {
         return getPayload( "/api/programs/" + programUid );
     }
 
-    private boolean dataElementHasOptionSet( Response response )
+    private boolean dataElementHasOptionSet( ApiResponse response )
     {
-        Object optionSet = response.jsonPath().get( "optionSetValue" );
+        Object optionSet = response.extract( "optionSetValue" );
         if ( optionSet != null )
         {
             return (Boolean) optionSet;
@@ -270,9 +348,9 @@ public class EntitiesCache
         return false;
     }
 
-    private Response getPayload( String uri )
+    private ApiResponse getPayload( String uri )
     {
-        return given().contentType( ContentType.JSON ).when().get( uri );
+        return new RestApiActions( "" ).get( uri );
     }
 
     public TeiType getTeiType( String name )
@@ -283,6 +361,11 @@ public class EntitiesCache
     public List<Program> getPrograms()
     {
         return this.programs;
+    }
+
+    public List<User> getUsers()
+    {
+        return this.users;
     }
 
     public List<Program> getProgramsWithAtLeastOnRepeatableStage()
@@ -304,5 +387,10 @@ public class EntitiesCache
     public Map<String, List<Tei>> getTeis()
     {
         return teis;
+    }
+
+    public List<DataSet> getDataSets()
+    {
+        return dataSets;
     }
 }

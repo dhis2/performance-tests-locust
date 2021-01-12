@@ -10,15 +10,8 @@ import io.restassured.mapper.ObjectMapperType;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.locust.LocustSlave;
-import org.hisp.dhis.tasks.*;
-import org.hisp.dhis.tasks.analytics.GetHeavyAnalyticsRandomTask;
-import org.hisp.dhis.tasks.analytics.GetHeavyAnalyticsTask;
-import org.hisp.dhis.tasks.tracker.events.AddEventsTask;
-import org.hisp.dhis.tasks.tracker.events.GetAndUpdateEventsTask;
-import org.hisp.dhis.tasks.tracker.tei.AddTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.FilterTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.GetAndUpdateTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
+import org.hisp.dhis.tasks.LoginTask;
+import org.hisp.dhis.tasks.aggregate.AddDataValueTask;
 
 import java.io.IOException;
 
@@ -53,7 +46,7 @@ public class Main
         RestAssured.baseURI = cfg.targetUri();
         EntitiesCache cache;
 
-        new LoginTask().execute();
+        new LoginTask( cfg.adminUsername(), cfg.adminPassword() ).execute();
 
         if ( !cacheExists() )
         {

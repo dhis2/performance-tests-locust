@@ -37,7 +37,7 @@ public class MetadataExportImportTask
     public void execute()
         throws Exception
     {
-        new LoginTask().execute();
+        //new LoginTask().execute();
 
         JsonObject metadata = new MetadataExportTask().executeAndGetBody();
 
