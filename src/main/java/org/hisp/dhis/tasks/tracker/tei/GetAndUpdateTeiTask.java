@@ -67,7 +67,7 @@ public class GetAndUpdateTeiTask
 
         // Some programs in cache doesn't necessarily have TEIs.
         while(teis == null || teis.size() == 0) {
-            program = entitiesCache.getPrograms().get( DataRandomizer.randomIntInRange( 0, entitiesCache.getPrograms().size() ) );
+            program = entitiesCache.getTrackerPrograms().get( DataRandomizer.randomIntInRange( 0, entitiesCache.getTrackerPrograms().size() ) );
 
             teis = entitiesCache.getTeis().get( program.getUid() );
         }

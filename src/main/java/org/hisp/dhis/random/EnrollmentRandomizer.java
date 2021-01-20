@@ -64,21 +64,14 @@ public class EnrollmentRandomizer
         this.maxEvent = 5;
     }
 
-    @Override
-    public Enrollment create( EntitiesCache cache, RandomizerContext ctx )
-    {
+    public Enrollment createWithoutEvents( EntitiesCache cache, RandomizerContext ctx) {
         Program program = getProgramFromContextOrRnd( ctx, cache );
-        String orgUnitUid = ctx.getOrgUnitUid();
-        
-        if ( orgUnitUid == null )
-        {
-            orgUnitUid = getRandomOrgUnitFromProgram( program );
-        }
+        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram(ctx, program );
 
         // Pick a random program stage to pass to the events
         ProgramStage programStage = getProgramStageFromProgram( program );
         ctx.setProgramStage( programStage );
-        
+
         Enrollment enrollment = new Enrollment();
         enrollment.setProgram( program.getUid() );
         enrollment.setOrgUnit( orgUnitUid );
@@ -87,9 +80,18 @@ public class EnrollmentRandomizer
         enrollment.setStatus( EnrollmentStatus.ACTIVE );
         enrollment.setFollowup( false );
         enrollment.setDeleted( false );
+        enrollment.setTrackedEntityInstance( ctx.getTeiId() );
+
+        return enrollment;
+    }
+
+    @Override
+    public Enrollment create( EntitiesCache cache, RandomizerContext ctx )
+    {
+        Enrollment enrollment = createWithoutEvents( cache, ctx );
 
         // if program stage is NON-REPEATABLE generate just one event
-        int eventsSize = programStage.isRepeatable() ? DataRandomizer.randomIntInRange( minEVent, maxEvent ) : 1;
+        int eventsSize = ctx.getProgramStage().isRepeatable() ? DataRandomizer.randomIntInRange( minEVent, maxEvent ) : 1;
 
         enrollment.setEvents( IntStream.rangeClosed( 1, eventsSize )
             .mapToObj( i -> eventRandomizer.create( cache, ctx ) )

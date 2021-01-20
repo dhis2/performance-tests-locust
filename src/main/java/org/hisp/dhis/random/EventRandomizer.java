@@ -28,13 +28,10 @@ package org.hisp.dhis.random;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.set.ListOrderedSet;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
@@ -52,27 +49,23 @@ public class EventRandomizer
     extends
         AbstractTrackerEntityRandomizer<Event>
 {
-    @Override
-    public Event create( EntitiesCache cache, RandomizerContext ctx )
-    {
+    public Event createWithoutDataValues( EntitiesCache cache, RandomizerContext ctx ) {
         Program program = ctx.getProgram();
         if ( program == null )
         {
             program = DataRandomizer.randomElementFromList( cache.getProgramsWithAtLeastOnRepeatableStage() );
         }
-        
+
         ProgramStage programStage = ctx.getProgramStage();
         if ( programStage == null )
         {
             programStage = getRepeatableRandomProgramStageFromProgram( program );
         }
-        String orgUnitUid = ctx.getOrgUnitUid();
-        if ( orgUnitUid == null )
-        {
-            orgUnitUid = getRandomOrgUnitFromProgram( program );
-        }
-        
+
+        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram(ctx, program );
+
         Event event = new Event();
+        event.setEnrollment( ctx.getEnrollmentId() );
         event.setDueDate( DEFAULT_DATEFORMAT.format( new Date() ) );
         event.setProgram( program.getUid() );
         event.setProgramStage( programStage.getUid() );
@@ -82,9 +75,13 @@ public class EventRandomizer
         event.setFollowup( false );
         event.setDeleted( false );
         event.setAttributeOptionCombo( "" ); // TODO
-        event.setDataValues( createDataValues( programStage, 1, 8 ) );
+
         if ( !ctx.isSkipTeiInEvent() )
         {
+            if (ctx.getTeiId() != null) {
+                event.setTrackedEntityInstance( ctx.getTeiId() );
+                return event;
+            }
             try
             {
                 String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( program.getUid() ) )
@@ -98,10 +95,20 @@ public class EventRandomizer
         }
         return event;
     }
-
-    private Set<DataValue> createDataValues( ProgramStage programStage, int min, int max )
+    @Override
+    public Event create( EntitiesCache cache, RandomizerContext ctx )
     {
-        Set<DataValue> dataValues = new HashSet<>();
+        Event event = createWithoutDataValues( cache, ctx );
+        ProgramStage programStage = ctx.getProgramStage();
+
+        event.setDataValues( createDataValues( programStage, 1, 8 ) );
+
+        return event;
+    }
+
+    public ListOrderedSet createDataValues( ProgramStage programStage, int min, int max )
+    {
+        ListOrderedSet dataValues = new ListOrderedSet();
         int numberOfDataValuesToCreate = DataRandomizer.randomIntInRange( min, max );
         List<Integer> indexes = DataRandomizer.randomSequence( programStage.getDataElements().size(),
             numberOfDataValuesToCreate );

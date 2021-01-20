@@ -28,6 +28,7 @@ package org.hisp.dhis.random;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.hisp.dhis.cache.Program;
@@ -51,6 +52,10 @@ public class RandomizerContext
     private ProgramStage programStage;
 
     private String orgUnitUid;
+
+    private String teiId;
+
+    private String enrollmentId;
     /**
      * if true, a TEI is not generated when creating a new random event
      */

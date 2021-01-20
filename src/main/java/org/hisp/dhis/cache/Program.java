@@ -19,6 +19,8 @@ public class Program
 
     private String entityType;
 
+    private boolean hasRegistration;
+
     public Program()
     {
     }

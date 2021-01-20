@@ -61,7 +61,7 @@ public class Main
             }
             catch ( Exception e )
             {
-                System.out.println( "Error deserializing cache. Recreating cache file..." );
+                System.out.println( "Error deserializing cache. Recreating cache file..." + e );
                 cache = createAndSerializeCache();
             }
         }

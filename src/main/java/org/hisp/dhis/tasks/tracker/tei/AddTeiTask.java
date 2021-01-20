@@ -2,10 +2,16 @@ package org.hisp.dhis.tasks.tracker.tei;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.User;
+import org.hisp.dhis.cache.UserCredentials;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
+import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 
@@ -13,14 +19,21 @@ public class AddTeiTask
     extends
     DhisAbstractTask
 {
-    private EntitiesCache cache;
-
     private String endpoint = "/api/trackedEntityInstances";
+    private TrackedEntityInstances trackedEntityInstanceBody;
+    private ApiResponse response;
 
     public AddTeiTask( int weight, EntitiesCache entitiesCache )
     {
         this.weight = weight;
-        this.cache = entitiesCache;
+        this.entitiesCache = entitiesCache;
+    }
+
+    public AddTeiTask( int weight, EntitiesCache cache, TrackedEntityInstances trackedEntityInstance, UserCredentials userCredentials ) {
+        this(weight, cache);
+        trackedEntityInstanceBody = trackedEntityInstance;
+        this.userCredentials = userCredentials;
+
     }
 
     public String getName()
@@ -36,16 +49,18 @@ public class AddTeiTask
 
     public void execute()
     {
-        TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstanceRandomizer().create( this.cache, 5 );
+        if (trackedEntityInstanceBody == null) {
+            trackedEntityInstanceBody = new TrackedEntityInstanceRandomizer().create( this.entitiesCache, 5 );
+        }
 
         long time = System.currentTimeMillis();
 
-        ApiResponse response = null;
         boolean hasFailed = false;
         try
         {
-            response = new RestApiActions( this.endpoint ).post( trackedEntityInstances );
+            this.response = new AuthenticatedApiActions( this.endpoint, getUser() ).post( trackedEntityInstanceBody );
         }
+
         catch ( Exception e )
         {
             recordFailure( System.currentTimeMillis() - time, e.getMessage() );
@@ -63,5 +78,10 @@ public class AddTeiTask
                 recordFailure( response.getRaw() );
             }
         }
+    }
+
+    public ApiResponse executeAndGetResponse() {
+        this.execute();
+        return this.response;
     }
 }

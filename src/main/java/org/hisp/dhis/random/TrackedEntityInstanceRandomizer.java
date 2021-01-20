@@ -65,11 +65,22 @@ public class TrackedEntityInstanceRandomizer
     @Override
     public TrackedEntityInstance create( EntitiesCache cache, RandomizerContext ctx )
     {
+        TrackedEntityInstance tei = createWithoutEnrollment( cache, ctx );
+
+        ctx.setSkipTeiInEvent( true );
+
+        Enrollment enrollment = enrollmentRandomizer.create( cache, ctx );
+        tei.setEnrollments( Collections.singletonList( enrollment ) );
+
+        return tei;
+    }
+
+    public TrackedEntityInstance createWithoutEnrollment( EntitiesCache cache, RandomizerContext ctx ) {
         Program program = getProgramFromContextOrRnd( ctx, cache );
 
-        String ou = getRandomOrgUnitFromProgram( program );
-        ctx.setOrgUnitUid( ou );
+        String ou = getOrgUnitFromContextOrRndFromProgram(ctx, program );
         ctx.setSkipTeiInEvent( true );
+
         TrackedEntityInstance tei = new TrackedEntityInstance();
 
         tei.setTrackedEntityType( program.getEntityType() );
@@ -78,9 +89,6 @@ public class TrackedEntityInstanceRandomizer
         tei.setFeatureType( FeatureType.NONE );
         tei.setOrgUnit( ou );
         tei.setAttributes( getRandomAttributesList( program ) );
-
-        Enrollment enrollment = enrollmentRandomizer.create( cache, ctx );
-        tei.setEnrollments( Collections.singletonList( enrollment ) );
 
         return tei;
     }
@@ -158,23 +166,35 @@ public class TrackedEntityInstanceRandomizer
     {
         TextPatternSegment segment = getGeneratedSegment( textPattern );
 
+        String value = "";
         if ( segment.getMethod().equals( TextPatternMethod.SEQUENTIAL ) )
         {
-            return String.format( "%0" + segment.getParameter().length() + "d", DataRandomizer.randomInt() );
+            value = String.format( "%0" + segment.getParameter().length() + "d", DataRandomizer.randomInt() );
         }
         else if ( segment.getMethod().equals( TextPatternMethod.RANDOM ) )
         {
-            return TextPatternMethodUtils.generateRandom( new Random(), segment.getParameter() );
+            value = TextPatternMethodUtils.generateRandom( new Random(), segment.getParameter() );
         }
         else
         {
-            return "";
+            value = "";
         }
+
+        if (getValueSegment( textPattern ) != null) {
+            value = getValueSegment( textPattern ).getParameter() + value;
+        }
+
+        return value;
     }
 
     private TextPatternSegment getGeneratedSegment( TextPattern textPattern )
     {
         return textPattern.getSegments().stream().filter( ( tp ) -> tp.getMethod().isGenerated() ).findFirst()
+            .orElse( null );
+    }
+
+    private TextPatternSegment getValueSegment( TextPattern textPattern ) {
+        return textPattern.getSegments().stream().filter( ( tp ) -> !tp.getMethod().isGenerated() ).findFirst()
             .orElse( null );
     }
 }

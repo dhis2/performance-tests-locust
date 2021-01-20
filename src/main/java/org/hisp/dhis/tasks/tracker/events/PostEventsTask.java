@@ -1,7 +1,11 @@
 package org.hisp.dhis.tasks.tracker.events;
 
 import com.google.gson.JsonObject;
+import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.UserCredentials;
+import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 
@@ -41,7 +45,8 @@ public class PostEventsTask
 
     public void execute()
     {
-        RestApiActions apiActions = new RestApiActions( this.endpoint );
+        RestApiActions apiActions = new AuthenticatedApiActions(
+            this.endpoint , getUser());
         ApiResponse response = apiActions.post( body );
 
         if ( response.statusCode() == STATUS_CODE_OK )
@@ -51,6 +56,5 @@ public class PostEventsTask
         }
 
         recordFailure( response.getRaw() );
-
     }
 }

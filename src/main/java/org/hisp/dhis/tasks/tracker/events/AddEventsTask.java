@@ -11,11 +11,14 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import com.google.gson.JsonParseException;
+import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
+import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.DataRandomizer;
@@ -29,19 +32,27 @@ import org.hisp.dhis.utils.JsonParserUtils;
 public class AddEventsTask
     extends DhisAbstractTask
 {
-    private EntitiesCache entitiesCache;
-
     private EventRandomizer eventRandomizer;
 
     private String endpoint = "/api/events";
 
     private List<String> blackListedTeis = new ArrayList<>();
 
+    private List<Event> events;
+
+    ApiResponse response;
+
     public AddEventsTask( int weight, EntitiesCache entitiesCache )
     {
         this.weight = weight;
         this.entitiesCache = entitiesCache;
         eventRandomizer = new EventRandomizer();
+    }
+
+    public AddEventsTask ( int weight, EntitiesCache entitiesCache, List<Event> events, UserCredentials userCredentials ) {
+        this(weight, entitiesCache);
+        this.events = events;
+        this.userCredentials = userCredentials;
     }
 
     @Override
@@ -56,37 +67,39 @@ public class AddEventsTask
         return "POST";
     }
 
-    private Event createRandomEvent()
+    private List<Event> createRandomEvents()
     {
-        try
+
+        List<Event> rndEvents = new ArrayList<>();
+        for ( int i = 0; i < DataRandomizer.randomIntInRange( 5, 10 ); i++ )
         {
-            return eventRandomizer.create( entitiesCache, RandomizerContext.EMPTY_CONTEXT() );
+            Event randomEvent = null;
+            try {
+                randomEvent = eventRandomizer.create( entitiesCache, RandomizerContext.EMPTY_CONTEXT() );
+
+            }
+            catch ( Exception e )
+            {
+                System.out.println( "An error occurred while creating a random event: " + e.getMessage() );
+            }
+
+            if ( randomEvent != null && !blackListedTeis.contains( randomEvent.getTrackedEntityInstance() ) )
+            {
+                rndEvents.add( randomEvent );
+            }
         }
-        catch ( Exception e )
-        {
-            System.out.println( "An error occurred while creating a random event: " + e.getMessage() );
-        }
-        return null;
+
+        return rndEvents;
     }
 
     @Override
     public void execute()
     {
-        List<Event> rndEvents = new ArrayList<>();
-        for ( int i = 0; i < DataRandomizer.randomIntInRange( 5, 10 ); i++ )
-        {
-            Event randomEvent = createRandomEvent();
+        List<Event> rndEvents = events != null ? events : createRandomEvents();
 
-            if ( randomEvent != null && !blackListedTeis.contains( randomEvent.getTrackedEntityInstance() ) )
-            {
-
-                rndEvents.add( randomEvent );
-            }
-        }
-
-        RestApiActions apiActions = new RestApiActions( this.endpoint );
+        RestApiActions apiActions = new AuthenticatedApiActions( this.endpoint, getUser() );
         EventWrapper ew = new EventWrapper( rndEvents );
-        ApiResponse response = apiActions.post( ew );
+        response = apiActions.post( ew );
 
         if ( response.statusCode() == STATUS_CODE_OK )
         {
@@ -98,6 +111,11 @@ public class AddEventsTask
 
             recordFailure( response.getRaw() );
         }
+    }
+
+    public ApiResponse executeAndGetResponse() {
+        this.execute();
+        return response;
     }
 
     // We need to wrap the list of events with a root element

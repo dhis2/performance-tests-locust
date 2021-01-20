@@ -32,6 +32,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 
+import com.github.javafaker.Faker;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.ProgramStage;
@@ -62,9 +63,20 @@ public abstract class AbstractTrackerEntityRandomizer<T>
         return program;
     }
 
+    protected String getOrgUnitFromContextOrRndFromProgram( RandomizerContext ctx, Program program ) {
+        if (ctx.getOrgUnitUid() == null) {
+            return getRandomOrgUnitFromProgram( program );
+        }
+
+        String uid = ctx.getOrgUnitUid();
+        ctx.setOrgUnitUid( uid );
+
+        return uid;
+    }
+
     private Program getRandomProgram( EntitiesCache cache )
     {
-        return DataRandomizer.randomElementFromList( cache.getPrograms() );
+        return DataRandomizer.randomElementFromList( cache.getTrackerPrograms() );
     }
 
     protected String getRandomOrgUnitFromProgram( Program program )
@@ -85,6 +97,11 @@ public abstract class AbstractTrackerEntityRandomizer<T>
         {
             val = String.valueOf( DataRandomizer.randomBoolean() );
         }
+        else if ( valueType.equals( ValueType.PHONE_NUMBER )) {
+            val = Faker.instance().phoneNumber().cellPhone();
+            return val;
+        }
+
         else if ( valueType.equals( ValueType.TRUE_ONLY ) )
         {
             return "true";
@@ -122,4 +139,5 @@ public abstract class AbstractTrackerEntityRandomizer<T>
 
         return val;
     }
+
 }

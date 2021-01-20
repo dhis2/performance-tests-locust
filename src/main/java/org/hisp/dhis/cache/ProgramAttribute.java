@@ -47,6 +47,8 @@ public class ProgramAttribute
 
     private String trackedEntityAttributeUid;
 
+    private boolean generated;
+
     private boolean unique;
 
     private String pattern;

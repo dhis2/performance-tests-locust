@@ -28,6 +28,10 @@ public class EntitiesCache
 
     private List<Program> programs;
 
+    private List<Program> trackerPrograms = new ArrayList<>();
+
+    private List<Program> eventPrograms = new ArrayList<>();
+
     private List<TeiType> teiTypes;
 
     private Map<String, List<Tei>> teis;
@@ -63,14 +67,26 @@ public class EntitiesCache
         List<String> programUids = getPayload( "/api/programs" ).extractList( "programs.id" );
 
         // Load Tracker-only programs + stages + data elements + program attributes
-        programs = programUids.parallelStream().filter( this::hasProgramRegistration )
+        programs = programUids.parallelStream()
+            //.filter( this::hasProgramRegistration )
             .map( ( String uid ) -> new Program( uid, getOrgUnitsFromProgram( uid ),
                 getStagesFromProgram( uid ).parallelStream()
                     .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ),
                         getStageInstanceRepeatableStatus( psUid ) ) )
                     .collect( Collectors.toList() ),
-                getTrackerAttributesFromProgram( uid ), getTrackedEntityTypeUid( uid ) ) )
+                getTrackerAttributesFromProgram( uid ), getTrackedEntityTypeUid( uid ), hasProgramRegistration( uid ) ) )
             .collect( Collectors.toList() );
+
+        programs.parallelStream().forEach( p -> {
+            if ( p.isHasRegistration() )
+            {
+                trackerPrograms.add( p );
+            }
+            else
+            {
+                eventPrograms.add( p );
+            }
+        } );
 
         // free memory
         programCache = null;
@@ -206,7 +222,7 @@ public class EntitiesCache
         System.out.println( "Tei cache loaded" );
 
         // remove programs without tei
-        this.programs = programs.stream().filter( p -> teis.containsKey( p.getUid() ) ).collect( Collectors.toList() );
+        this.trackerPrograms = trackerPrograms.stream().filter( p -> teis.containsKey( p.getUid() ) ).collect( Collectors.toList() );
 
         System.out.println( "Tracked Entity Types loaded in cache [" + this.teiTypes.size() + "]" );
         System.out.println( "Programs loaded in cache [" + this.programs.size() + "]" );
@@ -279,6 +295,7 @@ public class EntitiesCache
             programAttributes
                 .add( new ProgramAttribute( (String) att.get( "id" ), ValueType.valueOf( (String) att.get( "valueType" ) ),
                     (String) ((Map) att.get( "trackedEntityAttribute" )).get( "id" ),
+                    trackedEntityAttribute.extractObject( "generated", Boolean.class ),
                     trackedEntityAttribute.extractObject( "unique", Boolean.class ),
                     trackedEntityAttribute.extractString( "pattern" ),
                     getProgramAttributeOptionValues( trackedEntityAttribute ) ) );
@@ -361,6 +378,14 @@ public class EntitiesCache
     public List<Program> getPrograms()
     {
         return this.programs;
+    }
+
+    public List<Program> getTrackerPrograms() {
+        return this.trackerPrograms;
+    }
+
+    public List<Program> getEventPrograms() {
+        return this.eventPrograms;
     }
 
     public List<User> getUsers()
