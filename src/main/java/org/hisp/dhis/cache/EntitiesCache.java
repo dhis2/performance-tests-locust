@@ -165,13 +165,13 @@ public class EntitiesCache
 
         Map<String, List<Tei>> tempMap = new HashMap<>();
 
-        for ( Program program : this.programs )
+        for ( Program program : this.trackerPrograms )
         {
             //List<List<String>> partitions = Lists.partition( program.getOrgUnits(), 500);
             if ( program.getOrgUnits().size() == 0 )
             {
                 System.out.println( String.format( "Program %s doesn't have any org units", program.getUid() ) );
-                return;
+                break;
             }
 
             List<String> orgUnits = randomElementsFromList( program.getOrgUnits(), 1000 );

@@ -10,6 +10,7 @@ import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
+import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
@@ -50,7 +51,7 @@ public class AddTeiTask
     public void execute()
     {
         if (trackedEntityInstanceBody == null) {
-            trackedEntityInstanceBody = new TrackedEntityInstanceRandomizer().create( this.entitiesCache, 5 );
+            trackedEntityInstanceBody = new TrackedEntityInstanceRandomizer().create( this.entitiesCache, RandomizerContext.EMPTY_CONTEXT(), 5 );
         }
 
         long time = System.currentTimeMillis();
@@ -58,7 +59,7 @@ public class AddTeiTask
         boolean hasFailed = false;
         try
         {
-            this.response = new AuthenticatedApiActions( this.endpoint, getUser() ).post( trackedEntityInstanceBody );
+            this.response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( trackedEntityInstanceBody );
         }
 
         catch ( Exception e )

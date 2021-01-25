@@ -60,4 +60,9 @@ public class RandomizerContext
      * if true, a TEI is not generated when creating a new random event
      */
     private boolean skipTeiInEvent;
+
+    /**
+     * if true, a TEI reference is not used when creating a new ranndom enrollment
+     */
+    private boolean skipTeiInEnrollment;
 }

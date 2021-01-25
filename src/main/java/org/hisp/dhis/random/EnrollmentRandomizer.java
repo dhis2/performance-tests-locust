@@ -36,6 +36,7 @@ import java.util.stream.IntStream;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.ProgramStage;
+import org.hisp.dhis.cache.Tei;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
@@ -80,7 +81,18 @@ public class EnrollmentRandomizer
         enrollment.setStatus( EnrollmentStatus.ACTIVE );
         enrollment.setFollowup( false );
         enrollment.setDeleted( false );
-        enrollment.setTrackedEntityInstance( ctx.getTeiId() );
+
+        if (!ctx.isSkipTeiInEnrollment(  )) {
+            if (ctx.getTeiId() == null) {
+                enrollment.setTrackedEntityInstance( DataRandomizer.randomElementFromList( cache.getTeis().get( program ) ).getUid());
+            }
+
+            else
+            {
+                enrollment.setTrackedEntityInstance( ctx.getTeiId() );
+            }
+        }
+
 
         return enrollment;
     }

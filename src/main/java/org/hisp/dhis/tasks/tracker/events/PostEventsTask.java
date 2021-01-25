@@ -46,7 +46,7 @@ public class PostEventsTask
     public void execute()
     {
         RestApiActions apiActions = new AuthenticatedApiActions(
-            this.endpoint , getUser());
+            this.endpoint , getUserCredentials());
         ApiResponse response = apiActions.post( body );
 
         if ( response.statusCode() == STATUS_CODE_OK )

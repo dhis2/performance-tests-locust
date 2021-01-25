@@ -89,6 +89,7 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
         if (context.getEnrollmentId() == null )
             return;
 
+        context.setSkipTeiInEnrollment( false );
         context.setSkipTeiInEvent( false );
 
         Event event = new EventRandomizer().createWithoutDataValues( entitiesCache, context );

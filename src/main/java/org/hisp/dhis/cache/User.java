@@ -31,4 +31,8 @@ public class User
     public User() {
 
     }
+
+    public User(UserCredentials userCredentials) {
+        this.userCredentials = userCredentials;
+    }
 }

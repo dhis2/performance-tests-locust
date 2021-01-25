@@ -97,7 +97,7 @@ public class AddEventsTask
     {
         List<Event> rndEvents = events != null ? events : createRandomEvents();
 
-        RestApiActions apiActions = new AuthenticatedApiActions( this.endpoint, getUser() );
+        RestApiActions apiActions = new AuthenticatedApiActions( this.endpoint, getUserCredentials() );
         EventWrapper ew = new EventWrapper( rndEvents );
         response = apiActions.post( ew );
 

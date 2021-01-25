@@ -68,7 +68,7 @@ public class TrackedEntityInstanceRandomizer
         TrackedEntityInstance tei = createWithoutEnrollment( cache, ctx );
 
         ctx.setSkipTeiInEvent( true );
-
+        ctx.setSkipTeiInEnrollment( true );
         Enrollment enrollment = enrollmentRandomizer.create( cache, ctx );
         tei.setEnrollments( Collections.singletonList( enrollment ) );
 
@@ -93,13 +93,19 @@ public class TrackedEntityInstanceRandomizer
         return tei;
     }
 
-    public TrackedEntityInstances create( EntitiesCache cache, int size )
+    public TrackedEntityInstances create( EntitiesCache cache, RandomizerContext context, int min, int max) {
+        int numberToCreate = DataRandomizer.randomIntInRange( min, max );
+
+        return create(cache, context, numberToCreate);
+    }
+
+    public TrackedEntityInstances create( EntitiesCache cache, RandomizerContext context, int size )
     {
         List<TrackedEntityInstance> rndTeis = new ArrayList<>();
         TrackedEntityInstances teis = new TrackedEntityInstances();
         for ( int i = 0; i < size - 1 ; i++ )
         {
-            TrackedEntityInstance trackedEntityInstance = createTrackedEntityInstance( cache );
+            TrackedEntityInstance trackedEntityInstance = create( cache, context );
             if ( trackedEntityInstance != null )
             {
                 rndTeis.add( trackedEntityInstance );

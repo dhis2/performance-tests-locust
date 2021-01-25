@@ -6,6 +6,7 @@ import com.github.myzhan.locust4j.Locust;
 import io.restassured.response.Response;
 import org.aeonbits.owner.ConfigFactory;
 import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.random.UserRandomizer;
@@ -19,6 +20,8 @@ public abstract class DhisAbstractTask
     protected int weight;
 
     protected UserCredentials userCredentials;
+
+    protected User user;
 
     protected EntitiesCache entitiesCache;
 
@@ -34,8 +37,13 @@ public abstract class DhisAbstractTask
     public abstract void execute()
         throws Exception;
 
-    protected UserCredentials getUser( ) {
+    protected UserCredentials getUserCredentials( ) {
         UserCredentials creds;
+
+        if (this.user != null) {
+            return user.getUserCredentials();
+        }
+
         if (this.userCredentials == null) {
             if (this.entitiesCache == null)
             {
@@ -49,6 +57,24 @@ public abstract class DhisAbstractTask
         }
 
         return this.userCredentials;
+    }
+
+    protected User getUser() {
+        User user;
+        if (this.userCredentials == null) {
+            if (this.entitiesCache != null) {
+                user = new UserRandomizer().getRandomUser( this.entitiesCache );
+                return user;
+            }
+
+            LocustConfig conf = ConfigFactory.create( LocustConfig.class );
+            return new User( new UserCredentials(conf.adminUsername(), conf.adminPassword()));
+
+        }
+
+        return this.entitiesCache.getUsers().stream().filter( p -> p.getUserCredentials().equals( this.userCredentials ) )
+            .findFirst()
+            .orElse( null);
     }
 
     public void recordSuccess( Response response )

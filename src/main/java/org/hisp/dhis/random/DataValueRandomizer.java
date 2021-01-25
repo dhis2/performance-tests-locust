@@ -7,11 +7,15 @@ import org.hisp.dhis.cache.DataSet;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.common.AggregatedValue;
 import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.dxf2.datavalue.DataValue;
+import org.hisp.dhis.dxf2.datavalueset.DataValueSet;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -19,12 +23,39 @@ import java.util.concurrent.TimeUnit;
  */
 public class DataValueRandomizer
 {
-    public AggregateDataValue create( String ou, EntitiesCache entitiesCache ) {
+    public DataValue create( String ou, EntitiesCache entitiesCache ) {
         DataSet dataSet = DataRandomizer.randomElementFromList( entitiesCache.getDataSets());
 
         DataElement dataElement = DataRandomizer.randomElementFromList( dataSet.getDataElements() );
 
-        return new AggregateDataValue( dataElement.getUid(),"", dataSet.getId(), ou, randomPeriod(), rndValueFrom( dataElement.getValueType() ) );
+        DataValue dv = new DataValue();
+        dv.setDataElement( dataElement.getUid() );
+        dv.setOrgUnit( ou );
+        dv.setPeriod( randomPeriod() );
+        dv.setValue( rndValueFrom( dataElement.getValueType() ) );
+        dv.setCategoryOptionCombo( "" );
+
+        return dv;
+    }
+
+    public DataValueSet create( String ou, EntitiesCache entitiesCache, int numberOfValues) {
+        List<DataValue> values = new ArrayList<>();
+
+        for ( int i = 0; i < numberOfValues; i++ ) {
+            values.add( create( ou, entitiesCache ));
+        }
+
+        DataValueSet set = new DataValueSet();
+        set.setDataValues( values );
+        return set;
+    }
+
+    public DataValueSet create( String ou, EntitiesCache entitiesCache, int min, int max) {
+        List<DataValue> values = new ArrayList<>();
+
+        int numberOfValues = DataRandomizer.randomIntInRange( min, max );
+
+        return create( ou,entitiesCache,numberOfValues );
     }
 
 

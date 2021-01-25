@@ -56,7 +56,7 @@ public class AddDataValueTask extends DhisAbstractTask
             .build();
 
         System.out.println("Ssending request");
-        ApiResponse response = new AuthenticatedApiActions( "/api/events", getUser() )
+        ApiResponse response = new AuthenticatedApiActions( "/api/events", getUserCredentials() )
             .update( eventId + "/" + dataValue.getDataElement(), payload, ContentType.JSON.toString() );
 
         if (response.statusCode() == 200) {

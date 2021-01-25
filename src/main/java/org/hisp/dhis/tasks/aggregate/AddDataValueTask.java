@@ -6,6 +6,7 @@ import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.AggregateDataValue;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
+import org.hisp.dhis.dxf2.datavalue.DataValue;
 import org.hisp.dhis.random.DataValueRandomizer;
 import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.request.QueryParamsBuilder;
@@ -21,8 +22,6 @@ public class AddDataValueTask
     extends DhisAbstractTask
 {
     private String endpoint = "/api/dataValues";
-    private int weight;
-    private EntitiesCache entitiesCache;
 
     public AddDataValueTask(final int weight, final EntitiesCache entitiesCache ) {
         this.weight = weight;
@@ -44,20 +43,17 @@ public class AddDataValueTask
     @Override
     public void execute()
     {
-        UserRandomizer userRandomizer = new UserRandomizer();
-        User randomUser = userRandomizer.getRandomUser( entitiesCache );
+        User user = getUser();
+        AuthenticatedApiActions dataValueActions  = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
 
-        AuthenticatedApiActions dataValueActions  = new AuthenticatedApiActions( endpoint, randomUser.getUserCredentials() );
-
-        System.out.println(String.format( "User %s, %s. Id: %s", randomUser.getUsername(), randomUser.getPassword(), randomUser.getId()));
-        AggregateDataValue aggregateDataValue = new DataValueRandomizer().create( userRandomizer.getRandomUserOrgUnit( randomUser ), entitiesCache );
+        DataValue aggregateDataValue = new DataValueRandomizer().create( new UserRandomizer().getRandomUserOrgUnit( user ), entitiesCache );
 
         ApiResponse response = dataValueActions.post(aggregateDataValue, new QueryParamsBuilder()
-            .add( "de", aggregateDataValue.getDe())
-            .add( "pe",  aggregateDataValue.getPe())
+            .add( "de", aggregateDataValue.getDataElement())
+            .add( "pe",  aggregateDataValue.getPeriod())
             .add( "value=", aggregateDataValue.getValue())
-            .add( "ds=" + aggregateDataValue.getDs())
-            .add( "ou=", aggregateDataValue.getOu() ));
+            //.add( "ds=" + aggregateDataValue.get())
+            .add( "ou=", aggregateDataValue.getOrgUnit() ));
 
         if (response.statusCode() == 201 ) {
             recordSuccess( response.getRaw() );
