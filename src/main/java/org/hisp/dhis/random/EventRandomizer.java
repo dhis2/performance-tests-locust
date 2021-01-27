@@ -76,7 +76,7 @@ public class EventRandomizer
         event.setDeleted( false );
         event.setAttributeOptionCombo( "" ); // TODO
 
-        if ( !ctx.isSkipTeiInEvent() )
+        if ( !ctx.isSkipTeiInEvent() && program.isHasRegistration())
         {
             if (ctx.getTeiId() != null) {
                 event.setTrackedEntityInstance( ctx.getTeiId() );
@@ -111,7 +111,7 @@ public class EventRandomizer
         ListOrderedSet dataValues = new ListOrderedSet();
         int numberOfDataValuesToCreate = DataRandomizer.randomIntInRange( min, max );
         List<Integer> indexes = DataRandomizer.randomSequence( programStage.getDataElements().size(),
-            numberOfDataValuesToCreate );
+            numberOfDataValuesToCreate + 1 );
 
         for ( Integer index : indexes )
         {

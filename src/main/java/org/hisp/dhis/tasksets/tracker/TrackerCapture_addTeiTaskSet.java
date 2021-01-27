@@ -23,6 +23,7 @@ import org.hisp.dhis.tasks.tracker.enrollments.AddEnrollmentTask;
 import org.hisp.dhis.tasks.tracker.events.AddDataValueTask;
 import org.hisp.dhis.tasks.tracker.events.AddEventsTask;
 import org.hisp.dhis.tasks.tracker.tei.AddTeiTask;
+import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.Set;
@@ -55,6 +56,7 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
     @Override
     public void execute()
     {
+
         // user ou
         User user = new UserRandomizer().getRandomUser( entitiesCache );
         String ou = new UserRandomizer().getRandomUserOrgUnit( user );
@@ -71,11 +73,16 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
         TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstances();
         trackedEntityInstances.setTrackedEntityInstances( Lists.newArrayList( tei ) );
 
+        long time = System.currentTimeMillis();
+
+        new QueryFilterTeiTask( 1, String.format( "?program=%s&ou=%s&ouMode=SELECTED&pageSize=50&page=1&totalPages=false", program.getUid(), ou), user.getUserCredentials() );
+
         ApiResponse body = new AddTeiTask( 1, entitiesCache, trackedEntityInstances, user.getUserCredentials() ).executeAndGetResponse();
 
         context.setTeiId( body.extractUid() );
 
         if (context.getTeiId() == null) {
+            recordFailure( System.currentTimeMillis() - time, "TEI wasn't created" );
             return;
         }
 
@@ -86,8 +93,10 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
 
         context.setEnrollmentId( response.extractUid() );
 
-        if (context.getEnrollmentId() == null )
+        if (context.getEnrollmentId() == null ){
+            recordFailure( System.currentTimeMillis() - time, "Enrollment wasn't created" );
             return;
+        }
 
         context.setSkipTeiInEnrollment( false );
         context.setSkipTeiInEvent( false );
@@ -98,9 +107,13 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
 
         String eventId = response.extractUid();
 
+        if (eventId == null) {
+            recordFailure( System.currentTimeMillis() - time, "Event wasn't created" );
+        }
+
         int dataValuesToCreate = context.getProgramStage().getDataElements().size();
 
-        ListOrderedSet dataValueSet = new EventRandomizer().createDataValues( context.getProgramStage(), dataValuesToCreate / 4, dataValuesToCreate / 3);
+        ListOrderedSet dataValueSet = new EventRandomizer().createDataValues( context.getProgramStage(), dataValuesToCreate / 4, dataValuesToCreate);
 
         DhisDelayedTaskSet taskSet = new DhisDelayedTaskSet(5, TimeUnit.SECONDS);
         dataValueSet.forEach( dv -> {
@@ -110,6 +123,7 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
         } );
 
         taskSet.execute();
+        recordSuccess( System .currentTimeMillis() - time, 0);
     }
 
     private void generateAttributes(Program program, TrackedEntityInstance tei, UserCredentials userCredentials ) {

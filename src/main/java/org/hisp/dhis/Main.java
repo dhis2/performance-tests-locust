@@ -12,6 +12,11 @@ import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.locust.LocustSlave;
 import org.hisp.dhis.tasks.LoginTask;
 import org.hisp.dhis.tasks.aggregate.AddDataValueTask;
+import org.hisp.dhis.tasksets.aggregate.Android_syncDataValuesTaskSet;
+import org.hisp.dhis.tasksets.tracker.Android_syncTeisTaskSet;
+import org.hisp.dhis.tasksets.tracker.Capture_addEventTaskSet;
+import org.hisp.dhis.tasksets.tracker.TrackerCapture_addTeiTaskSet;
+import org.hisp.dhis.tasksets.tracker.TrackerCapture_searchForTeiTaskSet;
 
 import java.io.IOException;
 
@@ -51,7 +56,7 @@ public class Main
         if ( !cacheExists() )
         {
             System.out.println( "cache not found. Hold on while a new cache is created." );
-            cache = createAndSerializeCache();
+            cache = createAndSerializeCache(cfg);
         }
         else
         {
@@ -62,14 +67,25 @@ public class Main
             catch ( Exception e )
             {
                 System.out.println( "Error deserializing cache. Recreating cache file..." + e );
-                cache = createAndSerializeCache();
+                cache = createAndSerializeCache(cfg);
             }
         }
+
         System.out.println( "cache loaded from " + getCachePath() );
 
         Locust locust = LocustSlave.newInstance().init();
 
-        locust.run(
+        /*locust.run(
+            new Android_syncTeisTaskSet( 1, cache ),
+            new AddDataValueTask( 1, cache ),
+            new Android_syncDataValuesTaskSet( 1, cache ),
+            new TrackerCapture_addTeiTaskSet( 1, cache ),
+            new Capture_addEventTaskSet( 1, cache ) );*/
+
+        locust.dryRun(
+            new Android_syncTeisTaskSet( 1,cache )
+        );
+        /*locust.dryRun(
                 new QueryFilterTeiTask( 3 ),
                 new GetHeavyAnalyticsTask( 1, cfg.analyticsApiVersion() ),
                 new GetHeavyAnalyticsRandomTask( 1, cfg.analyticsApiVersion(), cache ),
@@ -82,6 +98,7 @@ public class Main
                 new GetAndUpdateTeiTask( 2, cache ),
                 new AddEventsTask(3, cache)
 
-        );
+        );*/
+
     }
 }

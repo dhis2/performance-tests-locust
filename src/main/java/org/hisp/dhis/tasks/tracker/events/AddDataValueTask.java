@@ -55,7 +55,6 @@ public class AddDataValueTask extends DhisAbstractTask
             .addOrAppendToArray( "dataValues", JsonParserUtils.toJsonObject( dataValue ).getAsJsonObject() )
             .build();
 
-        System.out.println("Ssending request");
         ApiResponse response = new AuthenticatedApiActions( "/api/events", getUserCredentials() )
             .update( eventId + "/" + dataValue.getDataElement(), payload, ContentType.JSON.toString() );
 

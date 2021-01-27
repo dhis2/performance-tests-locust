@@ -55,6 +55,8 @@ public class ProgramAttribute
 
     private List<String> options;
 
+    private boolean searchable;
+
     public ProgramAttribute()
     {
     }

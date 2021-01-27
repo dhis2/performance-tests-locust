@@ -78,14 +78,15 @@ public class GetAndUpdateTeiTask
 
         // get full tei body
 
-        JsonObject teiBody = new GetTeiTask( tei.getUid() ).executeAndGetBody();
+        ApiResponse response = new GetTeiTask( tei.getUid() ).executeAndGetResponse();
 
+        JsonObject teiBody = response.getBody();
         teiBody.add( "attributes", JsonParserUtils.toJsonObject( attributes ) );
 
 
         // update
 
-        ApiResponse response = teiActions.update( tei.getUid(), teiBody,
+        response = teiActions.update( tei.getUid(), teiBody,
             ContentType.JSON.toString() );
 
         if ( response.statusCode() == 200 )

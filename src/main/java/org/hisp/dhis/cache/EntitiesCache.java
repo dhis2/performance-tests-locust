@@ -2,6 +2,7 @@ package org.hisp.dhis.cache;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.myzhan.locust4j.Locust;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import org.aeonbits.owner.ConfigFactory;
@@ -43,9 +44,9 @@ public class EntitiesCache
     public static <T> List<T> randomElementsFromList( List<T> list, int elements )
     {
         Collections.shuffle( list );
-        if ( elements > list.size() - 1 )
+        if ( elements > list.size())
         {
-            elements = list.size() - 1;
+            elements = list.size();
         }
         return list.subList( 0, elements );
     }
@@ -92,18 +93,18 @@ public class EntitiesCache
         programCache = null;
     }
 
-    public void loadUserCache()
+    public void loadUserCache(LocustConfig config)
     {
         users = new ArrayList<>();
         users = getPayload(
-            "/api/users?filter=organisationUnits.level:eq:5&filter=displayName:like:uio&fields=id,organisationUnits~pluck,userCredentials[username]&pageSize=10" )
+            "/api/users?filter=organisationUnits.level:eq:5&filter=displayName:like:uio&fields=id,organisationUnits~pluck,userCredentials[username]&pageSize=" + config.cacheUserPoolSize() )
             .extractList( "users", User.class );
 
         // if there are no dummy users, use only default specified in locust conf
         if ( users.isEmpty() )
         {
             System.out.println( "No dummy users, only default user will be added to the cache" );
-            LocustConfig config = ConfigFactory.create( LocustConfig.class );
+
             users = getPayload( String.format(
                 "/api/users?filter=userCredentials.username:eq:%s&fields=id,organisationUnits~pluck,userCredentials[username]",
                 config.adminUsername() ) ).extractList( "users", User.class );
@@ -171,10 +172,19 @@ public class EntitiesCache
             if ( program.getOrgUnits().size() == 0 )
             {
                 System.out.println( String.format( "Program %s doesn't have any org units", program.getUid() ) );
-                break;
+                continue;
             }
 
-            List<String> orgUnits = randomElementsFromList( program.getOrgUnits(), 1000 );
+            // get org units that are assigned to users in the user pool
+
+            List<String> userOrgUnits = this.users.parallelStream()
+                .flatMap( p -> p.getOrganisationUnits().stream() )
+                .filter( ou -> program.getOrgUnits().contains( ou ) )
+                .collect( Collectors.toList() );
+
+            userOrgUnits = userOrgUnits.stream().filter( ou -> program.getOrgUnits().contains( ou ) ).collect( Collectors.toList());
+
+            List<String> orgUnits = randomElementsFromList( userOrgUnits, 1000 );
             List<List<String>> partitions = Lists.partition( orgUnits, 250 );
 
             partitions.forEach( p -> {
@@ -188,7 +198,8 @@ public class EntitiesCache
 
                 for ( Map map : payload )
                 {
-                    teisFromProgram.add( new Tei( (String) map.get( "trackedEntityInstance" ), program.getUid() ) );
+                    teisFromProgram.add( new Tei( (String) map.get( "trackedEntityInstance" ), program.getUid(),
+                        (String) map.get( "orgUnit" ) ) );
                 }
 
                 if ( teis.containsKey( program.getUid() ) )
@@ -204,12 +215,12 @@ public class EntitiesCache
         }
     }
 
-    public void loadAll()
+    public void loadAll( LocustConfig cfg )
     {
         this.loadDataSetsCache();
         System.out.println( "Data sets cache loaded" );
 
-        this.loadUserCache();
+        this.loadUserCache(cfg);
         System.out.println( "User cache loaded" );
 
         this.loadTeiTypeCache();
@@ -226,6 +237,7 @@ public class EntitiesCache
 
         System.out.println( "Tracked Entity Types loaded in cache [" + this.teiTypes.size() + "]" );
         System.out.println( "Programs loaded in cache [" + this.programs.size() + "]" );
+        System.out.println(" Tracker programs loaded in cache [ " + trackerPrograms.size() + "]");
         System.out.println( "Tracked Entity Instances loaded in cache ["
             + this.teis.values().stream().mapToInt( Collection::size ).sum() + "]" );
         System.out.println( "Data sets loaded in cache [" + this.dataSets.size() + "]" );
@@ -298,7 +310,8 @@ public class EntitiesCache
                     trackedEntityAttribute.extractObject( "generated", Boolean.class ),
                     trackedEntityAttribute.extractObject( "unique", Boolean.class ),
                     trackedEntityAttribute.extractString( "pattern" ),
-                    getProgramAttributeOptionValues( trackedEntityAttribute ) ) );
+                    getProgramAttributeOptionValues( trackedEntityAttribute ),
+                    (Boolean) att.get( "searchable") ) );
         }
         return programAttributes;
 

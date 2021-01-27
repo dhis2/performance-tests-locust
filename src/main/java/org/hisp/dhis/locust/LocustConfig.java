@@ -25,4 +25,7 @@ public interface LocustConfig
 
     @Key( "user.admin.password" )
     String adminPassword();
+
+    @Key( "cache.users.pool.size" )
+    int cacheUserPoolSize();
 }

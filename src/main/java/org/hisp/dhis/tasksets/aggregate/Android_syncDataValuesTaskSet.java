@@ -24,13 +24,13 @@ public class Android_syncDataValuesTaskSet extends DhisAbstractTask
     @Override
     public String getName()
     {
-        return "Android: sync data values";
+        return endpoint;
     }
 
     @Override
     public String getType()
     {
-        return "http";
+        return "POST";
     }
 
     @Override

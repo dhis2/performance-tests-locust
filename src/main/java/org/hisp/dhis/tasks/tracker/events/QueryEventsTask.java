@@ -1,7 +1,9 @@
 package org.hisp.dhis.tasks.tracker.events;
 
 import com.google.gson.JsonObject;
+import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 
@@ -12,7 +14,7 @@ public class QueryEventsTask
     extends
     DhisAbstractTask
 {
-    private RestApiActions apiActions = new RestApiActions( "/api/events" );
+    private String endpoint = "/api/events";
 
     private String query;
 
@@ -21,6 +23,11 @@ public class QueryEventsTask
     public QueryEventsTask( String query )
     {
         this.query = query;
+    }
+
+    public QueryEventsTask( String query, UserCredentials userCredentials ) {
+        this.query = query;
+        this.userCredentials = userCredentials;
     }
 
     public int getWeight()
@@ -41,7 +48,7 @@ public class QueryEventsTask
 
     public void execute()
     {
-        ApiResponse response = apiActions.get(this.query);
+        ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials()).get(this.query);
 
         this.responseBody = response.getBody();
 

@@ -16,7 +16,6 @@ public class AddEnrollmentTask extends DhisAbstractTask
 {
     private String endpoint = "/api/enrollments";
     private RandomizerContext ctx = RandomizerContext.EMPTY_CONTEXT();
-    private UserCredentials userCredentials;
     private ApiResponse response;
 
     public AddEnrollmentTask(int weight, EntitiesCache entitiesCache ) {

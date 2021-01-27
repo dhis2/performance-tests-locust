@@ -7,6 +7,7 @@ import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 import de.javakaffee.kryoserializers.UnmodifiableCollectionsSerializer;
 import org.hisp.dhis.cache.*;
 import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.locust.LocustConfig;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -68,11 +69,11 @@ public class CacheUtils
 
     }
 
-    public static EntitiesCache createAndSerializeCache()
+    public static EntitiesCache createAndSerializeCache( LocustConfig cfg )
             throws IOException
     {
         EntitiesCache cache = new EntitiesCache();
-        cache.loadAll();
+        cache.loadAll(cfg);
         serializeCache( cache );
         return cache;
     }

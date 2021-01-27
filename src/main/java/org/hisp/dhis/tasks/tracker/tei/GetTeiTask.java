@@ -1,7 +1,9 @@
 package org.hisp.dhis.tasks.tracker.tei;
 
 import com.google.gson.JsonObject;
+import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 
@@ -11,18 +13,23 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 public class GetTeiTask
     extends DhisAbstractTask
 {
-    private JsonObject responseBody;
+    private String endpoint = "/api/trackedEntityInstances";
+    private ApiResponse response;
     private String tei;
-    private RestApiActions teiActions = new RestApiActions( "/api/trackedEntityInstances" );
 
-    public GetTeiTask( String teiId) {
+    public GetTeiTask( String teiId ) {
         this.tei = teiId;
+    }
+
+    public GetTeiTask ( String teiId, UserCredentials userCredentials ) {
+        this.tei = teiId;
+        this.userCredentials = userCredentials;
     }
 
     @Override
     public String getName()
     {
-        return "/trackedEntityInstances/$id";
+        return endpoint + "/id";
     }
 
     @Override
@@ -34,9 +41,7 @@ public class GetTeiTask
     @Override
     public void execute()
     {
-        ApiResponse response = teiActions.get( tei );
-
-        this.responseBody = response.getBody();
+        this.response = new AuthenticatedApiActions( endpoint, getUserCredentials() ).get( tei );
 
         if ( response.statusCode() == 200 ) {
             this.recordSuccess( response.getRaw() );
@@ -47,9 +52,9 @@ public class GetTeiTask
 
     }
 
-    public JsonObject executeAndGetBody()
+    public ApiResponse executeAndGetResponse()
     {
         this.execute();
-        return responseBody;
+        return response;
     }
 }

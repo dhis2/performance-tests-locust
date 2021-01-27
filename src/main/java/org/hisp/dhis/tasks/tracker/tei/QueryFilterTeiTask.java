@@ -28,7 +28,9 @@ package org.hisp.dhis.tasks.tracker.tei;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 
@@ -39,15 +41,21 @@ public class QueryFilterTeiTask
     extends
     DhisAbstractTask
 {
-    private int weight;
-
     private String endpoint = "/api/trackedEntityInstances/query";
 
     private String query = "?ou=DiszpKrYNg8&attribute=TfdH5KvFmMy&filter=TfdH5KvFmMy:GE:Karoline";
 
+    private ApiResponse response;
+
     public QueryFilterTeiTask( int weight )
     {
         this.weight = weight;
+    }
+
+    public QueryFilterTeiTask( int weight, String query, UserCredentials userCredentials ) {
+        this.weight = weight;
+        this.query = query;
+        this.userCredentials = userCredentials;
     }
 
     public int getWeight()
@@ -58,7 +66,7 @@ public class QueryFilterTeiTask
     @Override
     public String getName()
     {
-        return "TEI's query matching filter " + endpoint + query;
+        return endpoint;
     }
 
     @Override
@@ -69,9 +77,8 @@ public class QueryFilterTeiTask
 
     @Override
     public void execute()
-        throws Exception
     {
-        ApiResponse response = new RestApiActions( endpoint ).get( query );
+        this.response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query );
 
         if ( response.statusCode() == 200 )
         {
@@ -80,5 +87,10 @@ public class QueryFilterTeiTask
         }
 
         recordFailure( response.getRaw() );
+    }
+
+    public ApiResponse executeAndGetResponse() {
+        this.execute();
+        return this.response;
     }
 }

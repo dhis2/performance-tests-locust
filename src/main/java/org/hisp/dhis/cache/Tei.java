@@ -44,4 +44,5 @@ public class Tei
 
     private String uid;
     private String program;
+    private String orgUnit;
 }
