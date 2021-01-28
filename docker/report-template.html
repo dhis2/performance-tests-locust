@@ -33,7 +33,7 @@
 RPS:<strong>{{ rps }}</strong> Failures: <strong>{{ fails }}</strong>
 </p>
 <h2>Statistics</h2>
-<div class="container">
+<div class="container" id="statistics">
     {% for row in stat_data %}
     <div class="column">
         <div class="header row">{{stat_headers[loop.index0]}}</div>
@@ -47,7 +47,7 @@ RPS:<strong>{{ rps }}</strong> Failures: <strong>{{ fails }}</strong>
 </div>
 
 <h2>Distribution</h2>
-<div class="container">
+<div class="container" id="distribution">
     {% for row in dist_data %}
     <div class="column">
         <div class="header row">{{dist_headers[loop.index0]}}</div>
@@ -61,7 +61,7 @@ RPS:<strong>{{ rps }}</strong> Failures: <strong>{{ fails }}</strong>
 </div>
 
 <h2>Failures</h2>
-<div class="container">
+<div class="container" id="failures">
     {% for row in e_data %}
     <div class="column">
         <div class="header row">{{e_headers[loop.index0]}}</div>
