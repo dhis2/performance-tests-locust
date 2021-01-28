@@ -31,7 +31,7 @@ public class DataValueRandomizer
         DataValue dv = new DataValue();
         dv.setDataElement( dataElement.getUid() );
         dv.setOrgUnit( ou );
-        dv.setPeriod( randomPeriod() );
+        dv.setPeriod( randomPeriod(dataSet.getPeriodType()) );
         dv.setValue( rndValueFrom( dataElement.getValueType() ) );
         dv.setCategoryOptionCombo( "" );
 
@@ -59,17 +59,26 @@ public class DataValueRandomizer
     }
 
 
-    public String randomPeriod() {
+    public String randomPeriod(String periodType) {
         Calendar calendar = new Calendar.Builder().build();
         calendar.setTime( DataRandomizer.randomPastDate() );
 
         int randomYear = calendar.get( Calendar.YEAR );
         String month = "";
+        String day = "";
         if (calendar.get( Calendar.MONTH ) + 1 < 10) {
             month = "0" + (calendar.get( Calendar.MONTH ) + 1);
         }
 
-        return String.format( "%s%s", randomYear, month);
+        if (periodType.equalsIgnoreCase( "daily" )) {
+            day = "" + calendar.get( Calendar.DAY_OF_MONTH );
+            if (calendar.get(Calendar.DAY_OF_MONTH) < 10)  {
+                day = "0" + calendar.get(Calendar.DAY_OF_MONTH);
+            }
+
+        }
+
+        return String.format( "%s%s%s", randomYear, month, day);
     }
 
     protected String rndValueFrom( ValueType valueType )

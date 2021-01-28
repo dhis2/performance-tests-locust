@@ -37,7 +37,7 @@ public class QueryEventsTask
 
     public String getName()
     {
-        return "/events" + this.query;
+        return "/events";
     }
 
     @Override

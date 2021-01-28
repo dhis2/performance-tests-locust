@@ -120,7 +120,7 @@ public class EntitiesCache
 
         // filter out data sets without monthly period, since generation is not yet supported
         sets.parallelStream().filter( p -> {
-            return p.get( "periodType" ).getAsString().equalsIgnoreCase( "Monthly" );
+            return p.get( "periodType" ).getAsString().equalsIgnoreCase( "Monthly" ) || p.get( "periodType" ).getAsString().equalsIgnoreCase( "daily" );
         } ).forEach( set -> {
             JsonObject obj = set.getAsJsonObject();
 
@@ -140,7 +140,7 @@ public class EntitiesCache
                     optionSets ) );
             } );
 
-            dataSets.add( new DataSet( obj.get( "id" ).getAsString(), dataElements ) );
+            dataSets.add( new DataSet( obj.get( "id" ).getAsString(), dataElements, obj.get( "periodType" ).getAsString() ) );
         } );
 
     }

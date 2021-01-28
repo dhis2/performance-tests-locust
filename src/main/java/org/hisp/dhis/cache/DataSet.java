@@ -3,6 +3,7 @@ package org.hisp.dhis.cache;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hisp.dhis.period.PeriodType;
 
 import java.util.List;
 
@@ -17,4 +18,6 @@ public class DataSet
     private String id;
 
     private List<DataElement> dataElements;
+
+    private String periodType;
 }
