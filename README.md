@@ -25,7 +25,8 @@ To configure the environment variables, run:
    
    DHIS2 does not have to run on the localhost. A remote instance can be used as well
    
-3. From the root directory of the `performance-test-locust` project execute `docker-compose up` command.
+3. From the root directory of the `performance-test-locust` project execute `docker-compose up` command. If this command ends up in some error for example
+`Could not find any locustfile` then use this command `docker pull dhis2/locustio:latest` to download docker image and re-run `docker-compose up`.
 
 4. Run `Main.main()` method in `performance-test-locust` project. 
     - You can run it directly via your IDE -> open `Main` class and click on a green arrow next to the `main()` method 
