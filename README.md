@@ -37,3 +37,18 @@ To configure the environment variables, run:
 6. Enter users count and hatch rate and start swarming
 
 
+## Running tests locally (without Docker!)
+
+## Requirements
+1. Python 3
+2. Locust 1.2+
+3. Working DHIS2 server
+
+## Running
+1. Install Locust (will upgrade if already exists): `pip3 install locust --upgrade`
+2. Start Locust master node: `locust -f locust-master.py --master --master-bind-host 127.0.0.1 --master-bind-port 5557 --web-host=127.0.0.1`
+3. Start the DHIS2 server now if you have not already
+3. Make sure `locust.properties` are pointing to your local DHIS2 server
+4. Compile and run this project from the command line: `mvn clean compile exec:java` (you can also start it from IntelliJ via Main.class file)
+5. Open your browser and go to `http://localhost:8089` enter you desired number of workers and spawn rate, point `Host` to: `127.0.0.1` "Locust master"
+6. Watch the tests and listen to your machine heats up
