@@ -28,28 +28,29 @@ package org.hisp.dhis.random;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.ProgramStage;
-import org.hisp.dhis.cache.Tei;
 import org.hisp.dhis.dxf2.events.event.DataValue;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.utils.DataRandomizer;
+
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Luciano Fiandesio
  */
 public class EventRandomizer
     extends
-        AbstractTrackerEntityRandomizer<Event>
+    AbstractTrackerEntityRandomizer<Event>
 {
-    public Event createWithoutDataValues( EntitiesCache cache, RandomizerContext ctx ) {
+    public Event createWithoutDataValues( EntitiesCache cache, RandomizerContext ctx )
+    {
         Program program = ctx.getProgram();
         if ( program == null )
         {
@@ -62,7 +63,7 @@ public class EventRandomizer
             programStage = getRepeatableRandomProgramStageFromProgram( program );
         }
 
-        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram(ctx, program );
+        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, program );
 
         Event event = new Event();
         event.setEnrollment( ctx.getEnrollmentId() );
@@ -76,9 +77,10 @@ public class EventRandomizer
         event.setDeleted( false );
         event.setAttributeOptionCombo( "" ); // TODO
 
-        if ( !ctx.isSkipTeiInEvent() && program.isHasRegistration())
+        if ( !ctx.isSkipTeiInEvent() && program.isHasRegistration() )
         {
-            if (ctx.getTeiId() != null) {
+            if ( ctx.getTeiId() != null )
+            {
                 event.setTrackedEntityInstance( ctx.getTeiId() );
                 return event;
             }
@@ -95,6 +97,7 @@ public class EventRandomizer
         }
         return event;
     }
+
     @Override
     public Event create( EntitiesCache cache, RandomizerContext ctx )
     {
@@ -127,16 +130,15 @@ public class EventRandomizer
         dataValue.setDataElement( dataElement.getUid() );
         dataValue.setProvidedElsewhere( false );
         String val;
-        // TODO commenting out logic to generate a random value for an option set, since it's not working properly
-        //        if ( dataElement.getOptionSet() != null && !dataElement.getOptionSet().isEmpty() )
-//        {
-//            val = DataRandomizer.randomElementFromList( dataElement.getOptionSet() );
-//        }
-//        else
-//        {
+        if ( dataElement.getOptionSet() != null && !dataElement.getOptionSet().isEmpty() )
+        {
+            val = DataRandomizer.randomElementFromList( dataElement.getOptionSet() );
+        }
+        else
+        {
+            val = rndValueFrom( dataElement.getValueType() );
+        }
 
-//        }
-        val = rndValueFrom( dataElement.getValueType() );
         dataValue.setValue( val );
         return dataValue;
     }

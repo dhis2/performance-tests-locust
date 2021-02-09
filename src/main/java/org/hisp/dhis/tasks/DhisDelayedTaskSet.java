@@ -48,8 +48,6 @@ public class DhisDelayedTaskSet extends AbstractTaskSet
         IntStream.range( 0, tasks.size() )
             .parallel()
             .forEach( i -> {
-                System.out.println( i );
-
                 ScheduledFuture<?> futureTask = threadpool.schedule(() ->
                     {
                         try

@@ -7,9 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import com.google.gson.JsonParseException;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
@@ -24,6 +23,7 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hisp.dhis.utils.JsonObjectBuilder;
 import org.hisp.dhis.utils.JsonParserUtils;
 
 /**
@@ -108,7 +108,6 @@ public class AddEventsTask
         else
         {
             addTeiToBlacklist( response );
-
             recordFailure( response.getRaw() );
         }
     }
@@ -152,10 +151,8 @@ public class AddEventsTask
 
         try
         {
-            String errorString = response.getAsString();
-            Map<String, Object> map = new ObjectMapper().readValue( errorString, Map.class );
-            Map<String, Object> responseJson = (Map<String, Object>) map.get( "response" );
-            List importSummaries = (List) responseJson.get( "importSummaries" );
+            List importSummaries = response.extractObject( "importSummaries", List.class );
+            if (importSummaries == null) return;
             for ( Object importSummary : importSummaries )
             {
 
@@ -171,7 +168,7 @@ public class AddEventsTask
 
             }
         }
-        catch ( IOException e )
+        catch ( Exception e )
         {
             e.printStackTrace();
         }

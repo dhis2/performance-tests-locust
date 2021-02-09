@@ -1,11 +1,9 @@
 package org.hisp.dhis.random;
 
 import com.github.javafaker.Faker;
-import org.hisp.dhis.cache.AggregateDataValue;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.DataSet;
 import org.hisp.dhis.cache.EntitiesCache;
-import org.hisp.dhis.common.AggregatedValue;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dxf2.datavalue.DataValue;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSet;
@@ -14,9 +12,7 @@ import org.hisp.dhis.utils.DataRandomizer;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -64,6 +60,11 @@ public class DataValueRandomizer
         calendar.setTime( DataRandomizer.randomPastDate() );
 
         int randomYear = calendar.get( Calendar.YEAR );
+
+        if (periodType.equalsIgnoreCase( "yearly" )) {
+            return "" + randomYear;
+        }
+
         String month = "";
         String day = "";
         if (calendar.get( Calendar.MONTH ) + 1 < 10) {
@@ -89,6 +90,11 @@ public class DataValueRandomizer
         {
             val = String.valueOf( DataRandomizer.randomBoolean() );
         }
+        else if ( valueType.equals( ValueType.PHONE_NUMBER )) {
+            val = Faker.instance().phoneNumber().cellPhone();
+            return val;
+        }
+
         else if ( valueType.equals( ValueType.TRUE_ONLY ) )
         {
             return "true";

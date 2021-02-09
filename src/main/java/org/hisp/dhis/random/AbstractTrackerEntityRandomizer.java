@@ -91,53 +91,7 @@ public abstract class AbstractTrackerEntityRandomizer<T>
 
     protected String rndValueFrom( ValueType valueType )
     {
-        String val = null;
-
-        if ( valueType.equals( ValueType.BOOLEAN ) )
-        {
-            val = String.valueOf( DataRandomizer.randomBoolean() );
-        }
-        else if ( valueType.equals( ValueType.PHONE_NUMBER )) {
-            val = Faker.instance().phoneNumber().cellPhone();
-            return val;
-        }
-
-        else if ( valueType.equals( ValueType.TRUE_ONLY ) )
-        {
-            return "true";
-        }
-        else if ( valueType.isDate() )
-        {
-            val = DataRandomizer.randomDate( DateTimeFormatter.ISO_LOCAL_DATE );
-        }
-        else if ( valueType.equals( ValueType.PERCENTAGE ) )
-        {
-            val = String.valueOf( DataRandomizer.randomIntInRange( 1, 100 ) );
-        }
-        else if ( valueType.isNumeric() )
-        {
-            val = String.valueOf( DataRandomizer.randomIntInRange( 1, 100000 ) );
-        }
-        else if ( valueType.isDecimal() )
-        {
-            val = String.valueOf( DataRandomizer.randomDoubleInRange( 100, 1000, 1 ) );
-        }
-        else if ( valueType.isText() )
-        {
-            val = DataRandomizer.randomString();
-        }
-        else if ( valueType.isOrganisationUnit() )
-        {
-            val = ""; // TODO
-        }
-        else if ( valueType.isGeo() )
-        {
-//            Point p = createRandomPoint();
-//            val = p.getY() + ", " + p.getY();
-            val = ""; // TODO
-        }
-
-        return val;
+       return new DataValueRandomizer().rndValueFrom( valueType );
     }
 
 }

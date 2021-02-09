@@ -103,7 +103,7 @@ public class TrackedEntityInstanceRandomizer
     {
         List<TrackedEntityInstance> rndTeis = new ArrayList<>();
         TrackedEntityInstances teis = new TrackedEntityInstances();
-        for ( int i = 0; i < size - 1 ; i++ )
+        for ( int i = 0; i < size  ; i++ )
         {
             TrackedEntityInstance trackedEntityInstance = create( cache, context );
             if ( trackedEntityInstance != null )

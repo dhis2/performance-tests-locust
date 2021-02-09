@@ -18,8 +18,6 @@ import org.hisp.dhis.utils.DataRandomizer;
  */
 public class Capture_addEventTaskSet extends DhisAbstractTask
 {
-    private EntitiesCache entitiesCache;
-
     public Capture_addEventTaskSet(int weight, EntitiesCache entitiesCache ) {
         this.weight = weight;
         this.entitiesCache = entitiesCache;

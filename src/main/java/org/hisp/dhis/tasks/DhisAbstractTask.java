@@ -38,28 +38,20 @@ public abstract class DhisAbstractTask
         throws Exception;
 
     protected UserCredentials getUserCredentials( ) {
-        UserCredentials creds;
 
-        if (this.user != null) {
-            return user.getUserCredentials();
+        if (this.userCredentials != null) {
+            return this.userCredentials;
         }
 
-        if (this.userCredentials == null) {
-            if (this.entitiesCache == null)
-            {
-                LocustConfig conf = ConfigFactory.create( LocustConfig.class );
-                return new UserCredentials(conf.adminUsername(), conf.adminPassword());
-            }
+        return this.getUser().getUserCredentials();
 
-            creds = new UserRandomizer().getRandomUser( this.entitiesCache ).getUserCredentials();
-
-            return creds;
-        }
-
-        return this.userCredentials;
     }
 
     protected User getUser() {
+        if (this.user != null) {
+            return this.user;
+        }
+
         User user;
         if (this.userCredentials == null) {
             if (this.entitiesCache != null) {

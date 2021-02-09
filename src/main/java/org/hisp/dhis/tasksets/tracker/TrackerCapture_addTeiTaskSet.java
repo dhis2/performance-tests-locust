@@ -109,6 +109,7 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
 
         if (eventId == null) {
             recordFailure( System.currentTimeMillis() - time, "Event wasn't created" );
+            return;
         }
 
         int dataValuesToCreate = context.getProgramStage().getDataElements().size();
