@@ -2,18 +2,18 @@ package org.hisp.dhis.cache;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
 @Getter
 @AllArgsConstructor
-public class AggregateDataValue
+@NoArgsConstructor
+public class Dashboard
 {
-    private String de;
-    private String co;
-    private String ds;
-    private String ou;
-    private String pe;
-    private String value;
+    private String id;
+    private List<DashboardItem> dashboardItems;
 }

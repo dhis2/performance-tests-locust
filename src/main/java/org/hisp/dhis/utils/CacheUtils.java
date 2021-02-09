@@ -43,6 +43,11 @@ public class CacheUtils
         kryo.register( User.class, 208 );
         kryo.register( ProgramAttribute.class, 209 );
         kryo.register( Tei.class, 210 );
+        kryo.register( Visualization.class, 211 );
+        kryo.register( DashboardItem.class, 212 );
+        kryo.register( Dashboard.class, 213);
+        kryo.register( RelationshipType.RelationshipConstraint.class, 214 );
+        kryo.register( RelationshipType.class, 215 );
 
     }
 
@@ -69,11 +74,11 @@ public class CacheUtils
 
     }
 
-    public static EntitiesCache createAndSerializeCache( LocustConfig cfg )
+    public static EntitiesCache createAndSerializeCache()
             throws IOException
     {
         EntitiesCache cache = new EntitiesCache();
-        cache.loadAll(cfg);
+        cache.loadAll();
         serializeCache( cache );
         return cache;
     }

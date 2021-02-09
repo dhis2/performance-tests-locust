@@ -1,24 +1,37 @@
 package org.hisp.dhis;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.myzhan.locust4j.Locust;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import io.restassured.RestAssured;
 import io.restassured.config.DecoderConfig;
 import io.restassured.config.EncoderConfig;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.mapper.ObjectMapperType;
+import io.restassured.path.json.mapper.factory.DefaultJackson2ObjectMapperFactory;
 import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.commons.config.JacksonObjectMapperConfig;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.locust.LocustSlave;
 import org.hisp.dhis.tasks.LoginTask;
 import org.hisp.dhis.tasks.aggregate.AddDataValueTask;
+import org.hisp.dhis.tasks.analytics.GetAnalyticsTask;
+import org.hisp.dhis.tasks.analytics.LoadDashboardTask;
+import org.hisp.dhis.tasks.tracker.importer.AddTrackerDataTask;
 import org.hisp.dhis.tasksets.aggregate.Android_syncDataValuesTaskSet;
 import org.hisp.dhis.tasksets.tracker.Android_syncTeisTaskSet;
 import org.hisp.dhis.tasksets.tracker.Capture_addEventTaskSet;
 import org.hisp.dhis.tasksets.tracker.TrackerCapture_addTeiTaskSet;
 import org.hisp.dhis.tasksets.tracker.TrackerCapture_searchForTeiTaskSet;
+import org.hisp.dhis.tasksets.tracker.importer.Android_importer_syncTeisTaskSet;
+import org.hisp.dhis.tasksets.tracker.importer.Capture_importer_addEventTaskSet;
+import org.hisp.dhis.tasksets.tracker.importer.TrackerCapture_importer_addTeiTaskSet;
+import org.hisp.dhis.tasksets.tracker.importer.TrackerCapture_importer_searchForTeiTaskSet;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.time.Instant;
 
 import static io.restassured.config.RestAssuredConfig.config;
 import static org.aeonbits.owner.ConfigFactory.create;
@@ -42,8 +55,16 @@ public class Main
         ).objectMapperConfig(
             new ObjectMapperConfig()
                 .defaultObjectMapperType( ObjectMapperType.GSON )
-                .gsonObjectMapperFactory( ( type, s ) -> new GsonBuilder().setDateFormat( "yyyy-MM-dd" ).create() )
+                .gsonObjectMapperFactory( ( type, s ) ->
+                    new GsonBuilder().setDateFormat( "yyyy-MM-dd" )
+                        .registerTypeAdapter( Instant.class, new JsonSerializer<Instant>() {
 
+                            @Override
+                            public JsonElement serialize( Instant src, Type typeOfSrc, JsonSerializationContext context )
+                            {
+                                return new JsonPrimitive( src.toString() );
+                            }
+                        } ).create() )
         );
 
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
@@ -56,7 +77,7 @@ public class Main
         if ( !cacheExists() )
         {
             System.out.println( "cache not found. Hold on while a new cache is created." );
-            cache = createAndSerializeCache(cfg);
+            cache = createAndSerializeCache();
         }
         else
         {
@@ -67,7 +88,7 @@ public class Main
             catch ( Exception e )
             {
                 System.out.println( "Error deserializing cache. Recreating cache file..." + e );
-                cache = createAndSerializeCache(cfg);
+                cache = createAndSerializeCache();
             }
         }
 
