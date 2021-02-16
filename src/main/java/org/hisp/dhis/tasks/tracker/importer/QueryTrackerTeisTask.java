@@ -16,6 +16,8 @@ public class QueryTrackerTeisTask extends DhisAbstractTask
 
     private ApiResponse response;
 
+    private boolean savePayload = false;
+
     public QueryTrackerTeisTask( int weight )
     {
         this.weight = weight;
@@ -47,18 +49,16 @@ public class QueryTrackerTeisTask extends DhisAbstractTask
     @Override
     public void execute()
     {
-        this.response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query );
+        ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query );
 
-        if ( response.statusCode() == 200 )
-        {
-            recordSuccess( response.getRaw() );
-            return;
+        if ( savePayload ) {
+            this.response = response;
         }
-
-        recordFailure( response.getRaw() );
+        record( response.getRaw() );
     }
 
     public ApiResponse executeAndGetResponse() {
+        savePayload = true;
         this.execute();
         return this.response;
     }

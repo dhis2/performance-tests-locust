@@ -44,13 +44,7 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask extends DhisAbst
         response = apiActions.get(  endpoint.replace( "id", teiAttributeId ), new QueryParamsBuilder().add( "numberToReserve",
             String.valueOf( numberToReserve ) )  );
 
-        if (response.statusCode() == 200) {
-            recordSuccess( response.getRaw() );
-            return;
-        }
-
-        recordFailure( response.getRaw() );
-
+        record( response.getRaw() );
     }
 
     public ApiResponse executeAndGetResponse()

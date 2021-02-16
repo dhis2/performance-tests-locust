@@ -41,12 +41,7 @@ public class GenerateTrackedEntityAttributeValueTask
 
         response = apiActions.get(  endpoint.replace( "id", teiAttributeId ) );
 
-        if (response.statusCode() == 200) {
-            recordSuccess( response.getRaw() );
-            return;
-        }
-
-        recordFailure( response.getRaw() );
+        record(response.getRaw());
 
     }
 

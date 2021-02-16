@@ -2,14 +2,11 @@ package org.hisp.dhis.tasks.tracker.events;
 
 import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
-import com.google.gson.JsonParseException;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
@@ -17,14 +14,11 @@ import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
-import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hisp.dhis.utils.JsonObjectBuilder;
-import org.hisp.dhis.utils.JsonParserUtils;
 
 /**
  * @author Luciano Fiandesio <luciano@dhis2.org>
@@ -39,6 +33,8 @@ public class AddEventsTask
     private List<String> blackListedTeis = new ArrayList<>();
 
     private List<Event> events;
+
+    private boolean storeResponse = false;
 
     ApiResponse response;
 

@@ -52,12 +52,7 @@ public class AddEnrollmentTask extends DhisAbstractTask
 
         response = authenticatedApiActions.post( enrollment );
 
-        if (response.statusCode() == 200) {
-            recordSuccess( response.getRaw() );
-            return;
-        }
-
-        recordFailure( response.getRaw() );
+        record(response.getRaw());
     }
 
     public ApiResponse executeAndGetBody() {

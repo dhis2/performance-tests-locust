@@ -143,7 +143,7 @@ public class TrackedEntityInstanceRandomizer
                         patternValue = patternValue.replaceAll( "0",
                             String.valueOf( DataRandomizer.randomIntInRange( 1, 9 ) ) );
                     }
-                    return new Attribute( att.getTrackedEntityAttributeUid(), att.getValueType(), patternValue );
+                    return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(), patternValue );
                 }
                 catch ( TextPatternParser.TextPatternParsingException e )
                 {
@@ -155,7 +155,7 @@ public class TrackedEntityInstanceRandomizer
             {
                 if ( att.getOptions() == null )
                 {
-                    return new Attribute( att.getTrackedEntityAttributeUid(), att.getValueType(),
+                    return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
                         rndValueFrom( att.getValueType() ) );
                 }
                 return null;

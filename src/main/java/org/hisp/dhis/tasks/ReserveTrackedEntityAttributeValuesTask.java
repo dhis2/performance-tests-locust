@@ -64,16 +64,4 @@ public class ReserveTrackedEntityAttributeValuesTask
                 System.currentTimeMillis() - time, failureResponse.getRaw().getBody().print() );
         }
     }
-
-    private void record( Response response )
-    {
-        if ( response.statusCode() == 200 )
-        {
-            recordSuccess( response );
-        }
-        else
-        {
-            recordFailure( response );
-        }
-    }
 }

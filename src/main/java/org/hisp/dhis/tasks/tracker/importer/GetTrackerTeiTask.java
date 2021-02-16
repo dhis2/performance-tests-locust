@@ -40,13 +40,7 @@ public class GetTrackerTeiTask extends DhisAbstractTask
     {
         this.response = new AuthenticatedApiActions( endpoint, getUserCredentials() ).get( tei );
 
-        if ( response.statusCode() == 200 ) {
-            this.recordSuccess( response.getRaw() );
-            return;
-        }
-
-        this.recordFailure( response.getRaw() );
-
+        record( response.getRaw() );
     }
 
     public ApiResponse executeAndGetResponse()

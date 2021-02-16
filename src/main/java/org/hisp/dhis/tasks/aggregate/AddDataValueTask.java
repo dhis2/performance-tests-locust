@@ -50,11 +50,6 @@ public class AddDataValueTask
             //.add( "ds=" + aggregateDataValue.get())
             .add( "ou=", aggregateDataValue.getOrgUnit() ));
 
-        if (response.statusCode() == 201 ) {
-            recordSuccess( response.getRaw() );
-            return;
-        }
-
-        recordFailure( response.getRaw() );
+        record( response.getRaw(), 201);
     }
 }

@@ -19,6 +19,8 @@ public class QueryTrackerEventsTask
 
     private JsonObject responseBody;
 
+    private boolean savePayload = false;
+
     public QueryTrackerEventsTask( String query )
     {
         this.query = query;

@@ -5,11 +5,15 @@ import com.github.myzhan.locust4j.Locust;
 
 import io.restassured.response.Response;
 import org.aeonbits.owner.ConfigFactory;
+import org.apache.poi.ss.formula.functions.T;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.random.UserRandomizer;
+
+import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -80,6 +84,29 @@ public abstract class DhisAbstractTask
         Locust.getInstance().recordSuccess( getType(), getName(), time, length );
     }
 
+    public void record( Response response) {
+        if (response.statusCode() == 200) {
+            recordSuccess( response );
+        }
+
+        else {
+            recordFailure( response );
+        }
+    }
+
+    public void record( Response response, int statusCode) {
+        if (response.statusCode() == statusCode) {
+            recordSuccess( response );
+        }
+
+        else {
+            recordFailure( response );
+        }
+    }
+
+    public void record( Response response, Function<Response, Response> function ) {
+        function.apply( response );
+    }
     public void recordFailure( long time, String message )
     {
         Locust.getInstance().recordFailure( getType(), getName(), time, message );

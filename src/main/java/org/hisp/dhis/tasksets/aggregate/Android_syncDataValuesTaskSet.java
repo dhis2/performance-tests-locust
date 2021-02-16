@@ -43,12 +43,6 @@ public class Android_syncDataValuesTaskSet extends DhisAbstractTask
 
         ApiResponse response = dataValueSetActions.post( aggregateDataValues );
 
-        if (response.statusCode() != 200 ) {
-            recordFailure( response.getRaw() );
-        }
-
-        else {
-            recordSuccess( response.getRaw() );
-        }
+        record( response.getRaw() );
     }
 }

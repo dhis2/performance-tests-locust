@@ -101,7 +101,7 @@ public class DataValueRandomizer
         }
         else if ( valueType.isDate() )
         {
-            val = DataRandomizer.randomDate( DateTimeFormatter.ISO_LOCAL_DATE );
+            val = DataRandomizer.randomPastDate( DateTimeFormatter.ISO_LOCAL_DATE );
         }
         else if ( valueType.equals( ValueType.PERCENTAGE ) )
         {

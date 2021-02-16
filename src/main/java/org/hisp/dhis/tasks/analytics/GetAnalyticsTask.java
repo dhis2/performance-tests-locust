@@ -64,18 +64,7 @@ public class GetAnalyticsTask extends DhisAbstractTask
 
         AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
 
-        ApiResponse response = authenticatedApiActions.get(query);
-
-        if (response.statusCode() == 200) {
-            recordSuccess( response.getRaw() );
-        }
-
-        else {
-            recordFailure( response.getRaw() );
-            System.out.println(query);
-            System.out.println("Viz:  " + visualization.getId());
-        }
-
+        record(  authenticatedApiActions.get(query).getRaw() );
     }
 
     private String getRandomAnalyticsQuery( Visualization visualization ) {

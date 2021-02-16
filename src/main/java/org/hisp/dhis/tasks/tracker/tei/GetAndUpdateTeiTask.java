@@ -7,11 +7,6 @@ import org.hisp.dhis.cache.Tei;
 import org.hisp.dhis.random.EnrollmentRandomizer;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 
-import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
-import org.hisp.dhis.random.EnrollmentRandomizer;
-import org.hisp.dhis.random.EventRandomizer;
-import org.hisp.dhis.random.RandomizerContext;
-
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
@@ -24,11 +19,6 @@ import io.restassured.http.ContentType;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
-import io.restassured.http.ContentType;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -89,14 +79,7 @@ public class GetAndUpdateTeiTask
         response = teiActions.update( tei.getUid(), teiBody,
             ContentType.JSON.toString() );
 
-        if ( response.statusCode() == 200 )
-        {
-            recordSuccess( response.getRaw() );
-        }
-        else
-        {
-            recordFailure( response.getRaw() );
-        }
+        record( response.getRaw() );
 
     }
 

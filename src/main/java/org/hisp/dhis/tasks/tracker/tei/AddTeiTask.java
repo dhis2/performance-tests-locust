@@ -1,18 +1,11 @@
 package org.hisp.dhis.tasks.tracker.tei;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
-import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
-import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
-import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 
@@ -70,14 +63,7 @@ public class AddTeiTask
 
         if ( !hasFailed )
         {
-            if ( response.statusCode() == 200 )
-            {
-                recordSuccess( response.getRaw() );
-            }
-            else
-            {
-                recordFailure( response.getRaw() );
-            }
+            record( response.getRaw() );
         }
     }
 

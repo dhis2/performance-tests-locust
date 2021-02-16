@@ -16,6 +16,8 @@ public class GetTeisTask
 
     private RestApiActions teiActions = new RestApiActions( "/api/trackedEntityInstances" );
 
+    private boolean savePayload = false;
+
     public GetTeisTask( ) {
         this.weight = 1;
     }
@@ -42,21 +44,17 @@ public class GetTeisTask
     {
         ApiResponse response = teiActions.get( "", new QueryParamsBuilder().add(  "ou", "DiszpKrYNg8") );
 
+        if ( savePayload ) {
         this.responseBody = response.getBody();
+        }
 
-        if ( response.statusCode() == 200 )
-        {
-            recordSuccess( response.getRaw());
-        }
-        else
-        {
-            recordFailure( response.getRaw());
-        }
+        record( response.getRaw() );
     }
 
     public JsonObject executeAndGetBody()
         throws Exception
     {
+        this.savePayload = true;
         this.execute();
 
         return this.responseBody;

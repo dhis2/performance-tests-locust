@@ -1,8 +1,6 @@
 package org.hisp.dhis.tasks.tracker.tei;
 
-import com.google.gson.JsonObject;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
@@ -43,13 +41,7 @@ public class GetTeiTask
     {
         this.response = new AuthenticatedApiActions( endpoint, getUserCredentials() ).get( tei );
 
-        if ( response.statusCode() == 200 ) {
-            this.recordSuccess( response.getRaw() );
-            return;
-        }
-
-        this.recordFailure( response.getRaw() );
-
+        record( response.getRaw() );
     }
 
     public ApiResponse executeAndGetResponse()

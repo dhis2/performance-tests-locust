@@ -2,7 +2,6 @@ package org.hisp.dhis.tasks.tracker.events;
 
 import com.google.gson.JsonObject;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
@@ -19,6 +18,8 @@ public class QueryEventsTask
     private String query;
 
     private JsonObject responseBody;
+
+    private boolean saveResponse = false;
 
     public QueryEventsTask( String query )
     {
@@ -50,19 +51,16 @@ public class QueryEventsTask
     {
         ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials()).get(this.query);
 
-        this.responseBody = response.getBody();
-
-        if ( response.statusCode() == 200 )
-        {
-            recordSuccess( response.getRaw() );
-            return;
+        if ( saveResponse ) {
+            this.responseBody = response.getBody();
         }
 
-        recordFailure( response.getRaw() );
+        record( response.getRaw() );
     }
 
     public JsonObject executeAndGetBody()
     {
+        this.saveResponse = true;
         execute();
         return responseBody;
     }

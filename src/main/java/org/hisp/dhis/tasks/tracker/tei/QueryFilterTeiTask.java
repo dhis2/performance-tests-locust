@@ -29,7 +29,6 @@ package org.hisp.dhis.tasks.tracker.tei;
  */
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
@@ -80,13 +79,7 @@ public class QueryFilterTeiTask
     {
         this.response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query );
 
-        if ( response.statusCode() == 200 )
-        {
-            recordSuccess( response.getRaw() );
-            return;
-        }
-
-        recordFailure( response.getRaw() );
+        record( response.getRaw() );
     }
 
     public ApiResponse executeAndGetResponse() {

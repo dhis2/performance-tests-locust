@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hisp.dhis.tracker.domain.Event;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,4 +17,15 @@ import java.util.List;
 public class Events
 {
     private List<Event> events;
+
+    public Events addEvent( Event event )
+    {
+        if ( this.events == null )
+        {
+            this.events = new ArrayList<>();
+        }
+
+        this.events.add( event );
+        return this;
+    }
 }

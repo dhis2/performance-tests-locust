@@ -64,12 +64,6 @@ public class FilterTeiTask
     {
         ApiResponse response = new RestApiActions( endpoint ).get( query );
 
-        if ( response.statusCode() == 200 )
-        {
-            recordSuccess( response.getRaw() );
-            return;
-        }
-
-        recordFailure( response.getRaw() );
+        record( response.getRaw() );
     }
 }
