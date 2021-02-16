@@ -28,4 +28,7 @@ public interface LocustConfig
 
     @Key( "cache.users.pool.size" )
     int cacheUserPoolSize();
+
+    @Key( "cache.users.use_default_user" )
+    boolean useDefaultUser();
 }

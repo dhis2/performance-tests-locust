@@ -7,7 +7,6 @@ import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 import de.javakaffee.kryoserializers.UnmodifiableCollectionsSerializer;
 import org.hisp.dhis.cache.*;
 import org.hisp.dhis.common.ValueType;
-import org.hisp.dhis.locust.LocustConfig;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -41,12 +40,12 @@ public class CacheUtils
         kryo.register( DataSet.class, 206 );
         kryo.register( UserCredentials.class, 207 );
         kryo.register( User.class, 208 );
-        kryo.register( ProgramAttribute.class, 209 );
+        kryo.register( TrackedEntityAttribute.class, 209 );
         kryo.register( Tei.class, 210 );
         kryo.register( Visualization.class, 211 );
         kryo.register( DashboardItem.class, 212 );
         kryo.register( Dashboard.class, 213);
-        kryo.register( RelationshipType.RelationshipConstraint.class, 214 );
+        kryo.register( RelationshipConstraint.class, 214 );
         kryo.register( RelationshipType.class, 215 );
 
     }
