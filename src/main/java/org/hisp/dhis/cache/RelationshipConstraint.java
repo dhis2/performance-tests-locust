@@ -8,16 +8,12 @@ import lombok.Setter;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-@Setter
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RelationshipType
-{
-    private String id;
-    private String name;
-    private RelationshipConstraint fromConstraint;
-    private RelationshipConstraint toConstraint;
-    private boolean bidirectional;
-
+public class RelationshipConstraint {
+    private String relationshipEntity;
+    private Program program;
+    private TeiType trackedEntityType;
 }

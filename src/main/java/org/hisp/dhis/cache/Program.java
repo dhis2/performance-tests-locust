@@ -15,7 +15,7 @@ public class Program
 
     private List<ProgramStage> stages;
 
-    private List<ProgramAttribute> attributes;
+    private List<TrackedEntityAttribute> attributes;
 
     private String entityType;
 

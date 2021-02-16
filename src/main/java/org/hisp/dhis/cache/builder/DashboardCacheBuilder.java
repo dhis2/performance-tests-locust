@@ -32,13 +32,14 @@ public class DashboardCacheBuilder
                 .forEach( dashboardItem -> {
                     Visualization visualization = dashboardItem.getVisualization();
                     ApiResponse response = getPayload( "/api/visualizations/" + visualization.getId() + "?fields=*" );
-                    visualization.setDataDimensionItems(
-                        (List<String>) JsonPath.parse( response.getBody().toString() )
-                            .read( "dataDimensionItems.**.id", List.class ).stream().collect( toList() ) );
-                    visualization.setColumnDimensions( response.extractObject( "columnDimensions", List.class ) );
-                    visualization.setRowDimensions( response.extractObject( "rowDimensions", List.class ) );
+                    if (response.statusCode() == 200) {
+                        visualization.setDataDimensionItems(
+                            (List<String>) JsonPath.parse( response.getBody().toString() )
+                                .read( "dataDimensionItems.**.id", List.class ).stream().collect( toList() ) );
+                        visualization.setColumnDimensions( response.extractObject( "columnDimensions", List.class ) );
+                        visualization.setRowDimensions( response.extractObject( "rowDimensions", List.class ) );
+                    }
                 } );
-
         } );
 
         cache.setDashboards( dashboards );

@@ -28,10 +28,20 @@ package org.hisp.dhis.cache;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.google.gson.*;
+import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.poi.ss.formula.functions.T;
 import org.hisp.dhis.common.ValueType;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -39,13 +49,14 @@ import java.util.List;
  */
 @Getter
 @AllArgsConstructor
-public class ProgramAttribute
+public class TrackedEntityAttribute
 {
-    private String uid;
+    private String id;
 
     private ValueType valueType;
 
-    private String trackedEntityAttributeUid;
+    @JsonAdapter(ObjectIdDeserializer.class)
+    private String trackedEntityAttribute;
 
     private boolean generated;
 
@@ -57,8 +68,43 @@ public class ProgramAttribute
 
     private boolean searchable;
 
-    public ProgramAttribute()
+    public TrackedEntityAttribute()
     {
+    }
+
+}
+
+class ObjectIdDeserializer
+    implements JsonDeserializer<String>
+{
+    @Override
+    public String deserialize( JsonElement json, Type typeOfT, JsonDeserializationContext context )
+        throws JsonParseException
+    {
+        return json.getAsJsonObject().get( "id" ).getAsString();
+    }
+}
+
+class ObjectIdAdapter extends TypeAdapter<String>
+{
+    @Override
+    public void write( JsonWriter out, String value )
+        throws IOException
+    {
+        JsonObject ob = new JsonObject();
+        ob.addProperty( "id", value );
+        out.value(
+            String.valueOf( ob )
+        );
+    }
+
+    @Override
+    public String read( JsonReader in )
+        throws IOException
+    {
+        in.hasNext();
+
+        return in.nextString();
     }
 
 }

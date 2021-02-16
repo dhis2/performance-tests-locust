@@ -38,6 +38,8 @@ public class EntitiesCache
 
     private List<RelationshipType> relationshipTypes;
 
+    private User defaultUser;
+
     public static <T> List<T> randomElementsFromList( List<T> list, int elements )
     {
         Collections.shuffle( list );
@@ -77,5 +79,4 @@ public class EntitiesCache
         }
         return programs;
     }
-
 }

@@ -20,12 +20,7 @@ public class TeiTypeCacheBuilder
     {
         List<TeiType> teiTypes = new ArrayList<>();
 
-        List<Map> payload = getPayload( "/api/trackedEntityTypes" ).extractList( "trackedEntityTypes" );
-
-        for ( Map map : payload )
-        {
-            teiTypes.add( new TeiType( (String) map.get( "id" ), (String) map.get( "displayName" ) ) );
-        }
+        teiTypes = getPayload( "/api/trackedEntityTypes?fields=*" ).extractList( "trackedEntityTypes", TeiType.class );
 
         cache.setTeiTypes( teiTypes) ;
     }

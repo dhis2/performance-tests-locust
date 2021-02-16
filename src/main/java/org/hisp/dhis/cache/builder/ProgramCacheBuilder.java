@@ -83,10 +83,10 @@ public class ProgramCacheBuilder
         return new RestApiActions( "" ).get( url );
     }
 
-    private List<ProgramAttribute> getTrackerAttributesFromProgram( String programUid )
+    private List<TrackedEntityAttribute> getTrackerAttributesFromProgram( String programUid )
     {
         ApiResponse response = programCache.get( programUid );
-        List<ProgramAttribute> programAttributes = new ArrayList<>();
+        List<TrackedEntityAttribute> programAttributes = new ArrayList<>();
         List<Map<String, Object>> atts = response.extractList( "programTrackedEntityAttributes" );
 
         for ( Map<String, Object> att : atts )
@@ -94,7 +94,7 @@ public class ProgramCacheBuilder
             ApiResponse trackedEntityAttribute = getAttributeUniqueness(
                 (String) ((Map) att.get( "trackedEntityAttribute" )).get( "id" ) );
             programAttributes
-                .add( new ProgramAttribute( (String) att.get( "id" ), ValueType.valueOf( (String) att.get( "valueType" ) ),
+                .add( new TrackedEntityAttribute( (String) att.get( "id" ), ValueType.valueOf( (String) att.get( "valueType" ) ),
                     (String) ((Map) att.get( "trackedEntityAttribute" )).get( "id" ),
                     trackedEntityAttribute.extractObject( "generated", Boolean.class ),
                     trackedEntityAttribute.extractObject( "unique", Boolean.class ),
