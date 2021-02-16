@@ -26,9 +26,6 @@ import org.hisp.dhis.tasks.tracker.tei.AddTeiTask;
 import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
 import org.hisp.dhis.utils.DataRandomizer;
 
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -86,9 +83,6 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
             return;
         }
 
-        //EnrollmentRandomizer randomizer = new EnrollmentRandomizer();
-        //Enrollment enrollment = randomizer.createWithoutEvents( entitiesCache, context );
-
         ApiResponse response = new AddEnrollmentTask( 1, entitiesCache, context, user.getUserCredentials() ).executeAndGetBody();
 
         context.setEnrollmentId( response.extractUid() );
@@ -123,8 +117,11 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
             );
         } );
 
+
+
         taskSet.execute();
         recordSuccess( System .currentTimeMillis() - time, 0);
+
     }
 
     private void generateAttributes(Program program, TrackedEntityInstance tei, UserCredentials userCredentials ) {
@@ -132,11 +129,11 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
         program.getAttributes().stream().filter( p ->
             p.isGenerated()
         ).forEach( att -> {
-            ApiResponse response = new GenerateTrackedEntityAttributeValueTask( 1, att.getTrackedEntityAttributeUid(),userCredentials ).executeAndGetResponse();
+            ApiResponse response = new GenerateTrackedEntityAttributeValueTask( 1, att.getTrackedEntityAttribute(),userCredentials ).executeAndGetResponse();
 
             String value = response.extractString( "value" );
 
-            Attribute attribute = tei.getAttributes().stream().filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttributeUid()))
+            Attribute attribute = tei.getAttributes().stream().filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute()))
                 .findFirst().orElse( null);
 
             attribute.setValue( value );

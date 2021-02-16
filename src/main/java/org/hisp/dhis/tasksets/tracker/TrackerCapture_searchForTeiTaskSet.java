@@ -1,9 +1,7 @@
 package org.hisp.dhis.tasksets.tracker;
 
-import org.apache.poi.hssf.record.chart.DatRecord;
 import org.hisp.dhis.cache.*;
 import org.hisp.dhis.common.ValueType;
-import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.tei.GetTeiTask;
@@ -12,7 +10,6 @@ import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -42,19 +39,14 @@ public class TrackerCapture_searchForTeiTaskSet extends DhisAbstractTask
         throws Exception
     {
         Program program = DataRandomizer.randomElementFromList( this.entitiesCache.getTrackerPrograms() );
-        User user = new UserRandomizer().getRandomUser( this.entitiesCache );
+        User user = getUser();
         String ou = DataRandomizer.randomElementFromList( user.getOrganisationUnits() );
 
-        //ApiResponse response = new GetTeiTask( tei.getUid(), user.getUserCredentials() ).executeAndGetResponse();
+        TrackedEntityAttribute searchableAttribute = DataRandomizer.randomElementFromList( program
+            .getAttributes().stream().filter( a -> a.isSearchable()&& a.getValueType() == ValueType.TEXT).collect( Collectors.toList()));
 
-        List<ProgramAttribute> searchableAttributes = program
-            .getAttributes().stream().filter( a -> a.isSearchable()&& a.getValueType() == ValueType.TEXT).collect( Collectors.toList());
-
-        ProgramAttribute randomAttribute = DataRandomizer.randomElementFromList( searchableAttributes );
-
-
-        ApiResponse response = new QueryFilterTeiTask( 1, String.format( "?ou=%s&ouMode=ACCESSIBLE&trackedEntityType=%s&attribute=%s:LIKE:%s", ou, program.getEntityType(), randomAttribute
-            .getTrackedEntityAttributeUid(), DataRandomizer.randomString(1)), user.getUserCredentials() ).executeAndGetResponse();
+        ApiResponse response = new QueryFilterTeiTask( 1, String.format( "?ou=%s&ouMode=ACCESSIBLE&trackedEntityType=%s&attribute=%s:LIKE:%s", ou, program.getEntityType(), searchableAttribute
+            .getTrackedEntityAttribute(), DataRandomizer.randomString(1)), user.getUserCredentials() ).executeAndGetResponse();
 
         List<ArrayList> rows = response.extractList( "rows" );
 

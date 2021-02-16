@@ -3,7 +3,6 @@ package org.hisp.dhis.tasks.analytics;
 import org.hisp.dhis.cache.Dashboard;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.tasks.DhisDelayedTaskSet;
 import org.hisp.dhis.utils.DataRandomizer;
 
 /**

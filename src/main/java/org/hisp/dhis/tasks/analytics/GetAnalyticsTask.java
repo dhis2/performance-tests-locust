@@ -8,10 +8,8 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.DataRandomizer;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.join;
@@ -56,11 +54,7 @@ public class GetAnalyticsTask extends DhisAbstractTask
             visualization = DataRandomizer.randomElementFromList( entitiesCache.getVisualizations());
         }
 
-        //visualization = entitiesCache.getVisualizations().stream().filter( p -> p.getId().equalsIgnoreCase( "hBV73xS6IKX" ) ).findFirst().orElse( null );
-
-
         String query = getRandomAnalyticsQuery( visualization );
-
 
         AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
 
@@ -106,8 +100,6 @@ public class GetAnalyticsTask extends DhisAbstractTask
         if (dimension.equalsIgnoreCase( "dx" )) {
             return "dx:" + String.join(";", visualization.getDataDimensionItems());
         }
-
-        System.out.println("Unrecognized reminsion + " + dimension);
 
         return "";
     }

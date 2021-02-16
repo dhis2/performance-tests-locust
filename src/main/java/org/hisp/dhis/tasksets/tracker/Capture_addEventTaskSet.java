@@ -46,7 +46,7 @@ public class Capture_addEventTaskSet extends DhisAbstractTask
 
         RandomizerContext context = new RandomizerContext();
         context.setProgram( program );
-        context.setProgramStage( program.getStages().get(0) );
+        context.setProgramStage( DataRandomizer.randomElementFromList( program.getStages() ) );
         context.setOrgUnitUid( ou );
 
         Event event = new EventRandomizer().create( entitiesCache, context );

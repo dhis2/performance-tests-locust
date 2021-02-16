@@ -12,8 +12,6 @@ import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
-import org.hisp.dhis.tasks.tracker.GenerateTrackedEntityAttributeValueTask;
-import org.hisp.dhis.tasks.tracker.tei.AddTeiTask;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.List;
@@ -60,14 +58,7 @@ public class Android_syncTeisTaskSet extends DhisAbstractTask
 
         ApiResponse response = authenticatedApiActions.post( teis, new QueryParamsBuilder().add( "strategy=SYNC" ) );
 
-        if (response.statusCode() == 200)  {
-           recordSuccess( response.getRaw() );
-        }
-
-        else
-        {
-            recordFailure( response.getRaw());
-        }
+        record( response.getRaw() );
     }
 
 
@@ -75,12 +66,12 @@ public class Android_syncTeisTaskSet extends DhisAbstractTask
         program.getAttributes().stream().filter( p ->
             p.isGenerated()
         ).forEach( att -> {
-            ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask(1, att.getTrackedEntityAttributeUid(), userCredentials, teis.size()).executeAndGetResponse();
+            ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask(1, att.getTrackedEntityAttribute(), userCredentials, teis.size()).executeAndGetResponse();
             List<String> values = response.extractList( "value" );
 
             for ( int i = 0; i < teis.size(); i++ )
             {
-                Attribute attribute = teis.get( i ).getAttributes().stream().filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttributeUid()))
+                Attribute attribute = teis.get( i ).getAttributes().stream().filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute()))
                     .findFirst().orElse( null);
 
                 attribute.setValue( values.get( i ) );
