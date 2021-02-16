@@ -12,6 +12,7 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
+import org.hisp.dhis.utils.JsonParserUtils;
 
 import java.util.stream.Collectors;
 
@@ -44,7 +45,7 @@ public class AddTrackerTeiTask
 
     public String getName()
     {
-        return this.endpoint;
+        return this.endpoint + ": teis";
     }
 
     @Override
@@ -70,7 +71,7 @@ public class AddTrackerTeiTask
         boolean hasFailed = false;
         try
         {
-            ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( trackedEntityInstanceBody, new QueryParamsBuilder().add( "async=false" ) );
+            ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( trackedEntityInstanceBody, new QueryParamsBuilder().addAll( "async=false", "identifier=teis" ) );
             this.response = new TrackerApiResponse( response );
         }
 
@@ -88,6 +89,7 @@ public class AddTrackerTeiTask
             }
             else
             {
+                System.out.println( JsonParserUtils.toJsonObject( trackedEntityInstanceBody ).toString() );
                 recordFailure( response.getRaw() );
             }
         }

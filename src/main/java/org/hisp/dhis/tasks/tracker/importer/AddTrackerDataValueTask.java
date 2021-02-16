@@ -18,19 +18,19 @@ import java.util.Arrays;
 public class AddTrackerDataValueTask extends DhisAbstractTask
 {
     private String endpoint = "/api/tracker";
-    private String eventId;
+    private Event event;
     private DataValue dataValue;
     private String eventProgram;
 
-    public AddTrackerDataValueTask(int weight, String eventId, DataValue dataValue, String program) {
+    public AddTrackerDataValueTask(int weight, Event event, DataValue dataValue, String program) {
         this.weight = weight;
-        this.eventId = eventId;
+        this.event = event;
         this.dataValue = dataValue;
         this.eventProgram = program;
     }
 
-    public AddTrackerDataValueTask(int weight, String eventId, DataValue dataValue, String program, UserCredentials userCredentials ) {
-        this(weight, eventId, dataValue, program);
+    public AddTrackerDataValueTask(int weight, Event event, DataValue dataValue, String program, UserCredentials userCredentials ) {
+        this(weight, event, dataValue, program);
         this.userCredentials = userCredentials;
     }
 
@@ -38,7 +38,7 @@ public class AddTrackerDataValueTask extends DhisAbstractTask
     @Override
     public String getName()
     {
-        return endpoint;
+        return endpoint + ": event data values";
     }
 
     @Override
@@ -50,14 +50,12 @@ public class AddTrackerDataValueTask extends DhisAbstractTask
     @Override
     public void execute()
     {
-        Event event = Event.builder().event( eventId )
-            .dataValues( Sets.newHashSet( this.dataValue ) )
-            .build();
+        event.setDataValues( Sets.newHashSet( this.dataValue ) );
 
         Events events = Events.builder().events( Arrays.asList( event) ).build();
 
         ApiResponse response = new AuthenticatedApiActions( "/api/tracker", getUserCredentials() )
-            .post( events, new QueryParamsBuilder().add( "async=false" ) );
+            .post( events, new QueryParamsBuilder().addAll( "async=false", "identifier=eventdatavalues" ) );
 
         if ( response.statusCode() == 200 ) {
             recordSuccess( response.getRaw() );

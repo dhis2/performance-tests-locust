@@ -45,7 +45,7 @@ public class GetTeisTask
         ApiResponse response = teiActions.get( "", new QueryParamsBuilder().add(  "ou", "DiszpKrYNg8") );
 
         if ( savePayload ) {
-        this.responseBody = response.getBody();
+            this.responseBody = response.getBody();
         }
 
         record( response.getRaw() );

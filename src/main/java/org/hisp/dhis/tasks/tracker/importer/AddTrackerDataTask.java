@@ -1,6 +1,5 @@
 package org.hisp.dhis.tasks.tracker.importer;
 
-import com.google.gson.JsonObject;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
@@ -17,13 +16,9 @@ import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
-import org.hisp.dhis.tracker.domain.TrackedEntity;
 import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
 import org.hisp.dhis.utils.DataRandomizer;
-import org.hisp.dhis.utils.JsonObjectBuilder;
-import org.hisp.dhis.utils.JsonParserUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +35,7 @@ public class AddTrackerDataTask extends DhisAbstractTask
     @Override
     public String getName()
     {
-        return endpoint;
+        return endpoint ;
     }
 
     @Override
@@ -52,11 +47,7 @@ public class AddTrackerDataTask extends DhisAbstractTask
     @Override
     public void execute()
     {
-        user = new RestApiActions("").get(
-            String.format(  "/api/users?filter=userCredentials.username:eq:%s&fields=id,organisationUnits~pluck,userCredentials[username]", "uio-I-U-H-I" ))
-            .extractObject( "users[0]", User.class );
-
-        //user = getUser();
+        user = getUser();
         RandomizerContext context = new RandomizerContext();
         context.setOrgUnitUid( DataRandomizer.randomElementFromList( user.getOrganisationUnits() ) );
 
@@ -91,12 +82,12 @@ public class AddTrackerDataTask extends DhisAbstractTask
         program.getAttributes().stream().filter( p ->
             p.isGenerated()
         ).forEach( att -> {
-            ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask(1, att.getTrackedEntityAttributeUid(), userCredentials, teis.size()).executeAndGetResponse();
+            ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask(1, att.getTrackedEntityAttribute(), userCredentials, teis.size()).executeAndGetResponse();
             List<String> values = response.extractList( "value" );
 
             for ( int i = 0; i < teis.size(); i++ )
             {
-                Attribute attribute = teis.get( i ).getAttributes().stream().filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttributeUid()))
+                Attribute attribute = teis.get( i ).getAttributes().stream().filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute()))
                     .findFirst().orElse( null);
 
                 attribute.setValue( values.get( i ) );

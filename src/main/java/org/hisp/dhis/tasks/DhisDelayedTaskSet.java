@@ -56,6 +56,7 @@ public class DhisDelayedTaskSet extends AbstractTaskSet
                         }
                         catch ( Exception e )
                         {
+                            System.out.println("Failed executing task");
                             e.printStackTrace();
                         }
                     },
@@ -67,6 +68,5 @@ public class DhisDelayedTaskSet extends AbstractTaskSet
             } );
 
         threadpool.shutdown();
-
     }
 }

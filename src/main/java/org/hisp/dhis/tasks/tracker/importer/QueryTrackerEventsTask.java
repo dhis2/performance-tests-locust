@@ -51,19 +51,15 @@ public class QueryTrackerEventsTask
     {
         ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials()).get(this.query);
 
-        this.responseBody = response.getBody();
-
-        if ( response.statusCode() == 200 )
-        {
-            recordSuccess( response.getRaw() );
-            return;
+        if ( savePayload ) {
+            this.responseBody = response.getBody();
         }
-
-        recordFailure( response.getRaw() );
+        record( response.getRaw() );
     }
 
     public JsonObject executeAndGetBody()
     {
+        savePayload = true;
         execute();
         return responseBody;
     }

@@ -65,7 +65,6 @@ public abstract class DhisAbstractTask
 
             LocustConfig conf = ConfigFactory.create( LocustConfig.class );
             return new User( new UserCredentials(conf.adminUsername(), conf.adminPassword()));
-
         }
 
         return this.entitiesCache.getUsers().stream().filter( p -> p.getUserCredentials().equals( this.userCredentials ) )

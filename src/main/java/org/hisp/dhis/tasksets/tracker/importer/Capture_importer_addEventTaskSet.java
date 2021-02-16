@@ -4,12 +4,11 @@ import com.google.common.collect.Lists;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
+import org.hisp.dhis.models.Events;
 import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.tasks.tracker.events.AddEventsTask;
-import org.hisp.dhis.tasks.tracker.events.QueryEventsTask;
 import org.hisp.dhis.tasks.tracker.importer.AddTrackerEventsTask;
 import org.hisp.dhis.tasks.tracker.importer.QueryTrackerEventsTask;
 import org.hisp.dhis.tracker.domain.Event;
@@ -55,6 +54,6 @@ public class Capture_importer_addEventTaskSet
 
         Event event = new EventMapperImpl().from( new EventRandomizer().create( entitiesCache, context ));
 
-        new AddTrackerEventsTask( 1, entitiesCache, Lists.newArrayList(event), user.getUserCredentials() ).execute();
+        new AddTrackerEventsTask( 1, entitiesCache, Events.builder().build().addEvent(event), user.getUserCredentials() ).execute();
     }
 }

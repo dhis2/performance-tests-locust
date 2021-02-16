@@ -16,13 +16,12 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tracker.domain.Event;
 import org.hisp.dhis.tracker.domain.mapper.EventMapperImpl;
 import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.JsonParserUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -36,7 +35,7 @@ public class AddTrackerEventsTask
 
     private List<String> blackListedTeis = new ArrayList<>();
 
-    private List<Event> events;
+    private Events events;
 
     private TrackerApiResponse response;
 
@@ -47,7 +46,7 @@ public class AddTrackerEventsTask
         eventRandomizer = new EventRandomizer();
     }
 
-    public AddTrackerEventsTask( int weight, EntitiesCache entitiesCache, List<Event> events, UserCredentials userCredentials )
+    public AddTrackerEventsTask( int weight, EntitiesCache entitiesCache, Events events, UserCredentials userCredentials )
     {
         this( weight, entitiesCache );
         this.events = events;
@@ -57,7 +56,7 @@ public class AddTrackerEventsTask
     @Override
     public String getName()
     {
-        return endpoint;
+        return endpoint + ": events";
     }
 
     @Override
@@ -66,7 +65,7 @@ public class AddTrackerEventsTask
         return "POST";
     }
 
-    private List<Event> createRandomEvents()
+    private Events createRandomEvents()
     {
 
         List<Event> rndEvents = new ArrayList<>();
@@ -90,18 +89,18 @@ public class AddTrackerEventsTask
             }
         }
 
-        return rndEvents;
+        return Events.builder().events( rndEvents ).build();
     }
 
     @Override
     public void execute()
     {
-        List<Event> rndEvents = events != null ? events : createRandomEvents();
+        Events rndEvents = events != null ? events : createRandomEvents();
 
         RestApiActions apiActions = new AuthenticatedApiActions( this.endpoint, getUserCredentials() );
 
         response = new TrackerApiResponse(
-            apiActions.post( Events.builder().events( rndEvents ).build(), new QueryParamsBuilder().add( "async=false" ) ) );
+            apiActions.post( rndEvents, new QueryParamsBuilder().addAll( "async=false", "identifier=events" ) ) );
 
         if ( response.statusCode() == 200 )
         {
@@ -109,6 +108,9 @@ public class AddTrackerEventsTask
         }
         else
         {
+
+            System.out.println( JsonParserUtils.toJsonObject( rndEvents ).toString() );
+
             //addTeiToBlacklist( response );
 
             recordFailure( response.getRaw() );

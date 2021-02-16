@@ -8,12 +8,11 @@ import org.hisp.dhis.models.Enrollments;
 import org.hisp.dhis.random.EnrollmentRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.request.QueryParamsBuilder;
-import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tracker.domain.Enrollment;
-import org.hisp.dhis.tracker.domain.mapper.EnrollmentMapper;
 import org.hisp.dhis.tracker.domain.mapper.EnrollmentMapperImpl;
+import org.hisp.dhis.utils.JsonParserUtils;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -38,7 +37,7 @@ public class AddTrackerEnrollmentTask extends DhisAbstractTask
     @Override
     public String getName()
     {
-        return endpoint;
+        return endpoint + ": enrollment";
     }
 
     @Override
@@ -59,13 +58,14 @@ public class AddTrackerEnrollmentTask extends DhisAbstractTask
         Enrollments enrollments = new Enrollments();
         enrollments.setEnrollments( Lists.newArrayList( enrollment ) );
 
-        response = new TrackerApiResponse( authenticatedApiActions.post( enrollments, new QueryParamsBuilder().add( "async=false" ) ));
+        response = new TrackerApiResponse( authenticatedApiActions.post( enrollments, new QueryParamsBuilder().addAll( "async=false", "identifier=enrollment" ) ));
 
         if ( response.statusCode() == 200 ) {
             recordSuccess( response.getRaw() );
             return;
         }
 
+        System.out.println( JsonParserUtils.toJsonObject( enrollments ).toString() );
         recordFailure( response.getRaw() );
     }
 

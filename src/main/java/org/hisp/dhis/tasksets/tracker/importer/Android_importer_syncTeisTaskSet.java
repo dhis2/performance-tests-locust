@@ -18,6 +18,7 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
 import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
 import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.JsonParserUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,7 +62,7 @@ public class Android_importer_syncTeisTaskSet
 
         AuthenticatedApiActions trackerActions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
 
-        TrackedEntityInstances instances = new TrackedEntityInstanceRandomizer().create( entitiesCache, context, 2, 3 );
+        TrackedEntityInstances instances = new TrackedEntityInstanceRandomizer().create( entitiesCache, context, 3, 10 );
 
         generateAttributes( context.getProgram(), instances.getTrackedEntityInstances(), user.getUserCredentials() );
 
@@ -72,9 +73,8 @@ public class Android_importer_syncTeisTaskSet
                 } ).collect( Collectors.toList() ) )
             .build();
 
-        TrackerApiResponse response = new TrackerApiResponse( trackerActions.post( trackedEntities, new QueryParamsBuilder().add( "async=false" ) ));
+        TrackerApiResponse response = new TrackerApiResponse( trackerActions.post( trackedEntities, new QueryParamsBuilder().addAll( "async=false", "identifier=full" ) ));
 
-        System.out.println(response.statusCode());
         if ( response.statusCode() == 200 )
         {
             recordSuccess( response.getRaw() );
@@ -82,6 +82,7 @@ public class Android_importer_syncTeisTaskSet
 
         else
         {
+            System.out.println( JsonParserUtils.toJsonObject( trackedEntities ).toString() );
             recordFailure( response.getRaw() );
         }
 
@@ -92,14 +93,14 @@ public class Android_importer_syncTeisTaskSet
         program.getAttributes().stream().filter( p ->
             p.isGenerated()
         ).forEach( att -> {
-            ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttributeUid(),
+            ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
                 userCredentials, teis.size() ).executeAndGetResponse();
             List<String> values = response.extractList( "value" );
 
             for ( int i = 0; i < teis.size(); i++ )
             {
                 Attribute attribute = teis.get( i ).getAttributes().stream()
-                    .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttributeUid() ) )
+                    .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
                     .findFirst().orElse( null );
 
                 attribute.setValue( values.get( i ) );
