@@ -77,8 +77,6 @@ public class TrackedEntityInstanceRandomizer
 
     public TrackedEntityInstance createWithoutEnrollment( EntitiesCache cache, RandomizerContext ctx ) {
         Program program = getProgramFromContextOrRnd( ctx, cache );
-
-        String ou = getOrgUnitFromContextOrRndFromProgram(ctx, program );
         ctx.setSkipTeiInEvent( true );
 
         TrackedEntityInstance tei = new TrackedEntityInstance();
@@ -87,7 +85,7 @@ public class TrackedEntityInstanceRandomizer
         tei.setInactive( false );
         tei.setDeleted( false );
         tei.setFeatureType( FeatureType.NONE );
-        tei.setOrgUnit( ou );
+        tei.setOrgUnit( getOrgUnitFromContextOrRndFromProgram(ctx, program ) );
         tei.setAttributes( getRandomAttributesList( program ) );
 
         return tei;
@@ -102,7 +100,6 @@ public class TrackedEntityInstanceRandomizer
     public TrackedEntityInstances create( EntitiesCache cache, RandomizerContext context, int size )
     {
         List<TrackedEntityInstance> rndTeis = new ArrayList<>();
-        TrackedEntityInstances teis = new TrackedEntityInstances();
         for ( int i = 0; i < size  ; i++ )
         {
             TrackedEntityInstance trackedEntityInstance = create( cache, context );
@@ -111,9 +108,10 @@ public class TrackedEntityInstanceRandomizer
                 rndTeis.add( trackedEntityInstance );
             }
         }
+
+        TrackedEntityInstances teis = new TrackedEntityInstances();
         teis.setTrackedEntityInstances( rndTeis );
         return teis;
-
     }
     
     private TrackedEntityInstance createTrackedEntityInstance( EntitiesCache cache )

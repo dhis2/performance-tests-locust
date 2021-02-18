@@ -55,12 +55,14 @@ public class EventRandomizer
         if ( program == null )
         {
             program = DataRandomizer.randomElementFromList( cache.getProgramsWithAtLeastOnRepeatableStage() );
+            ctx.setProgram( program );
         }
 
         ProgramStage programStage = ctx.getProgramStage();
         if ( programStage == null )
         {
             programStage = getRepeatableRandomProgramStageFromProgram( program );
+            ctx.setProgramStage( programStage );
         }
 
         String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, program );
@@ -84,17 +86,18 @@ public class EventRandomizer
                 event.setTrackedEntityInstance( ctx.getTeiId() );
                 return event;
             }
-            try
-            {
+
+            if (cache.getTeis().get( program.getUid() ) != null) {
                 String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( program.getUid() ) )
                     .getUid();
                 event.setTrackedEntityInstance( teiUid );
             }
-            catch ( Exception e )
-            {
+
+            else {
                 return null;
             }
         }
+
         return event;
     }
 

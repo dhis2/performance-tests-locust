@@ -59,27 +59,19 @@ public class DataValueRandomizer
         Calendar calendar = new Calendar.Builder().build();
         calendar.setTime( DataRandomizer.randomPastDate() );
 
-        int randomYear = calendar.get( Calendar.YEAR );
-
         if (periodType.equalsIgnoreCase( "yearly" )) {
-            return "" + randomYear;
+            return "" + calendar.get( Calendar.YEAR );
         }
 
-        String month = "";
-        String day = "";
-        if (calendar.get( Calendar.MONTH ) + 1 < 10) {
-            month = "0" + (calendar.get( Calendar.MONTH ) + 1);
+        if (periodType.equalsIgnoreCase( "monthly" )) {
+            return new SimpleDateFormat("yyyyMM").format( calendar.getTime() );
         }
 
         if (periodType.equalsIgnoreCase( "daily" )) {
-            day = "" + calendar.get( Calendar.DAY_OF_MONTH );
-            if (calendar.get(Calendar.DAY_OF_MONTH) < 10)  {
-                day = "0" + calendar.get(Calendar.DAY_OF_MONTH);
-            }
-
+            return new SimpleDateFormat("yyyyMMdd").format( calendar.getTime() );
         }
 
-        return String.format( "%s%s%s", randomYear, month, day);
+        return "NOT_SUPPORTED_PERIOD_TYPE";
     }
 
     protected String rndValueFrom( ValueType valueType )
