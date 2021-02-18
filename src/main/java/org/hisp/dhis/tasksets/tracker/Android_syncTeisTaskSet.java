@@ -1,7 +1,10 @@
 package org.hisp.dhis.tasksets.tracker;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.*;
+import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.User;
+import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
@@ -19,9 +22,11 @@ import java.util.List;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class Android_syncTeisTaskSet extends DhisAbstractTask
+public class Android_syncTeisTaskSet
+    extends DhisAbstractTask
 {
-    public Android_syncTeisTaskSet( int weight, EntitiesCache cache ) {
+    public Android_syncTeisTaskSet( int weight, EntitiesCache cache )
+    {
         this.weight = weight;
         this.entitiesCache = cache;
     }
@@ -54,25 +59,24 @@ public class Android_syncTeisTaskSet extends DhisAbstractTask
 
         generateAttributes( program, teis.getTrackedEntityInstances(), user.getUserCredentials() );
 
-        AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( "/api/trackedEntityInstances", user.getUserCredentials() );
-
-        ApiResponse response = authenticatedApiActions.post( teis, new QueryParamsBuilder().add( "strategy=SYNC" ) );
-
-        record( response.getRaw() );
+        performTaskAndRecord( () -> new AuthenticatedApiActions( "/api/trackedEntityInstances", user.getUserCredentials() )
+            .post( teis, new QueryParamsBuilder().add( "strategy=SYNC" ) ) );
     }
 
-
-    private void generateAttributes(Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials ) {
+    private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
+    {
         program.getAttributes().stream().filter( p ->
             p.isGenerated()
         ).forEach( att -> {
-            ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask(1, att.getTrackedEntityAttribute(), userCredentials, teis.size()).executeAndGetResponse();
+            ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
+                userCredentials, teis.size() ).executeAndGetResponse();
             List<String> values = response.extractList( "value" );
 
             for ( int i = 0; i < teis.size(); i++ )
             {
-                Attribute attribute = teis.get( i ).getAttributes().stream().filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute()))
-                    .findFirst().orElse( null);
+                Attribute attribute = teis.get( i ).getAttributes().stream()
+                    .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
+                    .findFirst().orElse( null );
 
                 attribute.setValue( values.get( i ) );
             }

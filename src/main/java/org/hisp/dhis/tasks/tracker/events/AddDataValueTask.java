@@ -35,7 +35,7 @@ public class AddDataValueTask extends DhisAbstractTask
     @Override
     public String getName()
     {
-        return "/events/id/de";
+        return "/api/events/id/de";
     }
 
     @Override
@@ -46,15 +46,15 @@ public class AddDataValueTask extends DhisAbstractTask
 
     @Override
     public void execute()
+        throws Exception
     {
         JsonObject payload = new JsonObjectBuilder()
             .addProperty( "program", eventProgram )
             .addOrAppendToArray( "dataValues", JsonParserUtils.toJsonObject( dataValue ).getAsJsonObject() )
             .build();
 
-        ApiResponse response = new AuthenticatedApiActions( "/api/events", getUserCredentials() )
-            .update( eventId + "/" + dataValue.getDataElement(), payload, ContentType.JSON.toString() );
+        performTaskAndRecord( () -> new AuthenticatedApiActions( "/api/events", getUserCredentials() )
+            .update( eventId + "/" + dataValue.getDataElement(), payload, ContentType.JSON.toString() ) );
 
-        record( response.getRaw() );
     }
 }

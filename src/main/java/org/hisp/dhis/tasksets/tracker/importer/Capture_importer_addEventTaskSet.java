@@ -40,6 +40,7 @@ public class Capture_importer_addEventTaskSet
 
     @Override
     public void execute()
+        throws Exception
     {
         User user = new UserRandomizer().getRandomUser( entitiesCache );
         String ou = new UserRandomizer().getRandomUserOrgUnit( user );

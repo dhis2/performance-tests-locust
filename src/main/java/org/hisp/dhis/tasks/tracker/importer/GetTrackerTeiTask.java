@@ -37,13 +37,13 @@ public class GetTrackerTeiTask extends DhisAbstractTask
 
     @Override
     public void execute()
+        throws Exception
     {
-        this.response = new AuthenticatedApiActions( endpoint, getUserCredentials() ).get( tei );
-
-        record( response.getRaw() );
+        this.response = performTaskAndRecord(() -> new AuthenticatedApiActions( endpoint, getUserCredentials() ).get( tei ) );
     }
 
     public ApiResponse executeAndGetResponse()
+        throws Exception
     {
         this.execute();
         return response;

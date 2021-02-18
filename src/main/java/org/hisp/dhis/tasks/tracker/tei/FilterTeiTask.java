@@ -61,9 +61,8 @@ public class FilterTeiTask
 
     @Override
     public void execute()
+        throws Exception
     {
-        ApiResponse response = new RestApiActions( endpoint ).get( query );
-
-        record( response.getRaw() );
+        performTaskAndRecord( () -> new RestApiActions( endpoint ).get( query ) );
     }
 }

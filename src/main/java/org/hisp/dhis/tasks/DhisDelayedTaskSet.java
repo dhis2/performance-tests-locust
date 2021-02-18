@@ -2,26 +2,26 @@ package org.hisp.dhis.tasks;
 
 import com.github.myzhan.locust4j.AbstractTask;
 import com.github.myzhan.locust4j.taskset.AbstractTaskSet;
-import org.hisp.dhis.dxf2.events.event.DataValue;
-import org.hisp.dhis.tasks.tracker.events.AddDataValueTask;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class DhisDelayedTaskSet extends AbstractTaskSet
+public class DhisDelayedTaskSet
+    extends AbstractTaskSet
 {
     private int delay;
+
     private TimeUnit timeUnit;
-    public DhisDelayedTaskSet( int delay, TimeUnit timeUnit) {
+
+    public DhisDelayedTaskSet( int delay, TimeUnit timeUnit )
+    {
         this.delay = delay;
         this.timeUnit = timeUnit;
     }
+
     @Override
     public void addTask( AbstractTask task )
     {
@@ -40,7 +40,7 @@ public class DhisDelayedTaskSet extends AbstractTaskSet
         return null;
     }
 
-    @Override
+    /*@Override
     public void execute()
     {
         ScheduledExecutorService threadpool = Executors.newScheduledThreadPool(tasks.size());
@@ -68,5 +68,32 @@ public class DhisDelayedTaskSet extends AbstractTaskSet
             } );
 
         threadpool.shutdown();
+    }
+
+     */
+
+    @Override
+    public void execute()
+    {
+        IntStream.range( 0, tasks.size() )
+            .parallel()
+            .forEach( i -> {
+                try
+                {
+                    Thread.sleep( this.delay * i * 1000 );
+                }
+                catch ( InterruptedException e ) { }
+                try
+                {
+                    tasks.get( i ).execute();
+                }
+                catch ( Exception e )
+                {
+                    System.out.println( "Failed executing task" );
+                    e.printStackTrace();
+                }
+
+            } );
+
     }
 }

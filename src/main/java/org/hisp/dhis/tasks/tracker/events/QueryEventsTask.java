@@ -38,7 +38,7 @@ public class QueryEventsTask
 
     public String getName()
     {
-        return "/events";
+        return "/api/events";
     }
 
     @Override

@@ -52,6 +52,7 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
 
     @Override
     public void execute()
+        throws Exception
     {
 
         // user ou
@@ -116,8 +117,6 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
                 new AddDataValueTask( 1, eventId, (DataValue) dv, program.getUid(), user.getUserCredentials() )
             );
         } );
-
-
 
         taskSet.execute();
         recordSuccess( System .currentTimeMillis() - time, 0);

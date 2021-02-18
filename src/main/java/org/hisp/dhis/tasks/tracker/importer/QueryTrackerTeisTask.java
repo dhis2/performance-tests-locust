@@ -54,6 +54,7 @@ public class QueryTrackerTeisTask extends DhisAbstractTask
         if ( savePayload ) {
             this.response = response;
         }
+
         record( response.getRaw() );
     }
 

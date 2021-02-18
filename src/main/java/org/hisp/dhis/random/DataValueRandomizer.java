@@ -9,6 +9,7 @@ import org.hisp.dhis.dxf2.datavalue.DataValue;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSet;
 import org.hisp.dhis.utils.DataRandomizer;
 
+import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;

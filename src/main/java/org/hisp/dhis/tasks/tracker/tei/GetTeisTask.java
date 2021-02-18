@@ -12,7 +12,7 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 public class GetTeisTask
     extends DhisAbstractTask
 {
-    private JsonObject responseBody;
+    private ApiResponse response;
 
     private RestApiActions teiActions = new RestApiActions( "/api/trackedEntityInstances" );
 
@@ -42,21 +42,13 @@ public class GetTeisTask
     public void execute()
         throws Exception
     {
-        ApiResponse response = teiActions.get( "", new QueryParamsBuilder().add(  "ou", "DiszpKrYNg8") );
-
-        if ( savePayload ) {
-            this.responseBody = response.getBody();
-        }
-
-        record( response.getRaw() );
+        this.response = performTaskAndRecord( () -> teiActions.get( "", new QueryParamsBuilder().add(  "ou", "DiszpKrYNg8") ));
     }
 
-    public JsonObject executeAndGetBody()
+    public ApiResponse executeAndGetBody()
         throws Exception
     {
-        this.savePayload = true;
         this.execute();
-
-        return this.responseBody;
+        return this.response;
     }
 }

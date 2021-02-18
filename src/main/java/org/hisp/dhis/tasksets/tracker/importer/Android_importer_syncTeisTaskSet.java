@@ -3,6 +3,7 @@ package org.hisp.dhis.tasksets.tracker.importer;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
@@ -51,16 +52,12 @@ public class Android_importer_syncTeisTaskSet
 
     @Override
     public void execute()
+        throws Exception
     {
-        user = new UserRandomizer().getRandomUser( entitiesCache );
+        User user = new UserRandomizer().getRandomUser( entitiesCache );
 
-        //user = getUser();
         RandomizerContext context = new RandomizerContext();
         context.setOrgUnitUid( DataRandomizer.randomElementFromList( user.getOrganisationUnits() ) );
-        //context.setProgram( entitiesCache.getTrackerPrograms().get( 2 ));
-        //context.setProgramStage( context.getProgram().getStages().get(1) );
-
-        AuthenticatedApiActions trackerActions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
 
         TrackedEntityInstances instances = new TrackedEntityInstanceRandomizer().create( entitiesCache, context, 3, 10 );
 
@@ -73,19 +70,8 @@ public class Android_importer_syncTeisTaskSet
                 } ).collect( Collectors.toList() ) )
             .build();
 
-        TrackerApiResponse response = new TrackerApiResponse( trackerActions.post( trackedEntities, new QueryParamsBuilder().addAll( "async=false", "identifier=full" ) ));
 
-        if ( response.statusCode() == 200 )
-        {
-            recordSuccess( response.getRaw() );
-        }
-
-        else
-        {
-            System.out.println( JsonParserUtils.toJsonObject( trackedEntities ).toString() );
-            recordFailure( response.getRaw() );
-        }
-
+        performTaskAndRecord(() -> new TrackerApiResponse(  new AuthenticatedApiActions( endpoint, user.getUserCredentials() ).post( trackedEntities, new QueryParamsBuilder().addAll( "async=false", "identifier=full" ) )) );
     }
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )

@@ -5,12 +5,13 @@ import com.github.myzhan.locust4j.Locust;
 
 import io.restassured.response.Response;
 import org.aeonbits.owner.ConfigFactory;
-import org.apache.poi.ss.formula.functions.T;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.random.UserRandomizer;
+import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.response.dto.TrackerApiResponse;
 
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -83,6 +84,33 @@ public abstract class DhisAbstractTask
         Locust.getInstance().recordSuccess( getType(), getName(), time, length );
     }
 
+    protected ApiResponse performTaskAndRecord( Callable<ApiResponse> function, int expectedStatusCode )
+        throws Exception
+    {
+        long time = System.currentTimeMillis();
+        ApiResponse response = null;
+        try
+        {
+            response = function.call();
+        }
+        catch ( Exception e )
+        {
+            if ( response != null) {
+                recordFailure( System.currentTimeMillis() - time, response.getRaw().print() );
+            }
+
+            throw e;
+        }
+
+        record( response.getRaw(), System.currentTimeMillis() - time, expectedStatusCode );
+        return response;
+    }
+    protected ApiResponse performTaskAndRecord( Callable<ApiResponse> function )
+        throws Exception
+    {
+       return performTaskAndRecord( function, 200 );
+    }
+
     public void record( Response response) {
         if (response.statusCode() == 200) {
             recordSuccess( response );
@@ -90,6 +118,20 @@ public abstract class DhisAbstractTask
 
         else {
             recordFailure( response );
+        }
+    }
+
+    protected void record( Response response, long time) {
+       record( response, time, 200 );
+    }
+
+    protected void record( Response response, long time, int expectedStatusCode ) {
+        if (response.statusCode() == expectedStatusCode) {
+            recordSuccess( time, response.getBody().asByteArray().length );
+        }
+
+        else {
+            recordFailure( time, response.print() );
         }
     }
 

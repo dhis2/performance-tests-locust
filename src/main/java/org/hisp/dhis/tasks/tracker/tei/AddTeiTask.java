@@ -42,32 +42,18 @@ public class AddTeiTask
     }
 
     public void execute()
+        throws Exception
     {
         if (trackedEntityInstanceBody == null) {
             trackedEntityInstanceBody = new TrackedEntityInstanceRandomizer().create( this.entitiesCache, RandomizerContext.EMPTY_CONTEXT(), 5 );
         }
 
-        long time = System.currentTimeMillis();
-
-        boolean hasFailed = false;
-        try
-        {
-            this.response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( trackedEntityInstanceBody );
-        }
-
-        catch ( Exception e )
-        {
-            recordFailure( System.currentTimeMillis() - time, e.getMessage() );
-            hasFailed = true;
-        }
-
-        if ( !hasFailed )
-        {
-            record( response.getRaw() );
-        }
+        this.response = performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( trackedEntityInstanceBody ) );
     }
 
-    public ApiResponse executeAndGetResponse() {
+    public ApiResponse executeAndGetResponse()
+        throws Exception
+    {
         this.execute();
         return this.response;
     }

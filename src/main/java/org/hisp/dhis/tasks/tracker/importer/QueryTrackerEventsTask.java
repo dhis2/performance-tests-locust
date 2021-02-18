@@ -17,14 +17,7 @@ public class QueryTrackerEventsTask
 
     private String query;
 
-    private JsonObject responseBody;
-
     private boolean savePayload = false;
-
-    public QueryTrackerEventsTask( String query )
-    {
-        this.query = query;
-    }
 
     public QueryTrackerEventsTask( String query, UserCredentials userCredentials ) {
         this.query = query;
@@ -48,20 +41,10 @@ public class QueryTrackerEventsTask
     }
 
     public void execute()
+        throws Exception
     {
-        ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials()).get(this.query);
+        performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials()).get(this.query) );
 
-        if ( savePayload ) {
-            this.responseBody = response.getBody();
-        }
-        record( response.getRaw() );
-    }
-
-    public JsonObject executeAndGetBody()
-    {
-        savePayload = true;
-        execute();
-        return responseBody;
     }
 }
 

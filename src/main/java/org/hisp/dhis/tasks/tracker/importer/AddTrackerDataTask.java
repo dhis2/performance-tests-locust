@@ -46,6 +46,7 @@ public class AddTrackerDataTask extends DhisAbstractTask
 
     @Override
     public void execute()
+        throws Exception
     {
         user = getUser();
         RandomizerContext context = new RandomizerContext();
@@ -55,7 +56,7 @@ public class AddTrackerDataTask extends DhisAbstractTask
 
         TrackedEntityInstances instances = new TrackedEntityInstanceRandomizer().create( entitiesCache, context, 2, 3  );
 
-        //generateAttributes( context.getProgram(), instances.getTrackedEntityInstances(), user.getUserCredentials() );
+        generateAttributes( context.getProgram(), instances.getTrackedEntityInstances(), user.getUserCredentials() );
 
         TrackedEntities trackedEntities = TrackedEntities.builder()
             .trackedEntities( instances.getTrackedEntityInstances().stream().
@@ -64,17 +65,7 @@ public class AddTrackerDataTask extends DhisAbstractTask
                 } ).collect( Collectors.toList()))
             .build();
 
-        ApiResponse response = trackerActions.post( trackedEntities, new QueryParamsBuilder().add( "async=false" ) );
-
-        if ( response.statusCode() == 200 ) {
-            recordSuccess( response.getRaw() );
-        }
-
-        else
-        {
-            recordFailure( response.getRaw() );
-        }
-
+        performTaskAndRecord( () -> trackerActions.post( trackedEntities, new QueryParamsBuilder().add( "async=false" ) ) );
     }
 
 

@@ -94,30 +94,18 @@ public class AddTrackerEventsTask
 
     @Override
     public void execute()
+        throws Exception
     {
         Events rndEvents = events != null ? events : createRandomEvents();
 
         RestApiActions apiActions = new AuthenticatedApiActions( this.endpoint, getUserCredentials() );
 
-        response = new TrackerApiResponse(
-            apiActions.post( rndEvents, new QueryParamsBuilder().addAll( "async=false", "identifier=events" ) ) );
-
-        if ( response.statusCode() == 200 )
-        {
-            recordSuccess( response.getRaw() );
-        }
-        else
-        {
-
-            System.out.println( JsonParserUtils.toJsonObject( rndEvents ).toString() );
-
-            //addTeiToBlacklist( response );
-
-            recordFailure( response.getRaw() );
-        }
+        response = (TrackerApiResponse) performTaskAndRecord( () -> new TrackerApiResponse(
+            apiActions.post( rndEvents, new QueryParamsBuilder().addAll( "async=false", "identifier=events" ) ) ) );
     }
 
     public TrackerApiResponse executeAndGetResponse()
+        throws Exception
     {
         this.execute();
         return response;

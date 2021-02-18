@@ -49,20 +49,11 @@ public class AddTrackerDataValueTask extends DhisAbstractTask
 
     @Override
     public void execute()
+        throws Exception
     {
         event.setDataValues( Sets.newHashSet( this.dataValue ) );
 
-        Events events = Events.builder().events( Arrays.asList( event) ).build();
-
-        ApiResponse response = new AuthenticatedApiActions( "/api/tracker", getUserCredentials() )
-            .post( events, new QueryParamsBuilder().addAll( "async=false", "identifier=eventdatavalues" ) );
-
-        if ( response.statusCode() == 200 ) {
-            recordSuccess( response.getRaw() );
-        }
-
-        else {
-            recordFailure( response.getRaw() );
-        }
+        performTaskAndRecord( () -> new AuthenticatedApiActions( "/api/tracker", this.userCredentials )
+            .post( Events.builder().events( Arrays.asList( event) ).build(), new QueryParamsBuilder().addAll( "async=false", "identifier=eventdatavalues" ) ) );
     }
 }

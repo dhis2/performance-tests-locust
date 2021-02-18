@@ -36,31 +36,23 @@ public class CreateTrackedEntityAttributeTask
     }
 
     public void execute()
+        throws Exception
     {
-        long time = System.currentTimeMillis();
-
         GeneratedTrackedEntityAttribute generatedAttribute = new GeneratedTrackedEntityAttribute();
         generatedAttribute.setName( generatedAttribute.getName() + UUID.randomUUID() );
         generatedAttribute.setShortName( "" + UUID.randomUUID() );
 
-        ApiResponse response = new RestApiActions( this.endpoint ).post( generatedAttribute );
+        ApiResponse response = performTaskAndRecord( () -> new RestApiActions( this.endpoint ).post( generatedAttribute ), 201 );
 
         if ( response.statusCode() == 201 )
         {
             id = response.extractString( "response.uid" );
         }
 
-        if ( response.statusCode() == 201 )
-        {
-            recordSuccess( response.getRaw() );
-        }
-        else
-        {
-            recordFailure( response.getRaw() );
-        }
     }
 
     public String executeAndGetId()
+        throws Exception
     {
         this.execute();
         return id;

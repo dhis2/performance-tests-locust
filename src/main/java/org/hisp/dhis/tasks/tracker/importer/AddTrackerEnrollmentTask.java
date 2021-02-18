@@ -48,6 +48,7 @@ public class AddTrackerEnrollmentTask extends DhisAbstractTask
 
     @Override
     public void execute()
+        throws Exception
     {
         EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer();
 
@@ -58,18 +59,15 @@ public class AddTrackerEnrollmentTask extends DhisAbstractTask
         Enrollments enrollments = new Enrollments();
         enrollments.setEnrollments( Lists.newArrayList( enrollment ) );
 
-        response = new TrackerApiResponse( authenticatedApiActions.post( enrollments, new QueryParamsBuilder().addAll( "async=false", "identifier=enrollment" ) ));
+        response = (TrackerApiResponse) performTaskAndRecord(
+            () -> new TrackerApiResponse( authenticatedApiActions.post( enrollments, new QueryParamsBuilder().addAll( "async=false", "identifier=enrollment" ) ))
+        );
 
-        if ( response.statusCode() == 200 ) {
-            recordSuccess( response.getRaw() );
-            return;
-        }
-
-        System.out.println( JsonParserUtils.toJsonObject( enrollments ).toString() );
-        recordFailure( response.getRaw() );
     }
 
-    public TrackerApiResponse executeAndGetBody() {
+    public TrackerApiResponse executeAndGetBody()
+        throws Exception
+    {
         this.execute();
         return response;
     }

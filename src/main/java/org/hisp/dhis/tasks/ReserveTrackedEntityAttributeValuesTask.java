@@ -33,6 +33,7 @@ public class ReserveTrackedEntityAttributeValuesTask
     }
 
     public void execute()
+        throws Exception
     {
         RestApiActions trackedEntityAttributeActions = new RestApiActions( endpoint );
         long time = System.currentTimeMillis();

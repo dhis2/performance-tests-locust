@@ -48,6 +48,7 @@ public class PostRelationshipTask
 
     @Override
     public void execute()
+        throws Exception
     {
         user = getUser();
 
@@ -62,6 +63,7 @@ public class PostRelationshipTask
         {
             return;
         }
+
         org.hisp.dhis.dxf2.events.trackedentity.Relationship relationship = relationshipRandomizer
             .create( entitiesCache, context, uids.get( 0 ), uids.get( 1 ) );
 
@@ -71,6 +73,7 @@ public class PostRelationshipTask
     }
 
     private List<String> createTeis( RandomizerContext context )
+        throws Exception
     {
 
         TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstanceRandomizer().create(
@@ -100,7 +103,7 @@ public class PostRelationshipTask
 
                 Attribute attribute = tei.getAttributes().stream()
                     .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
-                    .findFirst().orElse( null );
+                    .findFirst().orElse( new Attribute() );
 
                 attribute.setValue( value );
             }
