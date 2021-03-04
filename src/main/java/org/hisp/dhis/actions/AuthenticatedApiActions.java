@@ -19,6 +19,6 @@ public class AuthenticatedApiActions extends RestApiActions
     protected RequestSpecification given()
     {
         return super.given().auth()
-            .preemptive().basic( userCredentials.getUsername(), userCredentials.getPassword() );
+            .basic( userCredentials.getUsername(), userCredentials.getPassword() );
     }
 }

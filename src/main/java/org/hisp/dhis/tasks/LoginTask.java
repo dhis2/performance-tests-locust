@@ -41,9 +41,11 @@ public class LoginTask
 
     public void execute()
     {
-        RestAssured.getRestAssured().authentication = preemptive().basic( username, password );
+        //RestAssured.getRestAssured().authentication = preemptive().basic( username, password );
 
-        Response apiResponse = RestAssured.getRestAssured().given().contentType( ContentType.TEXT ).when()
+        Response apiResponse = RestAssured.getRestAssured().given().contentType( ContentType.TEXT )
+            .auth()
+            .basic( username,  password ).when()
             .get( "api/me" ).thenReturn();
 
         if ( apiResponse.statusCode() == 200 )

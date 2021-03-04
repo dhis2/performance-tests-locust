@@ -7,11 +7,16 @@ import com.github.myzhan.locust4j.ratelimit.RampUpRateLimiter;
 import com.github.myzhan.locust4j.ratelimit.StableRateLimiter;
 import com.google.gson.*;
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.config.DecoderConfig;
 import io.restassured.config.EncoderConfig;
 import io.restassured.config.ObjectMapperConfig;
+import io.restassured.filter.cookie.CookieFilter;
+import io.restassured.filter.session.SessionFilter;
+import io.restassured.http.ContentType;
 import io.restassured.mapper.ObjectMapperType;
 import io.restassured.path.json.mapper.factory.DefaultJackson2ObjectMapperFactory;
+import io.restassured.specification.RequestSpecification;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.commons.config.JacksonObjectMapperConfig;
 import org.hisp.dhis.locust.LocustConfig;
@@ -33,6 +38,7 @@ import org.hisp.dhis.tasksets.tracker.importer.Android_importer_syncTeisTaskSet;
 import org.hisp.dhis.tasksets.tracker.importer.Capture_importer_addEventTaskSet;
 import org.hisp.dhis.tasksets.tracker.importer.TrackerCapture_importer_addTeiTaskSet;
 import org.hisp.dhis.tasksets.tracker.importer.TrackerCapture_importer_searchForTeiTaskSet;
+import org.hisp.dhis.utils.AuthFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -69,18 +75,12 @@ public class Main
                 .defaultObjectMapperType( ObjectMapperType.GSON )
                 .gsonObjectMapperFactory( ( type, s ) ->
                     new GsonBuilder().setDateFormat( "yyyy-MM-dd" )
-                        .registerTypeAdapter( Instant.class, new JsonSerializer<Instant>() {
-
-                            @Override
-                            public JsonElement serialize( Instant src, Type typeOfSrc, JsonSerializationContext context )
-                            {
-                                return new JsonPrimitive( src.toString() );
-                            }
-                        } ).create() )
+                        .registerTypeAdapter( Instant.class,
+                            (JsonSerializer<Instant>) ( src, typeOfSrc, context ) -> new JsonPrimitive( src.toString() ) ).create() )
         );
 
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-
+        RestAssured.requestSpecification = defaultRequestSpecification();
         RestAssured.baseURI = cfg.targetUri();
         EntitiesCache cache;
 
@@ -164,6 +164,16 @@ public class Main
             new TrackerCapture_importer_addTeiTaskSet( 1, cache )
         );
     }
+
+
+    private static RequestSpecification defaultRequestSpecification()
+    {
+        RequestSpecBuilder requestSpecification = new RequestSpecBuilder();
+        requestSpecification.addFilter( new AuthFilter() );
+
+        return requestSpecification.build();
+    }
+
     public static void runTest(Locust locust, EntitiesCache cache) {
         locust.dryRun( new PostRelationshipTask( 1, cache ) );
     }
