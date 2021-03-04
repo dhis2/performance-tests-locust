@@ -37,6 +37,7 @@ public class AddDataValueTask
 
     @Override
     public void execute()
+        throws InterruptedException
     {
         User user = getUser();
         AuthenticatedApiActions dataValueActions  = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
@@ -51,5 +52,6 @@ public class AddDataValueTask
             .add( "ou=", aggregateDataValue.getOrgUnit() ));
 
         record( response.getRaw(), 201);
+        waitBetweenTasks();
     }
 }

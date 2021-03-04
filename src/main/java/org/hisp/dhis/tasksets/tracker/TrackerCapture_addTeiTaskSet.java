@@ -121,6 +121,8 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
         taskSet.execute();
         recordSuccess( System .currentTimeMillis() - time, 0);
 
+        waitBetweenTasks();
+
     }
 
     private void generateAttributes(Program program, TrackedEntityInstance tei, UserCredentials userCredentials ) {

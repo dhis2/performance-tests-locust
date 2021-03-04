@@ -80,7 +80,7 @@ public class DhisDelayedTaskSet
             .forEach( i -> {
                 try
                 {
-                    Thread.sleep( this.delay * i * 1000 );
+                    Thread.currentThread().sleep( this.delay * 1000 );
                 }
                 catch ( InterruptedException e ) { }
                 try

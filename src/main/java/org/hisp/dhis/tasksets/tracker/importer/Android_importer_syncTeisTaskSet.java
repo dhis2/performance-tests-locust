@@ -72,6 +72,8 @@ public class Android_importer_syncTeisTaskSet
 
 
         performTaskAndRecord(() -> new TrackerApiResponse(  new AuthenticatedApiActions( endpoint, user.getUserCredentials() ).post( trackedEntities, new QueryParamsBuilder().addAll( "async=false", "identifier=full" ) )) );
+
+        waitBetweenTasks();
     }
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )

@@ -1,7 +1,10 @@
 package org.hisp.dhis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.myzhan.locust4j.AbstractTask;
 import com.github.myzhan.locust4j.Locust;
+import com.github.myzhan.locust4j.ratelimit.RampUpRateLimiter;
+import com.github.myzhan.locust4j.ratelimit.StableRateLimiter;
 import com.google.gson.*;
 import io.restassured.RestAssured;
 import io.restassured.config.DecoderConfig;
@@ -17,7 +20,10 @@ import org.hisp.dhis.tasks.LoginTask;
 import org.hisp.dhis.tasks.aggregate.AddDataValueTask;
 import org.hisp.dhis.tasks.analytics.GetAnalyticsTask;
 import org.hisp.dhis.tasks.analytics.LoadDashboardTask;
+import org.hisp.dhis.tasks.tracker.PostRelationshipTask;
 import org.hisp.dhis.tasks.tracker.importer.AddTrackerDataTask;
+import org.hisp.dhis.tasks.tracker.importer.AddTrackerEventsTask;
+import org.hisp.dhis.tasks.tracker.importer.AddTrackerTeiTask;
 import org.hisp.dhis.tasksets.aggregate.Android_syncDataValuesTaskSet;
 import org.hisp.dhis.tasksets.tracker.Android_syncTeisTaskSet;
 import org.hisp.dhis.tasksets.tracker.Capture_addEventTaskSet;
@@ -27,11 +33,17 @@ import org.hisp.dhis.tasksets.tracker.importer.Android_importer_syncTeisTaskSet;
 import org.hisp.dhis.tasksets.tracker.importer.Capture_importer_addEventTaskSet;
 import org.hisp.dhis.tasksets.tracker.importer.TrackerCapture_importer_addTeiTaskSet;
 import org.hisp.dhis.tasksets.tracker.importer.TrackerCapture_importer_searchForTeiTaskSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import static io.restassured.config.RestAssuredConfig.config;
 import static org.aeonbits.owner.ConfigFactory.create;
@@ -79,6 +91,7 @@ public class Main
             System.out.println( "cache not found. Hold on while a new cache is created." );
             cache = createAndSerializeCache();
         }
+
         else
         {
             try
@@ -96,30 +109,62 @@ public class Main
 
         Locust locust = LocustSlave.newInstance().init();
 
-        /*locust.run(
-            new Android_syncTeisTaskSet( 1, cache ),
-            new AddDataValueTask( 1, cache ),
-            new Android_syncDataValuesTaskSet( 1, cache ),
+        runNewAndOldImporterTests( locust, cache );
+    }
+
+    private static void runNewAndOldImporterTests( Locust locust, EntitiesCache cache )
+    {locust.run(
+        new Android_importer_syncTeisTaskSet( 1, cache ),
+        new Capture_importer_addEventTaskSet( 1, cache ),
+        //new TrackerCapture_importer_searchForTeiTaskSet( 1, cache ),
+        new TrackerCapture_importer_addTeiTaskSet( 1, cache ),
+        new TrackerCapture_addTeiTaskSet( 1, cache ),
+        //new TrackerCapture_searchForTeiTaskSet( 1, cache ),
+        new Capture_addEventTaskSet( 1, cache ),
+        new Android_syncTeisTaskSet( 1, cache ),
+        new PostRelationshipTask( 1, cache )
+    );
+    }
+
+    private static List<AbstractTask> getOldImporterTests( EntitiesCache cache ) {
+        return Arrays.asList(
             new TrackerCapture_addTeiTaskSet( 1, cache ),
-            new Capture_addEventTaskSet( 1, cache ) );*/
-
-        locust.dryRun(
-            new Android_syncTeisTaskSet( 1,cache )
+            //new TrackerCapture_searchForTeiTaskSet( 1, cache ),
+            new Capture_addEventTaskSet( 1, cache ),
+            new Android_syncTeisTaskSet( 1, cache ),
+            new PostRelationshipTask( 1, cache )
         );
-        /*locust.dryRun(
-                new QueryFilterTeiTask( 3 ),
-                new GetHeavyAnalyticsTask( 1, cfg.analyticsApiVersion() ),
-                new GetHeavyAnalyticsRandomTask( 1, cfg.analyticsApiVersion(), cache ),
-                new AddTeiTask( 5, cache ),
-                new FilterTeiTask( 5 ),
-                new CreateTrackedEntityAttributeTask( 5 ),
-                //new MetadataExportImportTask( 1 ),
-                new ReserveTrackedEntityAttributeValuesTask( 1 ),
-                new GetAndUpdateEventsTask( 2, "?orgUnit=DiszpKrYNg8" ),
-                new GetAndUpdateTeiTask( 2, cache ),
-                new AddEventsTask(3, cache)
+    }
 
-        );*/
+    public static void runCovaxTests(Locust locust, EntitiesCache cache ) {
+        locust.run(
+            new Android_syncTeisTaskSet( 2, cache ),
+            new AddDataValueTask( 2, cache ),
+            new Android_syncDataValuesTaskSet( 2, cache ),
+            new TrackerCapture_addTeiTaskSet( 2, cache ),
+            new Capture_addEventTaskSet( 2, cache ),
+            new TrackerCapture_searchForTeiTaskSet( 2, cache ),
+            new LoadDashboardTask( 1, cache ),
+            new PostRelationshipTask( 2, cache )
+        );
+    }
 
+    public static void runAndroidTests( Locust locust, EntitiesCache cache) {
+        locust.run(
+            new Android_syncTeisTaskSet( 2,cache, 1 ),
+            new Android_syncTeisTaskSet( 2, cache, 10 ),
+            new Android_syncTeisTaskSet( 2, cache, 20 )
+        );
+    }
+    public static void runNewImporterTests( Locust locust, EntitiesCache cache) {
+        locust.run(
+            new Android_importer_syncTeisTaskSet( 1, cache ),
+            new Capture_importer_addEventTaskSet( 1, cache ),
+            new TrackerCapture_importer_searchForTeiTaskSet( 1, cache ),
+            new TrackerCapture_importer_addTeiTaskSet( 1, cache )
+        );
+    }
+    public static void runTest(Locust locust, EntitiesCache cache) {
+        locust.dryRun( new PostRelationshipTask( 1, cache ) );
     }
 }

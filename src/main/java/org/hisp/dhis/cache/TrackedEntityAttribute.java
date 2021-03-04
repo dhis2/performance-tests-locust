@@ -84,27 +84,3 @@ class ObjectIdDeserializer
         return json.getAsJsonObject().get( "id" ).getAsString();
     }
 }
-
-class ObjectIdAdapter extends TypeAdapter<String>
-{
-    @Override
-    public void write( JsonWriter out, String value )
-        throws IOException
-    {
-        JsonObject ob = new JsonObject();
-        ob.addProperty( "id", value );
-        out.value(
-            String.valueOf( ob )
-        );
-    }
-
-    @Override
-    public String read( JsonReader in )
-        throws IOException
-    {
-        in.hasNext();
-
-        return in.nextString();
-    }
-
-}

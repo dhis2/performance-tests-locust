@@ -43,6 +43,7 @@ public class AddEnrollmentTask extends DhisAbstractTask
 
     @Override
     public void execute()
+        throws Exception
     {
         EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer();
 
@@ -50,12 +51,12 @@ public class AddEnrollmentTask extends DhisAbstractTask
 
         AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, getUserCredentials() );
 
-        response = authenticatedApiActions.post( enrollment );
-
-        record(response.getRaw());
+        response = performTaskAndRecord( () -> authenticatedApiActions.post( enrollment ));
     }
 
-    public ApiResponse executeAndGetBody() {
+    public ApiResponse executeAndGetBody()
+        throws Exception
+    {
         this.execute();
         return response;
     }

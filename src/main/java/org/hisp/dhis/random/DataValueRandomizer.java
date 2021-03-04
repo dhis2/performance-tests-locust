@@ -48,8 +48,6 @@ public class DataValueRandomizer
     }
 
     public DataValueSet create( String ou, EntitiesCache entitiesCache, int min, int max) {
-        List<DataValue> values = new ArrayList<>();
-
         int numberOfValues = DataRandomizer.randomIntInRange( min, max );
 
         return create( ou,entitiesCache,numberOfValues );
@@ -110,7 +108,7 @@ public class DataValueRandomizer
         }
         else if ( valueType.isText() )
         {
-            val = DataRandomizer.randomString();
+            val = DataRandomizer.randomString(8);
         }
         else if ( valueType.isOrganisationUnit() )
         {

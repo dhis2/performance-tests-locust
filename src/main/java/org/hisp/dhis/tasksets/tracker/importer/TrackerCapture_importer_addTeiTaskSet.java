@@ -124,6 +124,8 @@ public class TrackerCapture_importer_addTeiTaskSet
 
         taskSet.execute();
         recordSuccess( System .currentTimeMillis() - time, 0);
+
+        waitBetweenTasks();
     }
 
     private void generateAttributes(Program program, TrackedEntity tei, UserCredentials userCredentials ) {

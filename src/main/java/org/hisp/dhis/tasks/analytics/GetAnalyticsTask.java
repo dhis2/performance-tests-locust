@@ -98,6 +98,7 @@ public class GetAnalyticsTask extends DhisAbstractTask
         }
 
         if (dimension.equalsIgnoreCase( "dx" )) {
+            if (visualization.getDataDimensionItems() == null) return "";
             return "dx:" + String.join(";", visualization.getDataDimensionItems());
         }
 

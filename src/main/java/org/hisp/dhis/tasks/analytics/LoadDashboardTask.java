@@ -2,8 +2,12 @@ package org.hisp.dhis.tasks.analytics;
 
 import org.hisp.dhis.cache.Dashboard;
 import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.Visualization;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.DataRandomizer;
+
+import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -34,11 +38,16 @@ public class LoadDashboardTask extends DhisAbstractTask
 
         Dashboard dashboard = DataRandomizer.randomElementFromList( entitiesCache.getDashboards() );
 
-        dashboard.getDashboardItems().parallelStream()
-            .forEach( di -> {
-                if (di.getVisualization() != null) {
-                    new GetAnalyticsTask( 1, entitiesCache, di.getVisualization(), user.getUserCredentials()).execute();
+        // app loads items as user scrolls, so load 10 at once
+        List<Integer> randomSequence = DataRandomizer.randomSequence(  dashboard.getDashboardItems().size(), 10);
+
+        randomSequence.parallelStream()
+            .forEach( o -> {
+                Visualization vi =  dashboard.getDashboardItems().get( o ).getVisualization();
+                if (vi != null) {
+                    new GetAnalyticsTask( 1, entitiesCache, vi, user.getUserCredentials()).execute();
                 }
-            });
+            } );
+        waitBetweenTasks();
     }
 }

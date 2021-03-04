@@ -12,9 +12,12 @@ import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.response.dto.TrackerApiResponse;
+import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+
+import static org.aeonbits.owner.ConfigFactory.create;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -23,6 +26,8 @@ public abstract class DhisAbstractTask
     extends AbstractTask
 {
     protected int weight;
+
+    LocustConfig cfg = create( LocustConfig.class );
 
     protected UserCredentials userCredentials;
 
@@ -42,6 +47,13 @@ public abstract class DhisAbstractTask
     public abstract void execute()
         throws Exception;
 
+    protected void waitBetweenTasks()
+        throws InterruptedException
+    {
+        if ( cfg.locustMinWaitBetweenTasks() != 0 && cfg.locustMaxWaitBetweenTasks() != 0) {
+            Thread.currentThread().sleep( DataRandomizer.randomIntInRange( cfg.locustMinWaitBetweenTasks(), cfg.locustMaxWaitBetweenTasks() ));
+        }
+    }
     protected UserCredentials getUserCredentials( ) {
 
         if (this.userCredentials != null) {

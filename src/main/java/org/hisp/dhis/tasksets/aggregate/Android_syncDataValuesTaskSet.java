@@ -35,6 +35,7 @@ public class Android_syncDataValuesTaskSet extends DhisAbstractTask
 
     @Override
     public void execute()
+        throws InterruptedException
     {
         User user = getUser();
         AuthenticatedApiActions dataValueSetActions  = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
@@ -44,5 +45,7 @@ public class Android_syncDataValuesTaskSet extends DhisAbstractTask
         ApiResponse response = dataValueSetActions.post( aggregateDataValues );
 
         record( response.getRaw() );
+
+        waitBetweenTasks();
     }
 }

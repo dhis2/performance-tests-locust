@@ -25,16 +25,23 @@ import java.util.List;
 public class Android_syncTeisTaskSet
     extends DhisAbstractTask
 {
+    private int minPayload = 3;
+    private int maxPayload = 10;
     public Android_syncTeisTaskSet( int weight, EntitiesCache cache )
     {
         this.weight = weight;
         this.entitiesCache = cache;
     }
+    public Android_syncTeisTaskSet( int weight, EntitiesCache cache, int payloadSize) {
+        this(weight, cache);
+        this.minPayload = payloadSize;
+        this.maxPayload = payloadSize;
+    }
 
     @Override
     public String getName()
     {
-        return "Android: sync teis";
+        return String.format( "Android: sync teis (%d, %d)", minPayload, maxPayload);
     }
 
     @Override
@@ -55,12 +62,14 @@ public class Android_syncTeisTaskSet
         context.setProgram( program );
         context.setOrgUnitUid( ou );
 
-        TrackedEntityInstances teis = new TrackedEntityInstanceRandomizer().create( this.entitiesCache, context, 3, 10 );
+        TrackedEntityInstances teis = new TrackedEntityInstanceRandomizer().create( this.entitiesCache, context, minPayload, maxPayload );
 
         generateAttributes( program, teis.getTrackedEntityInstances(), user.getUserCredentials() );
 
         performTaskAndRecord( () -> new AuthenticatedApiActions( "/api/trackedEntityInstances", user.getUserCredentials() )
             .post( teis, new QueryParamsBuilder().add( "strategy=SYNC" ) ) );
+
+        waitBetweenTasks();
     }
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )

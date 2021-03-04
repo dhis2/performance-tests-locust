@@ -46,7 +46,7 @@ public class TrackerCapture_searchForTeiTaskSet extends DhisAbstractTask
             .getAttributes().stream().filter( a -> a.isSearchable()&& a.getValueType() == ValueType.TEXT).collect( Collectors.toList()));
 
         ApiResponse response = new QueryFilterTeiTask( 1, String.format( "?ou=%s&ouMode=ACCESSIBLE&trackedEntityType=%s&attribute=%s:LIKE:%s", ou, program.getEntityType(), searchableAttribute
-            .getTrackedEntityAttribute(), DataRandomizer.randomString(1)), user.getUserCredentials() ).executeAndGetResponse();
+            .getTrackedEntityAttribute(), DataRandomizer.randomString(2)), user.getUserCredentials() ).executeAndGetResponse();
 
         List<ArrayList> rows = response.extractList( "rows" );
 
@@ -57,6 +57,8 @@ public class TrackerCapture_searchForTeiTaskSet extends DhisAbstractTask
 
             new GetTeiTask( teiId, user.getUserCredentials() ).execute();
         }
+
+        waitBetweenTasks();
 
     }
 }

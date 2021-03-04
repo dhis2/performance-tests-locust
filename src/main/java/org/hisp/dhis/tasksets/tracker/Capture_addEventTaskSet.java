@@ -37,6 +37,7 @@ public class Capture_addEventTaskSet extends DhisAbstractTask
 
     @Override
     public void execute()
+        throws InterruptedException
     {
         User user = new UserRandomizer().getRandomUser( entitiesCache );
         String ou = new UserRandomizer().getRandomUserOrgUnit( user );
@@ -52,5 +53,7 @@ public class Capture_addEventTaskSet extends DhisAbstractTask
         Event event = new EventRandomizer().create( entitiesCache, context );
 
         new AddEventsTask( 1, entitiesCache, Lists.newArrayList(event), user.getUserCredentials() ).execute();
+
+        waitBetweenTasks();
     }
 }

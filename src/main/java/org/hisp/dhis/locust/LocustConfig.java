@@ -14,6 +14,12 @@ public interface LocustConfig
     @Key( "locust.master.host" )
     String locustMasterHost();
 
+    @Key( "locust.min-wait" )
+    int locustMinWaitBetweenTasks();
+
+    @Key( "locust.max-wait" )
+    int locustMaxWaitBetweenTasks();
+
     @Key( "target.baseuri" )
     String targetUri();
 

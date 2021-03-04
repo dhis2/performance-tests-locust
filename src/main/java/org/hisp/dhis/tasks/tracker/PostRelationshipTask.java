@@ -67,9 +67,9 @@ public class PostRelationshipTask
         org.hisp.dhis.dxf2.events.trackedentity.Relationship relationship = relationshipRandomizer
             .create( entitiesCache, context, uids.get( 0 ), uids.get( 1 ) );
 
-        ApiResponse response = actions.post( relationship );
+        performTaskAndRecord( () -> actions.post( relationship ) );
 
-        record( response.getRaw() );
+        waitBetweenTasks();
     }
 
     private List<String> createTeis( RandomizerContext context )
