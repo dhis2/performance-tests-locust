@@ -116,8 +116,9 @@ public class ProgramCacheBuilder
         }
         if ( !StringUtils.isEmpty( optionSetUid ) )
         {
+            return getValuesFromOptionSet( optionSetUid );
             // TODO fill the array list with values from option sets
-            return new ArrayList<>();
+           // return new ArrayList<>();
 
         }
         return null;
@@ -186,7 +187,7 @@ public class ProgramCacheBuilder
     private String getOptionSetValue( String optionSetValueId )
     {
         ApiResponse response = getPayload( "/api/options/" + optionSetValueId );
-        return response.extractString( "displayName" );
+        return response.extractString( "code" );
     }
 
 }

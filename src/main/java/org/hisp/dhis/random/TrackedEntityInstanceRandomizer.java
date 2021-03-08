@@ -151,12 +151,16 @@ public class TrackedEntityInstanceRandomizer
             }
             else
             {
-                if ( att.getOptions() == null )
+                if ( att.getOptions() == null || att.getOptions().isEmpty())
                 {
                     return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
                         rndValueFrom( att.getValueType() ) );
                 }
-                return null;
+
+                else {
+                    return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(), DataRandomizer.randomElementFromList( att.getOptions() ));
+                }
+
             }
         } ).filter( Objects::nonNull ).collect( Collectors.toList() );
     }

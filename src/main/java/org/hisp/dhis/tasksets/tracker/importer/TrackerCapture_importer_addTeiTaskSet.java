@@ -77,7 +77,7 @@ public class TrackerCapture_importer_addTeiTaskSet
 
         TrackerApiResponse body = new AddTrackerTeiTask( 1, entitiesCache, trackedEntityInstances, user.getUserCredentials() ).executeAndGetResponse();
 
-        if ( body.extractImportedTeis().size() == 0) {
+        if ( body.extractString( "status" ).equalsIgnoreCase( "ERROR" ) || body.extractImportedTeis().size() == 0) {
             recordFailure( System.currentTimeMillis() - time, "TEI wasn't created" );
             return;
         }

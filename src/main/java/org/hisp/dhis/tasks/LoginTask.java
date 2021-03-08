@@ -41,7 +41,7 @@ public class LoginTask
 
     public void execute()
     {
-        //RestAssured.getRestAssured().authentication = preemptive().basic( username, password );
+        RestAssured.getRestAssured().authentication = preemptive().basic( username, password );
 
         Response apiResponse = RestAssured.getRestAssured().given().contentType( ContentType.TEXT )
             .auth()
