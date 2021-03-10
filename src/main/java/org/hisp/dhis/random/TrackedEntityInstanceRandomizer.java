@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import com.github.javafaker.Faker;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
@@ -153,12 +154,23 @@ public class TrackedEntityInstanceRandomizer
             {
                 if ( att.getOptions() == null || att.getOptions().isEmpty())
                 {
+                    if ( att.getDisplayName().toLowerCase().contains( "firstname" ) ||  att.getDisplayName().toLowerCase().contains( "given name" )) {
+                        return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
+                            Faker.instance().name().firstName());
+                    }
+
+                    if ( att.getDisplayName().toLowerCase().contains( "surname" ) ||  att.getDisplayName().toLowerCase().contains( "given name" )) {
+                        return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
+                            Faker.instance().name().lastName());
+                    }
+
                     return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
                         rndValueFrom( att.getValueType() ) );
                 }
 
                 else {
-                    return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(), DataRandomizer.randomElementFromList( att.getOptions() ));
+                    return null;
+                    //return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(), DataRandomizer.randomElementFromList( att.getOptions() ));
                 }
 
             }

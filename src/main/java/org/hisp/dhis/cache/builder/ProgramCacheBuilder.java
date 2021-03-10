@@ -100,7 +100,8 @@ public class ProgramCacheBuilder
                     trackedEntityAttribute.extractObject( "unique", Boolean.class ),
                     trackedEntityAttribute.extractString( "pattern" ),
                     getProgramAttributeOptionValues( trackedEntityAttribute ),
-                    (Boolean) att.get( "searchable" ) ) );
+                    (Boolean) att.get( "searchable" ),
+                    (String) att.get( "displayName" )) );
         }
         return programAttributes;
 

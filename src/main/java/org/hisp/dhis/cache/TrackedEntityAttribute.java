@@ -68,6 +68,8 @@ public class TrackedEntityAttribute
 
     private boolean searchable;
 
+    private String displayName;
+
     public TrackedEntityAttribute()
     {
     }
