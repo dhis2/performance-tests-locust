@@ -89,7 +89,7 @@ public abstract class AbstractTrackerEntityRandomizer<T>
         return DataRandomizer.randomElementFromList( program.getStages() );
     }
 
-    protected String rndValueFrom( ValueType valueType )
+    protected String rndValueFrom( ValueType valueType)
     {
        return new DataValueRandomizer().rndValueFrom( valueType );
     }

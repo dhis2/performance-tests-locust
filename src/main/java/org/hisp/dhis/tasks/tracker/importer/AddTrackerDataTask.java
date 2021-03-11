@@ -32,7 +32,7 @@ public class AddTrackerDataTask
     extends DhisAbstractTask
 {
     private String endpoint = "/api/tracker";
-
+    private String extraHeaders = "";
     private Object payload;
 
     private boolean async = true;
@@ -44,12 +44,13 @@ public class AddTrackerDataTask
     }
 
     public AddTrackerDataTask( int weight, EntitiesCache cache, UserCredentials userCredentials, Object payload,
-        boolean isAsync )
+        boolean isAsync, String extraHeaders )
     {
         this( weight, cache );
         this.userCredentials = userCredentials;
         this.payload = payload;
         this.async = isAsync;
+        this.extraHeaders = extraHeaders;
     }
 
     @Override
@@ -89,26 +90,29 @@ public class AddTrackerDataTask
 
         performTaskAndRecord( () -> {
             ApiResponse response = trackerActions
-                .post( payload, new QueryParamsBuilder().addAll( "async=" + this.async, "identifier=full" ) );
+                .post( payload, new QueryParamsBuilder().addAll( "async=" + this.async, extraHeaders ) );
 
-            if (this.async) {
-                response.validate()
-                    .statusCode( 200 )
-                    .body( "response.id", notNullValue() );
-
+            if ( this.async ) {
                 String jobId = response.extractString( "response.id" );
+
+                if (jobId == null) {
+                    recordFailure( 0,"job id was null" );
+                }
 
                 this.waitUntilJobIsCompleted( jobId, user.getUserCredentials() );
 
                 response = trackerActions.get(String.format( "/jobs/%s/report?reportMode=%s", jobId, "FULL" ));
 
-                if (response.extractString( "status" ).equalsIgnoreCase( "ERROR" )) {
-                    recordFailure( response.getRaw() );
-                }
             }
 
-            return new TrackerApiResponse( response );
+            if (response.extractString( "status" ).equalsIgnoreCase( "ERROR" )) {
+                recordFailure( response.getRaw() );
+                //response.validate().statusCode( 200 );
+            }
+
+            return response;
         } );
+
     }
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
@@ -133,21 +137,24 @@ public class AddTrackerDataTask
 
 
     public ApiResponse waitUntilJobIsCompleted( String jobId, UserCredentials credentials )
-        throws InterruptedException
+        throws Exception
     {
         ApiResponse response = null;
         boolean completed = false;
-        int maxAttempts = 100;
+        int attempts = 600;
 
-        while ( !completed && maxAttempts > 0)
+        while ( !completed && attempts > 0)
         {
-            Thread.currentThread().sleep( 1000 );
-            response = new AuthenticatedApiActions( "/api/tracker/jobs/" + jobId, credentials  ).get();
-            response.validate().statusCode( 200 );
+            Thread.currentThread().sleep( 100 );
+
+            response = new GetImportJobTask( 1, credentials, jobId ).executeAndGetResponse();
             completed = response.extractList( "completed" ).contains( true );
-            maxAttempts--;
+            attempts--;
         }
 
+        if (attempts == 0) {
+            System.out.println("MAX ATTEMPTS REACHED");
+        }
         return response;
     }
 }

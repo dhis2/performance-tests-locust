@@ -17,12 +17,15 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
+import org.hisp.dhis.tasks.tracker.importer.AddTrackerDataTask;
 import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
 import org.hisp.dhis.utils.DataRandomizer;
 import org.hisp.dhis.utils.JsonParserUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.hamcrest.Matchers.notNullValue;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -71,7 +74,7 @@ public class Android_importer_syncTeisTaskSet
             .build();
 
 
-        performTaskAndRecord(() -> new TrackerApiResponse(  new AuthenticatedApiActions( endpoint, user.getUserCredentials() ).post( trackedEntities, new QueryParamsBuilder().addAll( "async=false", "identifier=full" ) )) );
+        new AddTrackerDataTask( 1, entitiesCache, user.getUserCredentials(), trackedEntities, true, "identifier=FULL" ).execute();
 
         waitBetweenTasks();
     }

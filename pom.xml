@@ -15,7 +15,7 @@
     <dependency>
       <groupId>com.github.myzhan</groupId>
       <artifactId>locust4j</artifactId>
-      <version>LATEST</version>
+      <version>1.0.13</version>
     </dependency>
     <dependency>
       <groupId>org.locationtech.jts</groupId>
