@@ -37,6 +37,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.poi.ss.formula.functions.T;
 import org.hisp.dhis.common.ValueType;
 
@@ -69,6 +70,9 @@ public class TrackedEntityAttribute
     private boolean searchable;
 
     private String displayName;
+
+    @Setter
+    private String lastValue;
 
     public TrackedEntityAttribute()
     {

@@ -30,10 +30,7 @@ public class ProgramCacheBuilder
     {
         List<String> programUids = getPayload( "/api/programs" ).extractList( "programs.id" );
 
-        List<Program> programs = new ArrayList<>();
-
-        programs = programUids.parallelStream()
-            //.filter( this::hasProgramRegistration )
+        List<Program> programs =  programUids.parallelStream()
             .map( ( String uid ) -> new Program( uid, getOrgUnitsFromProgram( uid ),
                 getStagesFromProgram( uid ).parallelStream()
                     .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ),
@@ -101,10 +98,16 @@ public class ProgramCacheBuilder
                     trackedEntityAttribute.extractString( "pattern" ),
                     getProgramAttributeOptionValues( trackedEntityAttribute ),
                     (Boolean) att.get( "searchable" ),
-                    (String) att.get( "displayName" )) );
+                    (String) att.get( "displayName" ),
+                    null) );
         }
-        return programAttributes;
 
+        programAttributes.stream().filter( p-> p.getPattern() != null && !p.getPattern().isEmpty() ).forEach( p -> {
+            p.setLastValue( getAttributeLastValue( p.getTrackedEntityAttribute() ) );
+        } );
+
+
+        return programAttributes;
     }
 
     private List<String> getProgramAttributeOptionValues( ApiResponse trackedEntityAttribute )
@@ -118,11 +121,12 @@ public class ProgramCacheBuilder
         if ( !StringUtils.isEmpty( optionSetUid ) )
         {
             return getValuesFromOptionSet( optionSetUid );
-            // TODO fill the array list with values from option sets
-           // return new ArrayList<>();
-
         }
         return null;
+    }
+
+    private String getAttributeLastValue( String attributeId ) {
+        return getPayload( "/api/trackedEntityAttributes/" + attributeId + "/generate" ).extractString( "value" );
     }
 
     private ApiResponse getAttributeUniqueness( String trackerAttributeUid )

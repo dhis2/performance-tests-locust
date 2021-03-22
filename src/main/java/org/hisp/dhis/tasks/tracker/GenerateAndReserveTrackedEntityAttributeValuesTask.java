@@ -33,7 +33,7 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask extends DhisAbst
     @Override
     public String getType()
     {
-        return "POST";
+        return "GET";
     }
 
     @Override

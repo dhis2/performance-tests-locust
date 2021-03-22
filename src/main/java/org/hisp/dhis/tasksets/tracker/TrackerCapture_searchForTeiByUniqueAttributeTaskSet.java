@@ -1,16 +1,21 @@
 package org.hisp.dhis.tasksets.tracker;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
-import org.hisp.dhis.cache.User;
-import org.hisp.dhis.common.ValueType;
-import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.importer.GetTrackerTeiTask;
 import org.hisp.dhis.tasks.tracker.importer.QueryTrackerTeisTask;
+import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
+import org.hisp.dhis.textpattern.TextPattern;
+import org.hisp.dhis.textpattern.TextPatternParser;
+import org.hisp.dhis.textpattern.TextPatternSegment;
 import org.hisp.dhis.utils.DataRandomizer;
 
+import java.text.DecimalFormat;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,8 +23,17 @@ import java.util.stream.Collectors;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet extends DhisAbstractTask
+public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
+    extends DhisAbstractTask
 {
+    HashMap<String, List<TrackedEntityAttribute>> attributes = new HashMap<>();
+
+    public TrackerCapture_searchForTeiByUniqueAttributeTaskSet( int weight, EntitiesCache entitiesCache )
+    {
+        this.weight = weight;
+        this.entitiesCache = entitiesCache;
+    }
+
     @Override
     public String getName()
     {
@@ -36,22 +50,20 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet extends DhisAbs
     public void execute()
         throws Exception
     {
-        Program program = DataRandomizer.randomElementFromList( this.entitiesCache.getTrackerPrograms() );
-        User user = new UserRandomizer().getRandomUser( this.entitiesCache );
-        String ou = DataRandomizer.randomElementFromList( user.getOrganisationUnits() );
+        Program program = getProgramWithAttributes();
+        user = getUser();
 
+        TrackedEntityAttribute randomAttribute = getRandomAttribute( program.getUid() );
 
-        List<TrackedEntityAttribute> searchableAttributes = program
-            .getAttributes().stream().filter( a -> a.isSearchable() && a.isUnique() && a.getValueType() == ValueType.TEXT).collect( Collectors.toList());
-
-        TrackedEntityAttribute randomAttribute = DataRandomizer.randomElementFromList( searchableAttributes );
-
-        ApiResponse response = new QueryTrackerTeisTask( 1, String.format( "?orgUnit=%s&ouMode=ACCESSIBLE&trackedEntityType=%s&attribute=%s:LIKE:%s", ou, program.getEntityType(), randomAttribute
-            .getTrackedEntityAttribute(), DataRandomizer.randomString(1)), user.getUserCredentials() ).executeAndGetResponse();
+        ApiResponse response = new QueryFilterTeiTask( 1,
+            String.format( "?ouMode=ACCESSIBLE&program=%s&attribute=%s:EQ:%s", program.getUid(), randomAttribute
+                .getTrackedEntityAttribute(), getRandomAttributeValue( randomAttribute ) ), user.getUserCredentials() )
+            .executeAndGetResponse();
 
         List<HashMap> rows = response.extractList( "instances" );
 
-        if (rows != null && rows.size() > 0) {
+        if ( rows != null && rows.size() > 0 )
+        {
             HashMap row = DataRandomizer.randomElementFromList( rows );
 
             String teiId = row.get( "trackedEntity" ).toString();
@@ -60,15 +72,60 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet extends DhisAbs
 
     }
 
-    private void preloadAttributes() {
-        for ( Program program: this.entitiesCache.getTrackerPrograms()
-               )
+    private Program getProgramWithAttributes()
+    {
+        if ( attributes.isEmpty() )
         {
-            List<TrackedEntityAttribute> att = program.getAttributes().stream().filter( a -> a.isSearchable() && a.isUnique() && a.getValueType() == ValueType.TEXT).collect( Collectors.toList());
+            preloadAttributes();
+        }
+        int index = DataRandomizer.randomIntInRange( 0, attributes.size() );
 
+        String id = attributes.keySet().toArray()[index].toString();
+        return entitiesCache.getTrackerPrograms().stream().filter( p -> p.getUid().equals( id ) ).findFirst().orElse( null );
+    }
 
-
+    private TrackedEntityAttribute getRandomAttribute( String programId )
+    {
+        if ( attributes.isEmpty() )
+        {
+            preloadAttributes();
         }
 
+        return DataRandomizer.randomElementFromList( attributes.get( programId ) );
+    }
+
+    private void preloadAttributes()
+    {
+        for ( Program program : this.entitiesCache.getTrackerPrograms()
+        )
+        {
+            List<TrackedEntityAttribute> searchableAttributes = program
+                .getAttributes().stream().filter( a -> a.getLastValue() != null ).collect( Collectors.toList() );
+
+            if ( searchableAttributes.isEmpty() )
+            {
+                return;
+            }
+
+            attributes.put( program.getUid(), searchableAttributes );
+        }
+
+    }
+
+    private String getRandomAttributeValue( TrackedEntityAttribute entityAttribute )
+        throws TextPatternParser.TextPatternParsingException
+    {
+        TextPattern pattern = TextPatternParser.parse( entityAttribute.getPattern() );
+        TextPatternSegment staticSegment = pattern.getSegments().stream().filter( ( tp ) -> !tp.getMethod().isGenerated() )
+            .findFirst()
+            .orElse( null );
+
+        int valueSegmentLength = pattern.getSegments().stream().filter( ( tp ) -> tp.getMethod().isGenerated() )
+            .findFirst().get().getParameter().length();
+
+        int topValue = Integer.parseInt( entityAttribute.getLastValue().replace( staticSegment.getParameter(), "" ) );
+
+        String value = new DecimalFormat( StringUtils.repeat( "0", valueSegmentLength )).format( DataRandomizer.randomIntInRange( 0, topValue ) );
+        return staticSegment.getParameter() + value;
     }
 }

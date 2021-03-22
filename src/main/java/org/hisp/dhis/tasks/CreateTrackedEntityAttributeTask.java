@@ -1,7 +1,7 @@
 package org.hisp.dhis.tasks;
 
 import org.hisp.dhis.actions.RestApiActions;
-import org.hisp.dhis.cache.GeneratedTrackedEntityAttribute;
+import org.hisp.dhis.models.GeneratedTrackedEntityAttribute;
 import org.hisp.dhis.response.dto.ApiResponse;
 
 import java.util.UUID;

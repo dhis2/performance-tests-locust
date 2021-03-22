@@ -2,16 +2,15 @@ package org.hisp.dhis.tasks;
 
 import com.github.myzhan.locust4j.AbstractTask;
 import com.github.myzhan.locust4j.Locust;
-
 import io.restassured.response.Response;
 import org.aeonbits.owner.ConfigFactory;
+import org.apache.logging.log4j.core.appender.rolling.action.IfAll;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.concurrent.Callable;
@@ -50,13 +49,18 @@ public abstract class DhisAbstractTask
     protected void waitBetweenTasks()
         throws InterruptedException
     {
-        if ( cfg.locustMinWaitBetweenTasks() != 0 && cfg.locustMaxWaitBetweenTasks() != 0) {
-            Thread.currentThread().sleep( DataRandomizer.randomIntInRange( cfg.locustMinWaitBetweenTasks(), cfg.locustMaxWaitBetweenTasks() ));
+        if ( cfg.locustMinWaitBetweenTasks() != 0 && cfg.locustMaxWaitBetweenTasks() != 0 )
+        {
+            Thread.currentThread()
+                .sleep( DataRandomizer.randomIntInRange( cfg.locustMinWaitBetweenTasks(), cfg.locustMaxWaitBetweenTasks() ) );
         }
     }
-    protected UserCredentials getUserCredentials( ) {
 
-        if (this.userCredentials != null) {
+    protected UserCredentials getUserCredentials()
+    {
+
+        if ( this.userCredentials != null )
+        {
             return this.userCredentials;
         }
 
@@ -64,25 +68,29 @@ public abstract class DhisAbstractTask
 
     }
 
-    protected User getUser() {
-        if (this.user != null) {
+    protected User getUser()
+    {
+        if ( this.user != null )
+        {
             return this.user;
         }
 
         User user;
-        if (this.userCredentials == null) {
-            if (this.entitiesCache != null) {
+        if ( this.userCredentials == null )
+        {
+            if ( this.entitiesCache != null )
+            {
                 user = new UserRandomizer().getRandomUser( this.entitiesCache );
                 return user;
             }
 
             LocustConfig conf = ConfigFactory.create( LocustConfig.class );
-            return new User( new UserCredentials(conf.adminUsername(), conf.adminPassword()));
+            return new User( new UserCredentials( conf.adminUsername(), conf.adminPassword() ) );
         }
 
         return this.entitiesCache.getUsers().stream().filter( p -> p.getUserCredentials().equals( this.userCredentials ) )
             .findFirst()
-            .orElse( null);
+            .orElse( null );
     }
 
     public void recordSuccess( Response response )
@@ -96,70 +104,104 @@ public abstract class DhisAbstractTask
         Locust.getInstance().recordSuccess( getType(), getName(), time, length );
     }
 
-    protected ApiResponse performTaskAndRecord( Callable<ApiResponse> function, int expectedStatusCode )
+    protected ApiResponse performTaskAndRecord( Callable<ApiResponse> function, Function<ApiResponse, Boolean> expectation )
         throws Exception
     {
-        long time = System.currentTimeMillis();
+        final long time = System.currentTimeMillis();
         ApiResponse response = null;
         try
         {
             response = function.call();
         }
+
         catch ( Exception e )
         {
-            if ( response != null) {
+            if ( response != null )
+            {
                 recordFailure( System.currentTimeMillis() - time, response.getRaw().print() );
             }
 
             throw e;
         }
 
-        record( response.getRaw(), System.currentTimeMillis() - time, expectedStatusCode );
+        if ( expectation != null )
+        {
+            boolean passed = expectation.apply(response);
+
+            if ( passed )
+            {
+                recordSuccess( System.currentTimeMillis() - time, response.getRaw().getBody().asByteArray().length );
+                return response;
+            }
+
+            System.out.println( String.format( "Response time: %d", System.currentTimeMillis() - time));
+            recordFailure( System.currentTimeMillis() - time, response.getRaw().print() );
+        }
+
         return response;
     }
+
+    protected ApiResponse performTaskAndRecord( Callable<ApiResponse> function, int expectedStatusCode )
+        throws Exception
+    {
+        return performTaskAndRecord( function, response -> response.statusCode() == expectedStatusCode ? true : false );
+    }
+
     protected ApiResponse performTaskAndRecord( Callable<ApiResponse> function )
         throws Exception
     {
-       return performTaskAndRecord( function, 200 );
+        return performTaskAndRecord( function, 200 );
     }
 
-    public void record( Response response) {
-        if (response.statusCode() == 200) {
+    public void record( Response response )
+    {
+        if ( response.statusCode() == 200 )
+        {
             recordSuccess( response );
         }
 
-        else {
+        else
+        {
             recordFailure( response );
         }
     }
 
-    protected void record( Response response, long time) {
-       record( response, time, 200 );
+    protected void record( Response response, long time )
+    {
+        record( response, time, 200 );
     }
 
-    protected void record( Response response, long time, int expectedStatusCode ) {
-        if (response.statusCode() == expectedStatusCode) {
+    protected void record( Response response, long time, int expectedStatusCode )
+    {
+        if ( response.statusCode() == expectedStatusCode )
+        {
             recordSuccess( time, response.getBody().asByteArray().length );
         }
 
-        else {
+        else
+        {
             recordFailure( time, response.print() );
         }
     }
 
-    public void record( Response response, int statusCode) {
-        if (response.statusCode() == statusCode) {
+    public void record( Response response, int statusCode )
+    {
+        if ( response.statusCode() == statusCode )
+        {
             recordSuccess( response );
         }
 
-        else {
+        else
+        {
             recordFailure( response );
         }
     }
 
-    public void record( Response response, Function<Response, Response> function ) {
+    public void record( Response response, Function<Response, Response> function )
+    {
         function.apply( response );
     }
+
     public void recordFailure( long time, String message )
     {
         Locust.getInstance().recordFailure( getType(), getName(), time, message );

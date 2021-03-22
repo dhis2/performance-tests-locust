@@ -30,10 +30,7 @@ import org.hisp.dhis.tasks.tracker.importer.AddTrackerDataTask;
 import org.hisp.dhis.tasks.tracker.importer.AddTrackerEventsTask;
 import org.hisp.dhis.tasks.tracker.importer.AddTrackerTeiTask;
 import org.hisp.dhis.tasksets.aggregate.Android_syncDataValuesTaskSet;
-import org.hisp.dhis.tasksets.tracker.Android_syncTeisTaskSet;
-import org.hisp.dhis.tasksets.tracker.Capture_addEventTaskSet;
-import org.hisp.dhis.tasksets.tracker.TrackerCapture_addTeiTaskSet;
-import org.hisp.dhis.tasksets.tracker.TrackerCapture_searchForTeiTaskSet;
+import org.hisp.dhis.tasksets.tracker.*;
 import org.hisp.dhis.tasksets.tracker.importer.Android_importer_syncTeisTaskSet;
 import org.hisp.dhis.tasksets.tracker.importer.Capture_importer_addEventTaskSet;
 import org.hisp.dhis.tasksets.tracker.importer.TrackerCapture_importer_addTeiTaskSet;
@@ -158,6 +155,7 @@ public class Main
     }
     public static void runNewImporterTests( Locust locust, EntitiesCache cache) {
         locust.run(
+
             new Android_importer_syncTeisTaskSet( 1, cache ),
             new Capture_importer_addEventTaskSet( 1, cache ),
             new TrackerCapture_importer_searchForTeiTaskSet( 1, cache ),
@@ -170,6 +168,7 @@ public class Main
     {
         RequestSpecBuilder requestSpecification = new RequestSpecBuilder();
         requestSpecification.addFilter( new AuthFilter() );
+        requestSpecification.setBaseUri( cfg.targetUri() );
 
         return requestSpecification.build();
     }

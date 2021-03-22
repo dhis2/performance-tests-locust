@@ -18,9 +18,7 @@ public class TeiTypeCacheBuilder
     @Override
     public void load( EntitiesCache cache )
     {
-        List<TeiType> teiTypes = new ArrayList<>();
-
-        teiTypes = getPayload( "/api/trackedEntityTypes?fields=*" ).extractList( "trackedEntityTypes", TeiType.class );
+        List<TeiType> teiTypes = getPayload( "/api/trackedEntityTypes?fields=*" ).extractList( "trackedEntityTypes", TeiType.class );
 
         cache.setTeiTypes( teiTypes) ;
     }

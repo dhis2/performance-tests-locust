@@ -1,7 +1,5 @@
 package org.hisp.dhis.tasks.tracker.importer;
 
-import com.google.gson.JsonObject;
-import io.restassured.response.Response;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
@@ -14,7 +12,6 @@ import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
 import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
@@ -23,7 +20,7 @@ import org.hisp.dhis.utils.DataRandomizer;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.notNullValue;
+import static java.lang.Thread.sleep;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -32,10 +29,12 @@ public class AddTrackerDataTask
     extends DhisAbstractTask
 {
     private String endpoint = "/api/tracker";
+
     private String extraHeaders = "";
+
     private Object payload;
 
-    private boolean async = true;
+    private boolean async = false;
 
     public AddTrackerDataTask( int weight, EntitiesCache entitiesCache )
     {
@@ -92,27 +91,17 @@ public class AddTrackerDataTask
             ApiResponse response = trackerActions
                 .post( payload, new QueryParamsBuilder().addAll( "async=" + this.async, extraHeaders ) );
 
-            if ( this.async ) {
+            if ( this.async )
+            {
                 String jobId = response.extractString( "response.id" );
-
-                if (jobId == null) {
-                    recordFailure( 0,"job id was null" );
-                }
 
                 this.waitUntilJobIsCompleted( jobId, user.getUserCredentials() );
 
-                response = trackerActions.get(String.format( "/jobs/%s/report?reportMode=%s", jobId, "FULL" ));
-
-            }
-
-            if (response.extractString( "status" ).equalsIgnoreCase( "ERROR" )) {
-                recordFailure( response.getRaw() );
-                //response.validate().statusCode( 200 );
+                response = trackerActions.get( String.format( "/jobs/%s/report?reportMode=%s", jobId, "FULL" ) );
             }
 
             return response;
-        } );
-
+        }, response -> response.extractString( "status" ).equalsIgnoreCase( "ERROR" )  ? false : true );
     }
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
@@ -143,7 +132,7 @@ public class AddTrackerDataTask
         boolean completed = false;
         int attempts = 600;
 
-        while ( !completed && attempts > 0)
+        while ( !completed && attempts > 0 )
         {
             Thread.currentThread().sleep( 100 );
 
@@ -152,9 +141,11 @@ public class AddTrackerDataTask
             attempts--;
         }
 
-        if (attempts == 0) {
-            System.out.println("MAX ATTEMPTS REACHED");
+        if ( attempts == 0 )
+        {
+            System.out.println( "MAX ATTEMPTS REACHED" );
         }
+
         return response;
     }
 }
