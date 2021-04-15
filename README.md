@@ -24,8 +24,11 @@ To configure the environment variables, run:
    
    For more configuration options, see [configuration section](#test-configuration)
    
-3. From the root directory of the `performance-test-locust` project execute `docker-compose up` command. If this command ends up in some error for example
-`Could not find any locustfile` then use this command `docker pull dhis2/locustio:latest` to download docker image and re-run `docker-compose up`.
+3. Start locust master. From the root directory execute the following commands:
+```
+$ docker pull dhis2/locustio:latest
+$ docker-compose up
+```
 
 4. Run [main() method](src/main/java/org/hisp/dhis/Main.java).
     - You can run it directly via your IDE -> open `Main` class and click on a green arrow next to the `main()` method 
