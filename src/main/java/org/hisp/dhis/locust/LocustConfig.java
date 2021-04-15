@@ -14,13 +14,13 @@ public interface LocustConfig
     @Key( "locust.master.host" )
     String locustMasterHost();
 
-    @Key( "locust.min-wait" )
+    @Key( "locust.min_wait" )
     int locustMinWaitBetweenTasks();
 
-    @Key( "locust.max-wait" )
+    @Key( "locust.max_wait" )
     int locustMaxWaitBetweenTasks();
 
-    @Key( "target.baseuri" )
+    @Key( "target.base_uri" )
     String targetUri();
 
     @Key( "analytics.api.version" )
@@ -38,7 +38,7 @@ public interface LocustConfig
     @Key( "cache.users.use_admin_user" )
     boolean useDefaultUser();
 
-    @Key( "cache.users.base.identifier" )
+    @Key( "cache.users.identifier" )
     String cacheUsersIdentifier();
 
     @Key( "cache.users.password" )
