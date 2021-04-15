@@ -28,21 +28,13 @@ package org.hisp.dhis.cache;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.google.gson.*;
 import com.google.gson.annotations.JsonAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.poi.ss.formula.functions.T;
+import org.hisp.dhis.cache.serializer.ObjectIdDeserializer;
 import org.hisp.dhis.common.ValueType;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -56,7 +48,7 @@ public class TrackedEntityAttribute
 
     private ValueType valueType;
 
-    @JsonAdapter(ObjectIdDeserializer.class)
+    @JsonAdapter( ObjectIdDeserializer.class )
     private String trackedEntityAttribute;
 
     private boolean generated;
@@ -80,13 +72,3 @@ public class TrackedEntityAttribute
 
 }
 
-class ObjectIdDeserializer
-    implements JsonDeserializer<String>
-{
-    @Override
-    public String deserialize( JsonElement json, Type typeOfT, JsonDeserializationContext context )
-        throws JsonParseException
-    {
-        return json.getAsJsonObject().get( "id" ).getAsString();
-    }
-}

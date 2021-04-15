@@ -1,9 +1,9 @@
 package org.hisp.dhis.cache;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -18,7 +18,7 @@ public class ProgramStage
     public ProgramStage()
     {
     }
-    
+
     public ProgramStage( String uid )
     {
         this.uid = uid;

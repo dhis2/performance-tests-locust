@@ -11,6 +11,7 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -18,6 +19,8 @@ import java.util.List;
 public class DataSetsCacheBuilder
     implements CacheBuilder<DataSet>
 {
+    private Logger logger = Logger.getLogger( this.getClass().getName() );
+
     @Override
     public void load( EntitiesCache cache )
     {
@@ -50,8 +53,8 @@ public class DataSetsCacheBuilder
                 dataSets.add( new DataSet( obj.get( "id" ).getAsString(), dataElements, obj.get( "periodType" ).getAsString() ) );
             } );
 
-        cache.setDataSets( dataSets) ;
-        System.out.println( "Data sets loaded in cache. Size: " + dataSets.size() );
+        cache.setDataSets( dataSets );
+        logger.info( "Data sets loaded in cache. Size: " + dataSets.size() );
     }
 
     private ApiResponse getPayload( String url )

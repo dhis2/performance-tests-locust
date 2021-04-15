@@ -1,6 +1,5 @@
 package org.hisp.dhis.tasksets.tracker.importer;
 
-import com.google.common.collect.Lists;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
@@ -9,7 +8,7 @@ import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.tasks.tracker.importer.AddTrackerEventsTask;
+import org.hisp.dhis.tasks.tracker.importer.AddTrackerDataTask;
 import org.hisp.dhis.tasks.tracker.importer.QueryTrackerEventsTask;
 import org.hisp.dhis.tracker.domain.Event;
 import org.hisp.dhis.tracker.domain.mapper.EventMapperImpl;
@@ -21,7 +20,8 @@ import org.hisp.dhis.utils.DataRandomizer;
 public class Capture_importer_addEventTaskSet
     extends DhisAbstractTask
 {
-    public Capture_importer_addEventTaskSet(int weight, EntitiesCache entitiesCache ) {
+    public Capture_importer_addEventTaskSet( int weight, EntitiesCache entitiesCache )
+    {
         this.weight = weight;
         this.entitiesCache = entitiesCache;
     }
@@ -46,16 +46,20 @@ public class Capture_importer_addEventTaskSet
         String ou = new UserRandomizer().getRandomUserOrgUnit( user );
         Program program = DataRandomizer.randomElementFromList( entitiesCache.getEventPrograms() );
 
-        new QueryTrackerEventsTask( String.format( "?page=1&pageSize=15&totalPages=true&order=occurredAt:desc&program=%s&orgUnit=%s", program.getUid(), ou), user.getUserCredentials() ).execute();
+        new QueryTrackerEventsTask( String
+            .format( "?page=1&pageSize=15&totalPages=true&order=occurredAt:desc&program=%s&orgUnit=%s", program.getUid(), ou ),
+            user.getUserCredentials() ).execute();
 
         RandomizerContext context = new RandomizerContext();
         context.setProgram( program );
-        context.setProgramStage( DataRandomizer.randomElementFromList( program.getStages() ));
+        context.setProgramStage( DataRandomizer.randomElementFromList( program.getStages() ) );
         context.setOrgUnitUid( ou );
 
-        Event event = new EventMapperImpl().from( new EventRandomizer().create( entitiesCache, context ));
+        Event event = new EventMapperImpl().from( new EventRandomizer().create( entitiesCache, context ) );
 
-        new AddTrackerEventsTask( 1, entitiesCache, Events.builder().build().addEvent(event), user.getUserCredentials() ).execute();
+        new AddTrackerDataTask( 1, entitiesCache, user.getUserCredentials(), Events.builder().build().addEvent( event ), true,
+            "identifier=events" ).execute();
+        //new AddTrackerEventsTask( 1, entitiesCache, Events.builder().build().addEvent(event), user.getUserCredentials() ).execute();
 
         waitBetweenTasks();
     }

@@ -5,7 +5,6 @@ import io.restassured.http.ContentType;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.event.DataValue;
-import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.JsonObjectBuilder;
 import org.hisp.dhis.utils.JsonParserUtils;
@@ -13,24 +12,28 @@ import org.hisp.dhis.utils.JsonParserUtils;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class AddDataValueTask extends DhisAbstractTask
+public class AddDataValueTask
+    extends DhisAbstractTask
 {
     private String eventId;
+
     private DataValue dataValue;
+
     private String eventProgram;
 
-    public AddDataValueTask(int weight, String eventId, DataValue dataValue, String program) {
+    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program )
+    {
         this.weight = weight;
         this.eventId = eventId;
         this.dataValue = dataValue;
         this.eventProgram = program;
     }
 
-    public AddDataValueTask(int weight, String eventId, DataValue dataValue, String program, UserCredentials userCredentials ) {
-        this(weight, eventId, dataValue, program);
+    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program, UserCredentials userCredentials )
+    {
+        this( weight, eventId, dataValue, program );
         this.userCredentials = userCredentials;
     }
-
 
     @Override
     public String getName()

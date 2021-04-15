@@ -7,7 +7,6 @@ import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.importer.GetTrackerTeiTask;
-import org.hisp.dhis.tasks.tracker.importer.QueryTrackerTeisTask;
 import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
 import org.hisp.dhis.textpattern.TextPattern;
 import org.hisp.dhis.textpattern.TextPatternParser;
@@ -15,7 +14,6 @@ import org.hisp.dhis.textpattern.TextPatternSegment;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import java.text.DecimalFormat;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,7 +55,8 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
 
         ApiResponse response = new QueryFilterTeiTask( 1,
             String.format( "?ouMode=ACCESSIBLE&program=%s&attribute=%s:EQ:%s", program.getUid(), randomAttribute
-                .getTrackedEntityAttribute(), getRandomAttributeValue( randomAttribute ) ), user.getUserCredentials() )
+                .getTrackedEntityAttribute(), getRandomAttributeValue( randomAttribute ) ), user.getUserCredentials(),
+            "search by unique attribute" )
             .executeAndGetResponse();
 
         List<HashMap> rows = response.extractList( "instances" );
@@ -69,6 +68,8 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
             String teiId = row.get( "trackedEntity" ).toString();
             new GetTrackerTeiTask( teiId, user.getUserCredentials() ).execute();
         }
+
+        waitBetweenTasks();
 
     }
 
@@ -125,7 +126,8 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
 
         int topValue = Integer.parseInt( entityAttribute.getLastValue().replace( staticSegment.getParameter(), "" ) );
 
-        String value = new DecimalFormat( StringUtils.repeat( "0", valueSegmentLength )).format( DataRandomizer.randomIntInRange( 0, topValue ) );
+        String value = new DecimalFormat( StringUtils.repeat( "0", valueSegmentLength ) )
+            .format( DataRandomizer.randomIntInRange( 0, topValue ) );
         return staticSegment.getParameter() + value;
     }
 }

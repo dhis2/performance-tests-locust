@@ -14,7 +14,9 @@ public class AddTeiTask
     DhisAbstractTask
 {
     private String endpoint = "/api/trackedEntityInstances";
+
     private TrackedEntityInstances trackedEntityInstanceBody;
+
     private ApiResponse response;
 
     public AddTeiTask( int weight, EntitiesCache entitiesCache )
@@ -23,8 +25,10 @@ public class AddTeiTask
         this.entitiesCache = entitiesCache;
     }
 
-    public AddTeiTask( int weight, EntitiesCache cache, TrackedEntityInstances trackedEntityInstance, UserCredentials userCredentials ) {
-        this(weight, cache);
+    public AddTeiTask( int weight, EntitiesCache cache, TrackedEntityInstances trackedEntityInstance,
+        UserCredentials userCredentials )
+    {
+        this( weight, cache );
         trackedEntityInstanceBody = trackedEntityInstance;
         this.userCredentials = userCredentials;
 
@@ -44,11 +48,14 @@ public class AddTeiTask
     public void execute()
         throws Exception
     {
-        if (trackedEntityInstanceBody == null) {
-            trackedEntityInstanceBody = new TrackedEntityInstanceRandomizer().create( this.entitiesCache, RandomizerContext.EMPTY_CONTEXT(), 5 );
+        if ( trackedEntityInstanceBody == null )
+        {
+            trackedEntityInstanceBody = new TrackedEntityInstanceRandomizer()
+                .create( this.entitiesCache, RandomizerContext.EMPTY_CONTEXT(), 5 );
         }
 
-        this.response = performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( trackedEntityInstanceBody ) );
+        this.response = performTaskAndRecord(
+            () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( trackedEntityInstanceBody ) );
     }
 
     public ApiResponse executeAndGetResponse()

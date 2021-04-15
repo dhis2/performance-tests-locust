@@ -1,6 +1,5 @@
 package org.hisp.dhis.tasksets.tracker.importer;
 
-import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
@@ -12,20 +11,15 @@ import org.hisp.dhis.models.TrackedEntities;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.random.UserRandomizer;
-import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
 import org.hisp.dhis.tasks.tracker.importer.AddTrackerDataTask;
 import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
 import org.hisp.dhis.utils.DataRandomizer;
-import org.hisp.dhis.utils.JsonParserUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.hamcrest.Matchers.notNullValue;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -72,7 +66,6 @@ public class Android_importer_syncTeisTaskSet
                     return new TrackedEntityMapperImpl().from( p );
                 } ).collect( Collectors.toList() ) )
             .build();
-
 
         new AddTrackerDataTask( 1, entitiesCache, user.getUserCredentials(), trackedEntities, true, "identifier=FULL" ).execute();
 

@@ -28,29 +28,29 @@ package org.hisp.dhis.random;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.ProgramStage;
+import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
+import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
+import org.hisp.dhis.utils.DataRandomizer;
+
 import java.util.Date;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import org.hisp.dhis.cache.EntitiesCache;
-import org.hisp.dhis.cache.Program;
-import org.hisp.dhis.cache.ProgramStage;
-import org.hisp.dhis.cache.Tei;
-import org.hisp.dhis.common.CodeGenerator;
-import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
-import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
-import org.hisp.dhis.utils.DataRandomizer;
 
 /**
  * @author Luciano Fiandesio
  */
 public class EnrollmentRandomizer
     extends
-        AbstractTrackerEntityRandomizer<Enrollment>
+    AbstractTrackerEntityRandomizer<Enrollment>
 {
     private int maxEvent;
+
     private int minEVent;
+
     private EventRandomizer eventRandomizer = new EventRandomizer();
 
     public EnrollmentRandomizer( int minEVent, int maxEvent )
@@ -65,9 +65,10 @@ public class EnrollmentRandomizer
         this.maxEvent = 5;
     }
 
-    public Enrollment createWithoutEvents( EntitiesCache cache, RandomizerContext ctx) {
+    public Enrollment createWithoutEvents( EntitiesCache cache, RandomizerContext ctx )
+    {
         Program program = getProgramFromContextOrRnd( ctx, cache );
-        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram(ctx, program );
+        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, program );
 
         // Pick a random program stage to pass to the events
         ProgramStage programStage = getProgramStageFromProgram( program );
@@ -82,9 +83,12 @@ public class EnrollmentRandomizer
         enrollment.setFollowup( false );
         enrollment.setDeleted( false );
 
-        if (!ctx.isSkipTeiInEnrollment(  )) {
-            if (ctx.getTeiId() == null) {
-                enrollment.setTrackedEntityInstance( DataRandomizer.randomElementFromList( cache.getTeis().get( program ) ).getUid());
+        if ( !ctx.isSkipTeiInEnrollment() )
+        {
+            if ( ctx.getTeiId() == null )
+            {
+                enrollment
+                    .setTrackedEntityInstance( DataRandomizer.randomElementFromList( cache.getTeis().get( program ) ).getUid() );
             }
 
             else
@@ -92,7 +96,6 @@ public class EnrollmentRandomizer
                 enrollment.setTrackedEntityInstance( ctx.getTeiId() );
             }
         }
-
 
         return enrollment;
     }

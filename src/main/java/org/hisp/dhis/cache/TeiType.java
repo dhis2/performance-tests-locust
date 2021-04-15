@@ -16,6 +16,7 @@ public class TeiType
     private String name;
 
     private List<TrackedEntityAttribute> trackedEntityTypeAttributes;
+
     public TeiType()
     {
     }

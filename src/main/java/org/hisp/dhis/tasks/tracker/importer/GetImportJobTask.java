@@ -8,17 +8,22 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class GetImportJobTask extends DhisAbstractTask
+public class GetImportJobTask
+    extends DhisAbstractTask
 {
     private String endpoint = "/api/tracker/jobs/";
+
     private String jobId;
+
     private ApiResponse response;
 
-    public GetImportJobTask( int weight, UserCredentials userCredentials, String jobId ) {
+    public GetImportJobTask( int weight, UserCredentials userCredentials, String jobId )
+    {
         this.weight = weight;
         this.userCredentials = userCredentials;
         this.jobId = jobId;
     }
+
     @Override
     public String getName()
     {
@@ -35,8 +40,8 @@ public class GetImportJobTask extends DhisAbstractTask
     public void execute()
         throws Exception
     {
-        performTaskAndRecord(  () -> {
-            response = new AuthenticatedApiActions( endpoint + jobId, userCredentials  ).get();
+        performTaskAndRecord( () -> {
+            response = new AuthenticatedApiActions( endpoint + jobId, userCredentials ).get();
             return response;
         } );
     }

@@ -12,14 +12,18 @@ public class GetTeiTask
     extends DhisAbstractTask
 {
     private String endpoint = "/api/trackedEntityInstances";
+
     private ApiResponse response;
+
     private String tei;
 
-    public GetTeiTask( String teiId ) {
+    public GetTeiTask( String teiId )
+    {
         this.tei = teiId;
     }
 
-    public GetTeiTask ( String teiId, UserCredentials userCredentials ) {
+    public GetTeiTask( String teiId, UserCredentials userCredentials )
+    {
         this.tei = teiId;
         this.userCredentials = userCredentials;
     }

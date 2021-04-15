@@ -1,9 +1,10 @@
 package org.hisp.dhis.cache;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -19,20 +20,23 @@ public class User
 
     private List<String> organisationUnits;
 
+    public User()
+    {
+
+    }
+
+    public User( UserCredentials userCredentials )
+    {
+        this.userCredentials = userCredentials;
+    }
+
     public String getUsername()
     {
         return userCredentials.getUsername();
     }
 
-    public String getPassword() {
+    public String getPassword()
+    {
         return userCredentials.getPassword();
-    }
-
-    public User() {
-
-    }
-
-    public User(UserCredentials userCredentials) {
-        this.userCredentials = userCredentials;
     }
 }

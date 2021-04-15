@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.toList;
 
@@ -22,6 +23,8 @@ import static java.util.stream.Collectors.toList;
 public class ProgramCacheBuilder
     implements CacheBuilder<Program>
 {
+    private Logger logger = Logger.getLogger( this.getClass().getName() );
+
     private transient LoadingCache<String, ApiResponse> programCache = Caffeine.newBuilder().maximumSize( 100 )
         .expireAfterWrite( 1, TimeUnit.HOURS ).build( this::getProgram );
 
@@ -30,20 +33,21 @@ public class ProgramCacheBuilder
     {
         List<String> programUids = getPayload( "/api/programs" ).extractList( "programs.id" );
 
-        List<Program> programs =  programUids.parallelStream()
+        List<Program> programs = programUids.parallelStream()
             .map( ( String uid ) -> new Program( uid, getOrgUnitsFromProgram( uid ),
                 getStagesFromProgram( uid ).parallelStream()
                     .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ),
                         getStageInstanceRepeatableStatus( psUid ) ) )
                     .collect( toList() ),
-                getTrackerAttributesFromProgram( uid ), getTrackedEntityTypeUid( uid ), hasProgramRegistration( uid ) ) )
+                getTrackerAttributesFromProgram( uid ), getTrackedEntityTypeUid( uid ), hasProgramRegistration( uid ),
+                getMinAttributesRequiredToSearch( uid ) ) )
             .collect( toList() );
 
         cache.setPrograms( programs );
-        cache.setTrackerPrograms( programs.stream().filter( Program::isHasRegistration ).collect(toList()) );
-        cache.setEventPrograms( programs.stream().filter( program -> !program.isHasRegistration() ).collect(toList()) );
+        cache.setTrackerPrograms( programs.stream().filter( program -> program.isHasRegistration() ).collect( toList() ) );
+        cache.setEventPrograms( programs.stream().filter( program -> !program.isHasRegistration() ).collect( toList() ) );
 
-        System.out.println( "Programs loaded in cache. Size: " + cache.getPrograms().size() );
+        logger.info( "Programs loaded in cache. Size: " + cache.getPrograms().size() );
 
         programCache = null;
     }
@@ -60,6 +64,12 @@ public class ProgramCacheBuilder
         return getPayload( "/api/programStages/" + programStageUid ).extractList( "programStageDataElements.dataElement.id" )
             .parallelStream()
             .map( uid -> getDataElement( (String) uid ) ).collect( toList() );
+    }
+
+    private int getMinAttributesRequiredToSearch( String programId )
+    {
+        ApiResponse response = programCache.get( programId );
+        return (int) response.extract( "minAttributesRequiredToSearch" );
     }
 
     private List<String> getOrgUnitsFromProgram( String programUid )
@@ -99,13 +109,12 @@ public class ProgramCacheBuilder
                     getProgramAttributeOptionValues( trackedEntityAttribute ),
                     (Boolean) att.get( "searchable" ),
                     (String) att.get( "displayName" ),
-                    null) );
+                    null ) );
         }
 
-        programAttributes.stream().filter( p-> p.getPattern() != null && !p.getPattern().isEmpty() ).forEach( p -> {
+        programAttributes.stream().filter( p -> p.getPattern() != null && !p.getPattern().isEmpty() ).forEach( p -> {
             p.setLastValue( getAttributeLastValue( p.getTrackedEntityAttribute() ) );
         } );
-
 
         return programAttributes;
     }
@@ -125,7 +134,8 @@ public class ProgramCacheBuilder
         return null;
     }
 
-    private String getAttributeLastValue( String attributeId ) {
+    private String getAttributeLastValue( String attributeId )
+    {
         return getPayload( "/api/trackedEntityAttributes/" + attributeId + "/generate" ).extractString( "value" );
     }
 

@@ -15,9 +15,13 @@ import lombok.Setter;
 public class RelationshipType
 {
     private String id;
+
     private String name;
+
     private RelationshipConstraint fromConstraint;
+
     private RelationshipConstraint toConstraint;
+
     private boolean bidirectional;
 
 }

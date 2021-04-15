@@ -6,8 +6,10 @@ import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.Tei;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.toList;
 
@@ -17,15 +19,7 @@ import static java.util.stream.Collectors.toList;
 public class TeiCacheBuilder
     implements CacheBuilder<Tei>
 {
-    private static <T> List<T> randomElementsFromList( List<T> list, int elements )
-    {
-        Collections.shuffle( list );
-        if ( elements > list.size() )
-        {
-            elements = list.size();
-        }
-        return list.subList( 0, elements );
-    }
+    private Logger logger = Logger.getLogger( this.getClass().getName() );
 
     @Override
     public void load( EntitiesCache cache )
@@ -37,7 +31,7 @@ public class TeiCacheBuilder
             //List<List<String>> partitions = Lists.partition( program.getOrgUnits(), 500);
             if ( program.getOrgUnits().size() == 0 )
             {
-                System.out.println( String.format( "Program %s doesn't have any org units", program.getUid() ) );
+                logger.info( String.format( "Program %s doesn't have any org units", program.getUid() ) );
                 continue;
             }
 
@@ -50,7 +44,7 @@ public class TeiCacheBuilder
 
             userOrgUnits = userOrgUnits.stream().filter( ou -> program.getOrgUnits().contains( ou ) ).collect( toList() );
 
-            List<String> orgUnits = randomElementsFromList( userOrgUnits, 1000 );
+            List<String> orgUnits = DataRandomizer.randomElementsFromList( userOrgUnits, 1000 );
             List<List<String>> partitions = Lists.partition( orgUnits, 250 );
 
             partitions.forEach( p -> {
@@ -81,7 +75,7 @@ public class TeiCacheBuilder
         }
 
         cache.setTeis( tempMap );
-        System.out.println( "TEIs loaded in cache. Size: " + tempMap.values().stream().mapToInt( Collection::size ).sum() );
+        logger.info( "TEIs loaded in cache. Size: " + tempMap.values().stream().mapToInt( Collection::size ).sum() );
 
     }
 

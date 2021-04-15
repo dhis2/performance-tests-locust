@@ -43,14 +43,14 @@ public class EntitiesCache
     public static <T> List<T> randomElementsFromList( List<T> list, int elements )
     {
         Collections.shuffle( list );
-        if ( elements > list.size())
+        if ( elements > list.size() )
         {
             elements = list.size();
         }
         return list.subList( 0, elements );
     }
 
-    public void loadAll( )
+    public void loadAll()
     {
         new DashboardCacheBuilder().load( this );
         new DataSetsCacheBuilder().load( this );

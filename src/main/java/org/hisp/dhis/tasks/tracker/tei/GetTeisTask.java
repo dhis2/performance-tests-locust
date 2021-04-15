@@ -1,6 +1,5 @@
 package org.hisp.dhis.tasks.tracker.tei;
 
-import com.google.gson.JsonObject;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
@@ -18,11 +17,13 @@ public class GetTeisTask
 
     private boolean savePayload = false;
 
-    public GetTeisTask( ) {
+    public GetTeisTask()
+    {
         this.weight = 1;
     }
 
-    public GetTeisTask( int weight ) {
+    public GetTeisTask( int weight )
+    {
         this.weight = weight;
     }
 
@@ -42,7 +43,7 @@ public class GetTeisTask
     public void execute()
         throws Exception
     {
-        this.response = performTaskAndRecord( () -> teiActions.get( "", new QueryParamsBuilder().add(  "ou", "DiszpKrYNg8") ));
+        this.response = performTaskAndRecord( () -> teiActions.get( "", new QueryParamsBuilder().add( "ou", "DiszpKrYNg8" ) ) );
     }
 
     public ApiResponse executeAndGetBody()

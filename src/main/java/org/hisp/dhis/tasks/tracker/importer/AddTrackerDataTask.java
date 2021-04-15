@@ -18,9 +18,8 @@ import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import static java.lang.Thread.sleep;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -35,6 +34,8 @@ public class AddTrackerDataTask
     private Object payload;
 
     private boolean async = false;
+
+    private Logger logger = Logger.getLogger( this.getClass().getName() );
 
     public AddTrackerDataTask( int weight, EntitiesCache entitiesCache )
     {
@@ -101,7 +102,7 @@ public class AddTrackerDataTask
             }
 
             return response;
-        }, response -> response.extractString( "status" ).equalsIgnoreCase( "ERROR" )  ? false : true );
+        }, response -> response.extractString( "status" ).equalsIgnoreCase( "ERROR" ) ? false : true );
     }
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
@@ -124,7 +125,6 @@ public class AddTrackerDataTask
         } );
     }
 
-
     public ApiResponse waitUntilJobIsCompleted( String jobId, UserCredentials credentials )
         throws Exception
     {
@@ -143,7 +143,7 @@ public class AddTrackerDataTask
 
         if ( attempts == 0 )
         {
-            System.out.println( "MAX ATTEMPTS REACHED" );
+            logger.info( "MAX ATTEMPTS REACHED" );
         }
 
         return response;

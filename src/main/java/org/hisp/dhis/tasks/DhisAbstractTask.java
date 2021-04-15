@@ -4,7 +4,6 @@ import com.github.myzhan.locust4j.AbstractTask;
 import com.github.myzhan.locust4j.Locust;
 import io.restassured.response.Response;
 import org.aeonbits.owner.ConfigFactory;
-import org.apache.logging.log4j.core.appender.rolling.action.IfAll;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
@@ -26,13 +25,13 @@ public abstract class DhisAbstractTask
 {
     protected int weight;
 
-    LocustConfig cfg = create( LocustConfig.class );
-
     protected UserCredentials userCredentials;
 
     protected User user;
 
     protected EntitiesCache entitiesCache;
+
+    LocustConfig cfg = create( LocustConfig.class );
 
     public int getWeight()
     {
@@ -126,7 +125,7 @@ public abstract class DhisAbstractTask
 
         if ( expectation != null )
         {
-            boolean passed = expectation.apply(response);
+            boolean passed = expectation.apply( response );
 
             if ( passed )
             {
@@ -134,7 +133,6 @@ public abstract class DhisAbstractTask
                 return response;
             }
 
-            System.out.println( String.format( "Response time: %d", System.currentTimeMillis() - time));
             recordFailure( System.currentTimeMillis() - time, response.getRaw().print() );
         }
 

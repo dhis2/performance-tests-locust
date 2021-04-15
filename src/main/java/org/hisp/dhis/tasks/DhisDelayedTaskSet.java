@@ -4,6 +4,7 @@ import com.github.myzhan.locust4j.AbstractTask;
 import com.github.myzhan.locust4j.taskset.AbstractTaskSet;
 
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 /**
@@ -15,6 +16,8 @@ public class DhisDelayedTaskSet
     private int delay;
 
     private TimeUnit timeUnit;
+
+    private Logger logger = Logger.getLogger( this.getClass().getName() );
 
     public DhisDelayedTaskSet( int delay, TimeUnit timeUnit )
     {
@@ -40,6 +43,7 @@ public class DhisDelayedTaskSet
         return null;
     }
 
+    /* jdk 8 bug - very high cpu consumption for scheduled tasks
     /*@Override
     public void execute()
     {
@@ -56,7 +60,7 @@ public class DhisDelayedTaskSet
                         }
                         catch ( Exception e )
                         {
-                            System.out.println("Failed executing task");
+                            logger.warning("Failed executing task");
                             e.printStackTrace();
                         }
                     },
@@ -81,18 +85,16 @@ public class DhisDelayedTaskSet
                 try
                 {
                     Thread.currentThread().sleep( this.delay * 1000 );
-                }
-                catch ( InterruptedException e ) { }
-                try
-                {
                     tasks.get( i ).execute();
+                }
+                catch ( InterruptedException e )
+                {
                 }
                 catch ( Exception e )
                 {
-                    System.out.println( "Failed executing task" );
+                    logger.warning( "Failed executing task" );
                     e.printStackTrace();
                 }
-
             } );
 
     }

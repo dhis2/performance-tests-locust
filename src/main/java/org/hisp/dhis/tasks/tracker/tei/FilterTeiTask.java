@@ -29,7 +29,6 @@ package org.hisp.dhis.tasks.tracker.tei;
  */
 
 import org.hisp.dhis.actions.RestApiActions;
-import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 
 /**

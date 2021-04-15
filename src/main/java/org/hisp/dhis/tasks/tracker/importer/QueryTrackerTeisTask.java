@@ -8,7 +8,8 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class QueryTrackerTeisTask extends DhisAbstractTask
+public class QueryTrackerTeisTask
+    extends DhisAbstractTask
 {
     private String endpoint = "/api/tracker/trackedEntities";
 
@@ -23,7 +24,8 @@ public class QueryTrackerTeisTask extends DhisAbstractTask
         this.weight = weight;
     }
 
-    public QueryTrackerTeisTask( int weight, String query, UserCredentials userCredentials ) {
+    public QueryTrackerTeisTask( int weight, String query, UserCredentials userCredentials )
+    {
         this.weight = weight;
         this.query = query;
         this.userCredentials = userCredentials;
@@ -51,14 +53,16 @@ public class QueryTrackerTeisTask extends DhisAbstractTask
     {
         ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query );
 
-        if ( savePayload ) {
+        if ( savePayload )
+        {
             this.response = response;
         }
 
         record( response.getRaw() );
     }
 
-    public ApiResponse executeAndGetResponse() {
+    public ApiResponse executeAndGetResponse()
+    {
         savePayload = true;
         this.execute();
         return this.response;

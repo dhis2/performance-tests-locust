@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class DashboardItem
 {
     private String id;
+
     private Visualization visualization;
 
 }

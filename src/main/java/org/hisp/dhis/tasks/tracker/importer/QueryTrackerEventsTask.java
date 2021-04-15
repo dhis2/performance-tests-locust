@@ -1,9 +1,7 @@
 package org.hisp.dhis.tasks.tracker.importer;
 
-import com.google.gson.JsonObject;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
-import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 
 /**
@@ -19,7 +17,8 @@ public class QueryTrackerEventsTask
 
     private boolean savePayload = false;
 
-    public QueryTrackerEventsTask( String query, UserCredentials userCredentials ) {
+    public QueryTrackerEventsTask( String query, UserCredentials userCredentials )
+    {
         this.query = query;
         this.userCredentials = userCredentials;
     }
@@ -43,7 +42,7 @@ public class QueryTrackerEventsTask
     public void execute()
         throws Exception
     {
-        performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials()).get(this.query) );
+        performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query ) );
 
     }
 }

@@ -12,11 +12,15 @@ public class GenerateTrackedEntityAttributeValueTask
     extends DhisAbstractTask
 {
     private String teiAttributeId;
+
     private UserCredentials userCredentials;
+
     private String endpoint = "/api/trackedEntityAttributes/id/generate";
+
     private ApiResponse response;
 
-    public GenerateTrackedEntityAttributeValueTask(int weight, String trackedEntityAttributeId, UserCredentials userCredentials ) {
+    public GenerateTrackedEntityAttributeValueTask( int weight, String trackedEntityAttributeId, UserCredentials userCredentials )
+    {
         this.weight = weight;
         this.teiAttributeId = trackedEntityAttributeId;
         this.userCredentials = userCredentials;
@@ -39,9 +43,9 @@ public class GenerateTrackedEntityAttributeValueTask
     {
         AuthenticatedApiActions apiActions = new AuthenticatedApiActions( "", userCredentials );
 
-        response = apiActions.get(  endpoint.replace( "id", teiAttributeId ) );
+        response = apiActions.get( endpoint.replace( "id", teiAttributeId ) );
 
-        record(response.getRaw());
+        record( response.getRaw() );
 
     }
 

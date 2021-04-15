@@ -41,7 +41,7 @@ public class RelationshipRandomizer
 
         Relationship relationship = new Relationship();
         relationship.setRelationshipType( relationshipType.getId() );
-        relationship.setTo( getConstraint(to ));
+        relationship.setTo( getConstraint( to ) );
         relationship.setFrom( getConstraint( from ) );
 
         return relationship;

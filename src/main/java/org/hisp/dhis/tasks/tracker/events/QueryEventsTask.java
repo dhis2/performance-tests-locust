@@ -26,7 +26,8 @@ public class QueryEventsTask
         this.query = query;
     }
 
-    public QueryEventsTask( String query, UserCredentials userCredentials ) {
+    public QueryEventsTask( String query, UserCredentials userCredentials )
+    {
         this.query = query;
         this.userCredentials = userCredentials;
     }
@@ -49,9 +50,10 @@ public class QueryEventsTask
 
     public void execute()
     {
-        ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials()).get(this.query);
+        ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query );
 
-        if ( saveResponse ) {
+        if ( saveResponse )
+        {
             this.responseBody = response.getBody();
         }
 

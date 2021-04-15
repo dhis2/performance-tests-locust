@@ -12,24 +12,28 @@ import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tracker.domain.Enrollment;
 import org.hisp.dhis.tracker.domain.mapper.EnrollmentMapperImpl;
-import org.hisp.dhis.utils.JsonParserUtils;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class AddTrackerEnrollmentTask extends DhisAbstractTask
+public class AddTrackerEnrollmentTask
+    extends DhisAbstractTask
 {
     private String endpoint = "/api/tracker";
+
     private RandomizerContext ctx = RandomizerContext.EMPTY_CONTEXT();
+
     private TrackerApiResponse response;
 
-    public AddTrackerEnrollmentTask(int weight, EntitiesCache entitiesCache ) {
+    public AddTrackerEnrollmentTask( int weight, EntitiesCache entitiesCache )
+    {
         this.weight = weight;
         this.entitiesCache = entitiesCache;
     }
 
-    public AddTrackerEnrollmentTask(int weight, EntitiesCache cache, RandomizerContext context, UserCredentials userCredentials ) {
-        this(weight, cache);
+    public AddTrackerEnrollmentTask( int weight, EntitiesCache cache, RandomizerContext context, UserCredentials userCredentials )
+    {
+        this( weight, cache );
         this.ctx = context;
         this.userCredentials = userCredentials;
     }
@@ -52,7 +56,7 @@ public class AddTrackerEnrollmentTask extends DhisAbstractTask
     {
         EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer();
 
-        Enrollment enrollment = new EnrollmentMapperImpl().from( enrollmentRandomizer.createWithoutEvents( entitiesCache, ctx ));
+        Enrollment enrollment = new EnrollmentMapperImpl().from( enrollmentRandomizer.createWithoutEvents( entitiesCache, ctx ) );
 
         AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, getUserCredentials() );
 
@@ -60,7 +64,8 @@ public class AddTrackerEnrollmentTask extends DhisAbstractTask
         enrollments.setEnrollments( Lists.newArrayList( enrollment ) );
 
         response = (TrackerApiResponse) performTaskAndRecord(
-            () -> new TrackerApiResponse( authenticatedApiActions.post( enrollments, new QueryParamsBuilder().addAll( "async=false", "identifier=enrollment" ) ))
+            () -> new TrackerApiResponse( authenticatedApiActions
+                .post( enrollments, new QueryParamsBuilder().addAll( "async=false", "identifier=enrollment" ) ) )
         );
 
     }

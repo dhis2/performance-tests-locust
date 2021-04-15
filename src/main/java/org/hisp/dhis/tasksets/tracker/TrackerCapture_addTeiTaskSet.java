@@ -31,9 +31,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
+public class TrackerCapture_addTeiTaskSet
+    extends DhisAbstractTask
 {
-    public TrackerCapture_addTeiTaskSet(int weight, EntitiesCache entitiesCache ) {
+    public TrackerCapture_addTeiTaskSet( int weight, EntitiesCache entitiesCache )
+    {
         this.weight = weight;
         this.entitiesCache = entitiesCache;
     }
@@ -66,20 +68,24 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
 
         TrackedEntityInstance tei = new TrackedEntityInstanceRandomizer().createWithoutEnrollment( entitiesCache, context );
         // add tei
-        generateAttributes( program, tei, user.getUserCredentials());
+        generateAttributes( program, tei, user.getUserCredentials() );
 
         TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstances();
         trackedEntityInstances.setTrackedEntityInstances( Lists.newArrayList( tei ) );
 
         long time = System.currentTimeMillis();
 
-        new QueryFilterTeiTask( 1, String.format( "?program=%s&ou=%s&ouMode=SELECTED&pageSize=50&page=1&totalPages=false", program.getUid(), ou), user.getUserCredentials() );
+        new QueryFilterTeiTask( 1,
+            String.format( "?program=%s&ou=%s&ouMode=SELECTED&pageSize=50&page=1&totalPages=false", program.getUid(), ou ),
+            user.getUserCredentials(), "page load" );
 
-        ApiResponse body = new AddTeiTask( 1, entitiesCache, trackedEntityInstances, user.getUserCredentials() ).executeAndGetResponse();
+        ApiResponse body = new AddTeiTask( 1, entitiesCache, trackedEntityInstances, user.getUserCredentials() )
+            .executeAndGetResponse();
 
         context.setTeiId( body.extractUid() );
 
-        if (context.getTeiId() == null) {
+        if ( context.getTeiId() == null )
+        {
             recordFailure( System.currentTimeMillis() - time, "TEI wasn't created" );
             return;
         }
@@ -88,7 +94,8 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
 
         context.setEnrollmentId( response.extractUid() );
 
-        if (context.getEnrollmentId() == null ){
+        if ( context.getEnrollmentId() == null )
+        {
             recordFailure( System.currentTimeMillis() - time, "Enrollment wasn't created" );
             return;
         }
@@ -98,20 +105,23 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
 
         Event event = new EventRandomizer().createWithoutDataValues( entitiesCache, context );
 
-        response = new AddEventsTask(1, entitiesCache, Lists.newArrayList(event) , user.getUserCredentials() ).executeAndGetResponse();
+        response = new AddEventsTask( 1, entitiesCache, Lists.newArrayList( event ), user.getUserCredentials() )
+            .executeAndGetResponse();
 
         String eventId = response.extractUid();
 
-        if (eventId == null) {
+        if ( eventId == null )
+        {
             recordFailure( System.currentTimeMillis() - time, "Event wasn't created" );
             return;
         }
 
         int dataValuesToCreate = context.getProgramStage().getDataElements().size();
 
-        ListOrderedSet dataValueSet = new EventRandomizer().createDataValues( context.getProgramStage(), dataValuesToCreate / 4, dataValuesToCreate);
+        ListOrderedSet dataValueSet = new EventRandomizer()
+            .createDataValues( context.getProgramStage(), dataValuesToCreate / 4, dataValuesToCreate );
 
-        DhisDelayedTaskSet taskSet = new DhisDelayedTaskSet(5, TimeUnit.SECONDS);
+        DhisDelayedTaskSet taskSet = new DhisDelayedTaskSet( 5, TimeUnit.SECONDS );
         dataValueSet.forEach( dv -> {
             taskSet.addTask(
                 new AddDataValueTask( 1, eventId, (DataValue) dv, program.getUid(), user.getUserCredentials() )
@@ -119,23 +129,26 @@ public class TrackerCapture_addTeiTaskSet extends DhisAbstractTask
         } );
 
         taskSet.execute();
-        recordSuccess( System .currentTimeMillis() - time, 0);
+        recordSuccess( System.currentTimeMillis() - time, 0 );
 
         waitBetweenTasks();
 
     }
 
-    private void generateAttributes(Program program, TrackedEntityInstance tei, UserCredentials userCredentials ) {
+    private void generateAttributes( Program program, TrackedEntityInstance tei, UserCredentials userCredentials )
+    {
 
         program.getAttributes().stream().filter( p ->
             p.isGenerated()
         ).forEach( att -> {
-            ApiResponse response = new GenerateTrackedEntityAttributeValueTask( 1, att.getTrackedEntityAttribute(),userCredentials ).executeAndGetResponse();
+            ApiResponse response = new GenerateTrackedEntityAttributeValueTask( 1, att.getTrackedEntityAttribute(),
+                userCredentials ).executeAndGetResponse();
 
             String value = response.extractString( "value" );
 
-            Attribute attribute = tei.getAttributes().stream().filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute()))
-                .findFirst().orElse( null);
+            Attribute attribute = tei.getAttributes().stream()
+                .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
+                .findFirst().orElse( null );
 
             attribute.setValue( value );
         } );

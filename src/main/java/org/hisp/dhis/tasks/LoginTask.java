@@ -45,7 +45,7 @@ public class LoginTask
 
         Response apiResponse = RestAssured.getRestAssured().given().contentType( ContentType.TEXT )
             .auth()
-            .basic( username,  password ).when()
+            .basic( username, password ).when()
             .get( "api/me" ).thenReturn();
 
         if ( apiResponse.statusCode() == 200 )

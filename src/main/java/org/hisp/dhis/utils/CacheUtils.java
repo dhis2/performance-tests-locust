@@ -7,14 +7,18 @@ import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 import de.javakaffee.kryoserializers.UnmodifiableCollectionsSerializer;
 import org.hisp.dhis.cache.*;
 import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.locust.LocustConfig;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.logging.Logger;
 
 public class CacheUtils
 {
+    private static Logger logger = Logger.getLogger( CacheUtils.class.getName() );
+
     private static String TMP = System.getProperty( "java.io.tmpdir" );
 
     public static String CACHE_FILE = TMP + System.getProperty( "file.separator" ) + "locust-cache.dat";
@@ -44,7 +48,7 @@ public class CacheUtils
         kryo.register( Tei.class, 210 );
         kryo.register( Visualization.class, 211 );
         kryo.register( DashboardItem.class, 212 );
-        kryo.register( Dashboard.class, 213);
+        kryo.register( Dashboard.class, 213 );
         kryo.register( RelationshipConstraint.class, 214 );
         kryo.register( RelationshipType.class, 215 );
 
@@ -73,8 +77,38 @@ public class CacheUtils
 
     }
 
+    public static EntitiesCache initCache( LocustConfig cfg )
+        throws IOException
+    {
+
+        EntitiesCache cache;
+
+        if ( !cacheExists() || !cfg.reuseCache() )
+        {
+            logger.info( "Cache not found. Hold on while a new cache is created." );
+            cache = createAndSerializeCache();
+        }
+
+        else
+        {
+            try
+            {
+                cache = deserializeCache();
+            }
+            catch ( Exception e )
+            {
+                logger.warning( "Error deserializing cache. Recreating cache file..." + e );
+                cache = createAndSerializeCache();
+            }
+        }
+
+        logger.info( "Cache loaded from " + getCachePath() );
+
+        return cache;
+    }
+
     public static EntitiesCache createAndSerializeCache()
-            throws IOException
+        throws IOException
     {
         EntitiesCache cache = new EntitiesCache();
         cache.loadAll();

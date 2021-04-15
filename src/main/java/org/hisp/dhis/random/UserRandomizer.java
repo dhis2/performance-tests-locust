@@ -11,18 +11,23 @@ import java.util.stream.Collectors;
  */
 public class UserRandomizer
 {
-    public User getRandomUser( EntitiesCache entitiesCache ) {
+    public User getRandomUser( EntitiesCache entitiesCache )
+    {
         return DataRandomizer.randomElementFromList( entitiesCache.getUsers().stream().filter( p -> {
             return !p.getUserCredentials().getUsername().equalsIgnoreCase( entitiesCache.getDefaultUser().getUsername() );
-        } ).collect( Collectors.toList()) );
+        } ).collect( Collectors.toList() ) );
     }
 
-    public User getRandomUserNotAdmin( EntitiesCache cache ) {
-        return DataRandomizer.randomElementFromList( cache.getUsers().stream().filter( p-> !p.getUserCredentials().equals( cache.getDefaultUser().getUserCredentials() )).collect(
-            Collectors.toList()) );
+    public User getRandomUserNotAdmin( EntitiesCache cache )
+    {
+        return DataRandomizer.randomElementFromList(
+            cache.getUsers().stream().filter( p -> !p.getUserCredentials().equals( cache.getDefaultUser().getUserCredentials() ) )
+                .collect(
+                    Collectors.toList() ) );
     }
 
-    public String getRandomUserOrgUnit( User user ) {
+    public String getRandomUserOrgUnit( User user )
+    {
         return DataRandomizer.randomElementFromList( user.getOrganisationUnits() );
     }
 }

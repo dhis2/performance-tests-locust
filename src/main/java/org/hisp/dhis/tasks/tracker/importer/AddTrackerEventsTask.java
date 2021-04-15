@@ -16,12 +16,12 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tracker.domain.Event;
 import org.hisp.dhis.tracker.domain.mapper.EventMapperImpl;
 import org.hisp.dhis.utils.DataRandomizer;
-import org.hisp.dhis.utils.JsonParserUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -38,6 +38,8 @@ public class AddTrackerEventsTask
     private Events events;
 
     private TrackerApiResponse response;
+
+    private Logger logger = Logger.getLogger( this.getClass().getName() );
 
     public AddTrackerEventsTask( int weight, EntitiesCache entitiesCache )
     {
@@ -80,7 +82,7 @@ public class AddTrackerEventsTask
             }
             catch ( Exception e )
             {
-                System.out.println( "An error occurred while creating a random event: " + e.getMessage() );
+                logger.warning( "An error occurred while creating a random event: " + e.getMessage() );
             }
 
             if ( randomEvent != null && !blackListedTeis.contains( randomEvent.getTrackedEntity() ) )

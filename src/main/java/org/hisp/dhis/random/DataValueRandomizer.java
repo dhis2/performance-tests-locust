@@ -20,26 +20,29 @@ import java.util.List;
  */
 public class DataValueRandomizer
 {
-    public DataValue create( String ou, EntitiesCache entitiesCache ) {
-        DataSet dataSet = DataRandomizer.randomElementFromList( entitiesCache.getDataSets());
+    public DataValue create( String ou, EntitiesCache entitiesCache )
+    {
+        DataSet dataSet = DataRandomizer.randomElementFromList( entitiesCache.getDataSets() );
 
         DataElement dataElement = DataRandomizer.randomElementFromList( dataSet.getDataElements() );
 
         DataValue dv = new DataValue();
         dv.setDataElement( dataElement.getUid() );
         dv.setOrgUnit( ou );
-        dv.setPeriod( randomPeriod(dataSet.getPeriodType()) );
+        dv.setPeriod( randomPeriod( dataSet.getPeriodType() ) );
         dv.setValue( rndValueFrom( dataElement.getValueType() ) );
         dv.setCategoryOptionCombo( "" );
 
         return dv;
     }
 
-    public DataValueSet create( String ou, EntitiesCache entitiesCache, int numberOfValues) {
+    public DataValueSet create( String ou, EntitiesCache entitiesCache, int numberOfValues )
+    {
         List<DataValue> values = new ArrayList<>();
 
-        for ( int i = 0; i < numberOfValues; i++ ) {
-            values.add( create( ou, entitiesCache ));
+        for ( int i = 0; i < numberOfValues; i++ )
+        {
+            values.add( create( ou, entitiesCache ) );
         }
 
         DataValueSet set = new DataValueSet();
@@ -47,27 +50,31 @@ public class DataValueRandomizer
         return set;
     }
 
-    public DataValueSet create( String ou, EntitiesCache entitiesCache, int min, int max) {
+    public DataValueSet create( String ou, EntitiesCache entitiesCache, int min, int max )
+    {
         int numberOfValues = DataRandomizer.randomIntInRange( min, max );
 
-        return create( ou,entitiesCache,numberOfValues );
+        return create( ou, entitiesCache, numberOfValues );
     }
 
-
-    public String randomPeriod(String periodType) {
+    public String randomPeriod( String periodType )
+    {
         Calendar calendar = new Calendar.Builder().build();
         calendar.setTime( DataRandomizer.randomPastDate() );
 
-        if (periodType.equalsIgnoreCase( "yearly" )) {
+        if ( periodType.equalsIgnoreCase( "yearly" ) )
+        {
             return "" + calendar.get( Calendar.YEAR );
         }
 
-        if (periodType.equalsIgnoreCase( "monthly" )) {
-            return new SimpleDateFormat("yyyyMM").format( calendar.getTime() );
+        if ( periodType.equalsIgnoreCase( "monthly" ) )
+        {
+            return new SimpleDateFormat( "yyyyMM" ).format( calendar.getTime() );
         }
 
-        if (periodType.equalsIgnoreCase( "daily" )) {
-            return new SimpleDateFormat("yyyyMMdd").format( calendar.getTime() );
+        if ( periodType.equalsIgnoreCase( "daily" ) )
+        {
+            return new SimpleDateFormat( "yyyyMMdd" ).format( calendar.getTime() );
         }
 
         return "NOT_SUPPORTED_PERIOD_TYPE";
@@ -81,7 +88,8 @@ public class DataValueRandomizer
         {
             val = String.valueOf( DataRandomizer.randomBoolean() );
         }
-        else if ( valueType.equals( ValueType.PHONE_NUMBER )) {
+        else if ( valueType.equals( ValueType.PHONE_NUMBER ) )
+        {
             val = Faker.instance().phoneNumber().cellPhone();
             return val;
         }
@@ -108,7 +116,7 @@ public class DataValueRandomizer
         }
         else if ( valueType.isText() )
         {
-            val = DataRandomizer.randomString(8);
+            val = DataRandomizer.randomString( 8 );
         }
         else if ( valueType.isOrganisationUnit() )
         {

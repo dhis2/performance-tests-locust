@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasks;
 
 import com.github.myzhan.locust4j.Locust;
-import io.restassured.response.Response;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;

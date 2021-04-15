@@ -5,9 +5,8 @@ import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.TeiType;
 import org.hisp.dhis.response.dto.ApiResponse;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -15,12 +14,16 @@ import java.util.Map;
 public class TeiTypeCacheBuilder
     implements CacheBuilder<TeiType>
 {
+    private Logger logger = Logger.getLogger( this.getClass().getName() );
+
     @Override
     public void load( EntitiesCache cache )
     {
-        List<TeiType> teiTypes = getPayload( "/api/trackedEntityTypes?fields=*" ).extractList( "trackedEntityTypes", TeiType.class );
+        List<TeiType> teiTypes = getPayload( "/api/trackedEntityTypes?fields=*" )
+            .extractList( "trackedEntityTypes", TeiType.class );
 
-        cache.setTeiTypes( teiTypes) ;
+        logger.info( "Tei types loaded in cache. Size: " + teiTypes.size() );
+        cache.setTeiTypes( teiTypes );
     }
 
     private ApiResponse getPayload( String url )

@@ -12,19 +12,24 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class AddEnrollmentTask extends DhisAbstractTask
+public class AddEnrollmentTask
+    extends DhisAbstractTask
 {
     private String endpoint = "/api/enrollments";
+
     private RandomizerContext ctx = RandomizerContext.EMPTY_CONTEXT();
+
     private ApiResponse response;
 
-    public AddEnrollmentTask(int weight, EntitiesCache entitiesCache ) {
+    public AddEnrollmentTask( int weight, EntitiesCache entitiesCache )
+    {
         this.weight = weight;
         this.entitiesCache = entitiesCache;
     }
 
-    public AddEnrollmentTask(int weight, EntitiesCache cache, RandomizerContext context, UserCredentials userCredentials ) {
-        this(weight, cache);
+    public AddEnrollmentTask( int weight, EntitiesCache cache, RandomizerContext context, UserCredentials userCredentials )
+    {
+        this( weight, cache );
         this.ctx = context;
         this.userCredentials = userCredentials;
     }
@@ -51,7 +56,7 @@ public class AddEnrollmentTask extends DhisAbstractTask
 
         AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, getUserCredentials() );
 
-        response = performTaskAndRecord( () -> authenticatedApiActions.post( enrollment ));
+        response = performTaskAndRecord( () -> authenticatedApiActions.post( enrollment ) );
     }
 
     public ApiResponse executeAndGetBody()

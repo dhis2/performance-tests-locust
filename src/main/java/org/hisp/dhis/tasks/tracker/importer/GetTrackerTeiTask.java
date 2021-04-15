@@ -8,17 +8,22 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class GetTrackerTeiTask extends DhisAbstractTask
+public class GetTrackerTeiTask
+    extends DhisAbstractTask
 {
     private String endpoint = "/api/tracker/trackedEntities";
+
     private ApiResponse response;
+
     private String tei;
 
-    public GetTrackerTeiTask( String teiId ) {
+    public GetTrackerTeiTask( String teiId )
+    {
         this.tei = teiId;
     }
 
-    public GetTrackerTeiTask ( String teiId, UserCredentials userCredentials ) {
+    public GetTrackerTeiTask( String teiId, UserCredentials userCredentials )
+    {
         this.tei = teiId;
         this.userCredentials = userCredentials;
     }
@@ -39,7 +44,7 @@ public class GetTrackerTeiTask extends DhisAbstractTask
     public void execute()
         throws Exception
     {
-        this.response = performTaskAndRecord(() -> new AuthenticatedApiActions( endpoint, getUserCredentials() ).get( tei ) );
+        this.response = performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, getUserCredentials() ).get( tei ) );
     }
 
     public ApiResponse executeAndGetResponse()

@@ -6,9 +6,11 @@ import org.hisp.dhis.cache.UserCredentials;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class AuthenticatedApiActions extends RestApiActions
+public class AuthenticatedApiActions
+    extends RestApiActions
 {
     private UserCredentials userCredentials;
+
     public AuthenticatedApiActions( String endpoint, UserCredentials userCredentials )
     {
         super( endpoint );

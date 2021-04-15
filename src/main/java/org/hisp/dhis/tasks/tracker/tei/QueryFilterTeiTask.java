@@ -42,6 +42,8 @@ public class QueryFilterTeiTask
 {
     private String endpoint = "/api/trackedEntityInstances/query";
 
+    private String idetifier = "";
+
     private String query = "?ou=DiszpKrYNg8&attribute=TfdH5KvFmMy&filter=TfdH5KvFmMy:GE:Karoline";
 
     private ApiResponse response;
@@ -51,10 +53,12 @@ public class QueryFilterTeiTask
         this.weight = weight;
     }
 
-    public QueryFilterTeiTask( int weight, String query, UserCredentials userCredentials ) {
+    public QueryFilterTeiTask( int weight, String query, UserCredentials userCredentials, String customIdentifier )
+    {
         this.weight = weight;
         this.query = query;
         this.userCredentials = userCredentials;
+        this.idetifier = String.format( " ( %s )", customIdentifier );
     }
 
     public int getWeight()
@@ -65,7 +69,7 @@ public class QueryFilterTeiTask
     @Override
     public String getName()
     {
-        return endpoint;
+        return endpoint + idetifier;
     }
 
     @Override
@@ -82,7 +86,8 @@ public class QueryFilterTeiTask
         record( response.getRaw() );
     }
 
-    public ApiResponse executeAndGetResponse() {
+    public ApiResponse executeAndGetResponse()
+    {
         this.execute();
         return this.response;
     }

@@ -12,8 +12,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RelationshipConstraint {
+public class RelationshipConstraint
+{
     private String relationshipEntity;
+
     private Program program;
+
     private TeiType trackedEntityType;
 }

@@ -11,9 +11,14 @@ import lombok.Getter;
 public class AggregateDataValue
 {
     private String de;
+
     private String co;
+
     private String ds;
+
     private String ou;
+
     private String pe;
+
     private String value;
 }

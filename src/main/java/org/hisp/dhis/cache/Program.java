@@ -21,6 +21,8 @@ public class Program
 
     private boolean hasRegistration;
 
+    private int minAttributesRequiredToSearch;
+
     public Program()
     {
     }

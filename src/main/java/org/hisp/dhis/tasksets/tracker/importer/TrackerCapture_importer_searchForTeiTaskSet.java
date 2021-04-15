@@ -14,14 +14,19 @@ import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class TrackerCapture_importer_searchForTeiTaskSet extends DhisAbstractTask
+public class TrackerCapture_importer_searchForTeiTaskSet
+    extends DhisAbstractTask
 {
-    public TrackerCapture_importer_searchForTeiTaskSet(int weight, EntitiesCache entitiesCache ) {
+    HashMap<String, List<TrackedEntityAttribute>> attributes = new HashMap<>();
+
+    public TrackerCapture_importer_searchForTeiTaskSet( int weight, EntitiesCache entitiesCache )
+    {
         this.weight = weight;
         this.entitiesCache = entitiesCache;
     }
@@ -46,23 +51,60 @@ public class TrackerCapture_importer_searchForTeiTaskSet extends DhisAbstractTas
         User user = new UserRandomizer().getRandomUser( this.entitiesCache );
         String ou = DataRandomizer.randomElementFromList( user.getOrganisationUnits() );
 
-
-        List<TrackedEntityAttribute> searchableAttributes = program
-            .getAttributes().stream().filter( a -> a.isSearchable()&& a.getValueType() == ValueType.TEXT).collect( Collectors.toList());
-
-        TrackedEntityAttribute randomAttribute = DataRandomizer.randomElementFromList( searchableAttributes );
-
-
-        ApiResponse response = new QueryTrackerTeisTask( 1, String.format( "?orgUnit=%s&ouMode=ACCESSIBLE&trackedEntityType=%s&attribute=%s:LIKE:%s", ou, program.getEntityType(), randomAttribute
-            .getTrackedEntityAttribute(), DataRandomizer.randomString(1)), user.getUserCredentials() ).executeAndGetResponse();
+        ApiResponse response = new QueryTrackerTeisTask( 1,
+            String.format( "?orgUnit=%s&ouMode=ACCESSIBLE&program=%s%s", ou, program.getUid(), getAttributesQuery( program ) ),
+            user.getUserCredentials() ).executeAndGetResponse();
 
         List<HashMap> rows = response.extractList( "instances" );
 
-        if (rows != null && rows.size() > 0) {
+        if ( rows != null && rows.size() > 0 )
+        {
             HashMap row = DataRandomizer.randomElementFromList( rows );
 
             String teiId = row.get( "trackedEntity" ).toString();
             new GetTrackerTeiTask( teiId, user.getUserCredentials() ).execute();
+        }
+
+    }
+
+    private String getAttributesQuery( Program program )
+    {
+        AtomicReference<String> query = new AtomicReference<>( "" );
+
+        getRandomAttributes( program.getUid(), program.getMinAttributesRequiredToSearch() )
+            .forEach( p -> {
+                query.set( query +
+                    String.format( "&attribute=%s:EQ:%s", p.getTrackedEntityAttribute(), DataRandomizer.randomString( 2 ) ) );
+            } );
+
+        return query.get();
+    }
+
+    private List<TrackedEntityAttribute> getRandomAttributes( String programId, int size )
+    {
+        if ( attributes.isEmpty() )
+        {
+            preloadAttributes();
+        }
+
+        return DataRandomizer.randomElementsFromList( attributes.get( programId ), size );
+    }
+
+    private void preloadAttributes()
+    {
+        for ( Program program : this.entitiesCache.getTrackerPrograms()
+        )
+        {
+            List<TrackedEntityAttribute> searchableAttributes = program
+                .getAttributes().stream().filter( a -> a.isSearchable() && a.getValueType().equals( ValueType.TEXT ) )
+                .collect( Collectors.toList() );
+
+            if ( searchableAttributes.isEmpty() )
+            {
+                return;
+            }
+
+            attributes.put( program.getUid(), searchableAttributes );
         }
 
     }

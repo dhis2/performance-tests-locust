@@ -26,14 +26,18 @@ public class Android_syncTeisTaskSet
     extends DhisAbstractTask
 {
     private int minPayload = 3;
+
     private int maxPayload = 10;
+
     public Android_syncTeisTaskSet( int weight, EntitiesCache cache )
     {
         this.weight = weight;
         this.entitiesCache = cache;
     }
-    public Android_syncTeisTaskSet( int weight, EntitiesCache cache, int payloadSize) {
-        this(weight, cache);
+
+    public Android_syncTeisTaskSet( int weight, EntitiesCache cache, int payloadSize )
+    {
+        this( weight, cache );
         this.minPayload = payloadSize;
         this.maxPayload = payloadSize;
     }
@@ -41,7 +45,7 @@ public class Android_syncTeisTaskSet
     @Override
     public String getName()
     {
-        return String.format( "Android: sync teis (%d, %d)", minPayload, maxPayload);
+        return String.format( "Android: sync teis (%d, %d)", minPayload, maxPayload );
     }
 
     @Override
@@ -62,7 +66,8 @@ public class Android_syncTeisTaskSet
         context.setProgram( program );
         context.setOrgUnitUid( ou );
 
-        TrackedEntityInstances teis = new TrackedEntityInstanceRandomizer().create( this.entitiesCache, context, minPayload, maxPayload );
+        TrackedEntityInstances teis = new TrackedEntityInstanceRandomizer()
+            .create( this.entitiesCache, context, minPayload, maxPayload );
 
         generateAttributes( program, teis.getTrackedEntityInstances(), user.getUserCredentials() );
 

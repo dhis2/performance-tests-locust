@@ -2,7 +2,6 @@ package org.hisp.dhis.utils;
 
 import com.google.gson.*;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -19,9 +18,10 @@ public class JsonParserUtils
             return parser.parse( (String) object ).getAsJsonObject();
         }
 
-        Gson gson = new GsonBuilder().setDateFormat( "yyyy-MM-dd"  ).create();
+        Gson gson = new GsonBuilder().setDateFormat( "yyyy-MM-dd" ).create();
 
-        if (object instanceof ArrayList ) {
+        if ( object instanceof ArrayList )
+        {
             return parser.parse( gson.toJson( object ) ).getAsJsonArray();
 
         }

@@ -12,11 +12,13 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class Android_syncDataValuesTaskSet extends DhisAbstractTask
+public class Android_syncDataValuesTaskSet
+    extends DhisAbstractTask
 {
     private String endpoint = "/api/dataValueSets";
 
-    public Android_syncDataValuesTaskSet(int weight, EntitiesCache entitiesCache ) {
+    public Android_syncDataValuesTaskSet( int weight, EntitiesCache entitiesCache )
+    {
         this.entitiesCache = entitiesCache;
         this.weight = weight;
     }
@@ -38,9 +40,10 @@ public class Android_syncDataValuesTaskSet extends DhisAbstractTask
         throws InterruptedException
     {
         User user = getUser();
-        AuthenticatedApiActions dataValueSetActions  = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
+        AuthenticatedApiActions dataValueSetActions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
 
-        DataValueSet aggregateDataValues = new DataValueRandomizer().create( new UserRandomizer().getRandomUserOrgUnit( user ), entitiesCache, 10, 50 );
+        DataValueSet aggregateDataValues = new DataValueRandomizer()
+            .create( new UserRandomizer().getRandomUserOrgUnit( user ), entitiesCache, 10, 50 );
 
         ApiResponse response = dataValueSetActions.post( aggregateDataValues );
 

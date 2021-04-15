@@ -80,7 +80,8 @@ public class PostRelationshipTask
             entitiesCache, context, 2
         );
 
-        trackedEntityInstances.getTrackedEntityInstances().forEach( p-> generateAttributes( context.getProgram(), p, user.getUserCredentials()) );
+        trackedEntityInstances.getTrackedEntityInstances()
+            .forEach( p -> generateAttributes( context.getProgram(), p, user.getUserCredentials() ) );
 
         ApiResponse body = new AddTeiTask( 1, entitiesCache, trackedEntityInstances, user.getUserCredentials() )
             .executeAndGetResponse();

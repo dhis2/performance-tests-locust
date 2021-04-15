@@ -9,15 +9,22 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class GenerateAndReserveTrackedEntityAttributeValuesTask extends DhisAbstractTask
+public class GenerateAndReserveTrackedEntityAttributeValuesTask
+    extends DhisAbstractTask
 {
     private String teiAttributeId;
+
     private UserCredentials userCredentials;
+
     private int numberToReserve = 0;
+
     private String endpoint = "/api/trackedEntityAttributes/id/generateAndReserve";
+
     private ApiResponse response;
 
-    public GenerateAndReserveTrackedEntityAttributeValuesTask(int weight, String trackedEntityAttributeId, UserCredentials userCredentials, int numberToReserve ) {
+    public GenerateAndReserveTrackedEntityAttributeValuesTask( int weight, String trackedEntityAttributeId,
+        UserCredentials userCredentials, int numberToReserve )
+    {
         this.weight = weight;
         this.teiAttributeId = trackedEntityAttributeId;
         this.userCredentials = userCredentials;
@@ -41,8 +48,8 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask extends DhisAbst
     {
         AuthenticatedApiActions apiActions = new AuthenticatedApiActions( "", userCredentials );
 
-        response = apiActions.get(  endpoint.replace( "id", teiAttributeId ), new QueryParamsBuilder().add( "numberToReserve",
-            String.valueOf( numberToReserve ) )  );
+        response = apiActions.get( endpoint.replace( "id", teiAttributeId ), new QueryParamsBuilder().add( "numberToReserve",
+            String.valueOf( numberToReserve ) ) );
 
         record( response.getRaw() );
     }

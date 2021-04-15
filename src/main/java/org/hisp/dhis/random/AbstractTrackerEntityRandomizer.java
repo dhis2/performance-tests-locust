@@ -28,16 +28,14 @@ package org.hisp.dhis.random;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
-
-import com.github.javafaker.Faker;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.ProgramStage;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.utils.DataRandomizer;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * @author Luciano Fiandesio
@@ -63,8 +61,10 @@ public abstract class AbstractTrackerEntityRandomizer<T>
         return program;
     }
 
-    protected String getOrgUnitFromContextOrRndFromProgram( RandomizerContext ctx, Program program ) {
-        if (ctx.getOrgUnitUid() == null) {
+    protected String getOrgUnitFromContextOrRndFromProgram( RandomizerContext ctx, Program program )
+    {
+        if ( ctx.getOrgUnitUid() == null )
+        {
             return getRandomOrgUnitFromProgram( program );
         }
 
@@ -84,14 +84,14 @@ public abstract class AbstractTrackerEntityRandomizer<T>
         return DataRandomizer.randomElementFromList( program.getOrgUnits() );
     }
 
-    protected ProgramStage getProgramStageFromProgram(Program program )
+    protected ProgramStage getProgramStageFromProgram( Program program )
     {
         return DataRandomizer.randomElementFromList( program.getStages() );
     }
 
-    protected String rndValueFrom( ValueType valueType)
+    protected String rndValueFrom( ValueType valueType )
     {
-       return new DataValueRandomizer().rndValueFrom( valueType );
+        return new DataValueRandomizer().rndValueFrom( valueType );
     }
 
 }

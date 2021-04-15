@@ -1,11 +1,6 @@
 package org.hisp.dhis.tasks.tracker.events;
 
-import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
@@ -18,7 +13,12 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.DataRandomizer;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
 
 /**
  * @author Luciano Fiandesio <luciano@dhis2.org>
@@ -26,6 +26,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class AddEventsTask
     extends DhisAbstractTask
 {
+    ApiResponse response;
+
     private EventRandomizer eventRandomizer;
 
     private String endpoint = "/api/events";
@@ -36,7 +38,7 @@ public class AddEventsTask
 
     private boolean storeResponse = false;
 
-    ApiResponse response;
+    private Logger logger = Logger.getLogger( this.getClass().getName() );
 
     public AddEventsTask( int weight, EntitiesCache entitiesCache )
     {
@@ -45,8 +47,9 @@ public class AddEventsTask
         eventRandomizer = new EventRandomizer();
     }
 
-    public AddEventsTask ( int weight, EntitiesCache entitiesCache, List<Event> events, UserCredentials userCredentials ) {
-        this(weight, entitiesCache);
+    public AddEventsTask( int weight, EntitiesCache entitiesCache, List<Event> events, UserCredentials userCredentials )
+    {
+        this( weight, entitiesCache );
         this.events = events;
         this.userCredentials = userCredentials;
     }
@@ -70,13 +73,14 @@ public class AddEventsTask
         for ( int i = 0; i < DataRandomizer.randomIntInRange( 5, 10 ); i++ )
         {
             Event randomEvent = null;
-            try {
+            try
+            {
                 randomEvent = eventRandomizer.create( entitiesCache, RandomizerContext.EMPTY_CONTEXT() );
 
             }
             catch ( Exception e )
             {
-                System.out.println( "An error occurred while creating a random event: " + e.getMessage() );
+                logger.warning( "An error occurred while creating a random event: " + e.getMessage() );
             }
 
             if ( randomEvent != null && !blackListedTeis.contains( randomEvent.getTrackedEntityInstance() ) )
@@ -108,26 +112,10 @@ public class AddEventsTask
         }
     }
 
-    public ApiResponse executeAndGetResponse() {
+    public ApiResponse executeAndGetResponse()
+    {
         this.execute();
         return response;
-    }
-
-    // We need to wrap the list of events with a root element
-    static class EventWrapper
-    {
-        @JsonProperty( "events" )
-        private List<Event> events;
-
-        public EventWrapper( List<Event> events )
-        {
-            this.events = events;
-        }
-
-        public List<Event> getEvents()
-        {
-            return events;
-        }
     }
 
     /**
@@ -136,7 +124,7 @@ public class AddEventsTask
      * in order to avoid reusing invalid Tracked Entity Instances (which are the link between a PSI and a PI),
      * this method analyzed the response payload and checks if one of the ImportSummaries contains an error
      * ending for: 'is not enrolled in program". This error signal that there was Program Instance found by Tei + Program.
-     *
+     * <p>
      * If the message is found the TEI uid is extracted and added to a "Tei Black List", so that the same tei is not reused
      * in the context of the performance test
      *
@@ -148,7 +136,10 @@ public class AddEventsTask
         try
         {
             List importSummaries = response.extractObject( "importSummaries", List.class );
-            if (importSummaries == null) return;
+            if ( importSummaries == null )
+            {
+                return;
+            }
             for ( Object importSummary : importSummaries )
             {
 
@@ -167,6 +158,23 @@ public class AddEventsTask
         catch ( Exception e )
         {
             e.printStackTrace();
+        }
+    }
+
+    // We need to wrap the list of events with a root element
+    static class EventWrapper
+    {
+        @JsonProperty( "events" )
+        private List<Event> events;
+
+        public EventWrapper( List<Event> events )
+        {
+            this.events = events;
+        }
+
+        public List<Event> getEvents()
+        {
+            return events;
         }
     }
 }

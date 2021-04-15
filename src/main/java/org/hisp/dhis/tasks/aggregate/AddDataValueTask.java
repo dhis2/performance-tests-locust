@@ -18,7 +18,8 @@ public class AddDataValueTask
 {
     private String endpoint = "/api/dataValues";
 
-    public AddDataValueTask(final int weight, final EntitiesCache entitiesCache ) {
+    public AddDataValueTask( final int weight, final EntitiesCache entitiesCache )
+    {
         this.weight = weight;
         this.entitiesCache = entitiesCache;
     }
@@ -40,18 +41,19 @@ public class AddDataValueTask
         throws InterruptedException
     {
         User user = getUser();
-        AuthenticatedApiActions dataValueActions  = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
+        AuthenticatedApiActions dataValueActions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
 
-        DataValue aggregateDataValue = new DataValueRandomizer().create( new UserRandomizer().getRandomUserOrgUnit( user ), entitiesCache );
+        DataValue aggregateDataValue = new DataValueRandomizer()
+            .create( new UserRandomizer().getRandomUserOrgUnit( user ), entitiesCache );
 
-        ApiResponse response = dataValueActions.post(aggregateDataValue, new QueryParamsBuilder()
-            .add( "de", aggregateDataValue.getDataElement())
-            .add( "pe",  aggregateDataValue.getPeriod())
-            .add( "value=", aggregateDataValue.getValue())
+        ApiResponse response = dataValueActions.post( aggregateDataValue, new QueryParamsBuilder()
+            .add( "de", aggregateDataValue.getDataElement() )
+            .add( "pe", aggregateDataValue.getPeriod() )
+            .add( "value=", aggregateDataValue.getValue() )
             //.add( "ds=" + aggregateDataValue.get())
-            .add( "ou=", aggregateDataValue.getOrgUnit() ));
+            .add( "ou=", aggregateDataValue.getOrgUnit() ) );
 
-        record( response.getRaw(), 201);
+        record( response.getRaw(), 201 );
         waitBetweenTasks();
     }
 }

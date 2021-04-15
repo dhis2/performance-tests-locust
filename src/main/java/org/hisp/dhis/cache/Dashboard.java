@@ -15,5 +15,6 @@ import java.util.List;
 public class Dashboard
 {
     private String id;
+
     private List<DashboardItem> dashboardItems;
 }

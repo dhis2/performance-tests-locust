@@ -39,7 +39,6 @@ import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -87,13 +86,15 @@ public class EventRandomizer
                 return event;
             }
 
-            if (cache.getTeis().get( program.getUid() ) != null) {
+            if ( cache.getTeis().get( program.getUid() ) != null )
+            {
                 String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( program.getUid() ) )
                     .getUid();
                 event.setTrackedEntityInstance( teiUid );
             }
 
-            else {
+            else
+            {
                 return null;
             }
         }
@@ -116,13 +117,10 @@ public class EventRandomizer
     {
         ListOrderedSet dataValues = new ListOrderedSet();
         int numberOfDataValuesToCreate = DataRandomizer.randomIntInRange( min, max );
-        List<Integer> indexes = DataRandomizer.randomSequence( programStage.getDataElements().size(),
-            numberOfDataValuesToCreate + 1 );
 
-        for ( Integer index : indexes )
-        {
-            dataValues.add( withRandomValue( programStage.getDataElements().get( index ) ) );
-        }
+        DataRandomizer.randomElementsFromList( programStage.getDataElements(), numberOfDataValuesToCreate ).forEach( p -> {
+            dataValues.add( withRandomValue( p ) );
+        } );
 
         return dataValues;
     }
