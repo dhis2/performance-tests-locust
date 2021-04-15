@@ -27,7 +27,7 @@ public class UserCacheBuilder
     {
         List<User> users = getPayload(
             String.format(
-                "/api/users?filter=organisationUnits.level:eq:5&fields=id,organisationUnits~pluck,userCredentials[username]&filter=displayName:like:%s&pageSize=%d )",
+                "/api/users?filter=organisationUnits.level:eq:5&fields=id,organisationUnits~pluck,userCredentials[username]&filter=displayName:like:%s&pageSize=%d",
                 cfg.cacheUsersIdentifier(),
                 cfg.cacheUserPoolSize() ) )
             .extractList( "users", User.class );
