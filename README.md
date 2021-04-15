@@ -24,7 +24,8 @@ To configure the environment variables, run:
    
    For more configuration options, see [configuration section](#test-configuration)
    
-3. From the root directory of the `performance-test-locust` project execute `docker-compose up` command.
+3. From the root directory of the `performance-test-locust` project execute `docker-compose up` command. If this command ends up in some error for example
+`Could not find any locustfile` then use this command `docker pull dhis2/locustio:latest` to download docker image and re-run `docker-compose up`.
 
 4. Run [main() method](src/main/java/org/hisp/dhis/Main.java).
     - You can run it directly via your IDE -> open `Main` class and click on a green arrow next to the `main()` method 
@@ -56,3 +57,18 @@ To configure the environment variables, run:
 
 
 
+## Running tests locally (without Docker!)
+
+## Requirements
+1. Python 3
+2. Locust 1.2+
+3. Working DHIS2 server
+
+## Running
+1. Install Locust (will upgrade if already exists): `pip3 install locust --upgrade`
+2. Start Locust master node: `locust -f locust-master.py --master --master-bind-host 127.0.0.1 --master-bind-port 5557 --web-host=127.0.0.1`
+3. Start the DHIS2 server now if you have not already
+3. Make sure `locust.properties` are pointing to your local DHIS2 server
+4. Compile and run this project from the command line: `mvn clean compile exec:java` (you can also start it from IntelliJ via Main.class file)
+5. Open your browser and go to `http://localhost:8089` enter you desired number of workers and spawn rate, point `Host` to: `127.0.0.1` "Locust master"
+6. Watch the tests and listen to your machine heats up
