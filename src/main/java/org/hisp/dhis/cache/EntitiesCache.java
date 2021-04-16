@@ -18,6 +18,8 @@ import static java.util.stream.Collectors.toList;
 @Getter
 public class EntitiesCache
 {
+    private static EntitiesCache cache = null;
+
     private List<Program> programs;
 
     private List<Program> trackerPrograms = new ArrayList<>();
@@ -40,6 +42,25 @@ public class EntitiesCache
 
     private User defaultUser;
 
+    private EntitiesCache()
+    {
+    }
+
+    public static EntitiesCache getInstance()
+    {
+        if ( cache == null )
+        {
+            cache = new EntitiesCache();
+            cache.loadAll();
+        }
+
+        return cache;
+    }
+
+    public static void setInstance( EntitiesCache entitiesCache ) {
+        cache = entitiesCache;
+    }
+
     public static <T> List<T> randomElementsFromList( List<T> list, int elements )
     {
         Collections.shuffle( list );
@@ -50,33 +71,34 @@ public class EntitiesCache
         return list.subList( 0, elements );
     }
 
-    public void loadAll()
+    private void loadAll()
     {
+        new ProgramCacheBuilder().load( this );
         new DashboardCacheBuilder().load( this );
         new DataSetsCacheBuilder().load( this );
         new UserCacheBuilder().load( this );
         new TeiTypeCacheBuilder().load( this );
-        new ProgramCacheBuilder().load( this );
-        new TeiCacheBuilder().load( this );
+
+        new TeiCacheBuilder( this ).load( this );
         new RelationshipTypeCacheBuilder().load( this );
 
         // remove programs without tei
-        this.trackerPrograms = trackerPrograms.stream().filter( p -> teis.containsKey( p.getUid() ) ).collect( toList() );
+        this.trackerPrograms = trackerPrograms.stream().filter( p -> teis.containsKey( p.getId() ) ).collect( toList() );
     }
 
     public List<Program> getProgramsWithAtLeastOnRepeatableStage()
     {
-        List<Program> programs = new ArrayList<>();
+        List<Program> progr = new ArrayList<>();
         for ( Program program : this.programs )
         {
-            for ( ProgramStage ps : program.getStages() )
+            for ( ProgramStage ps : program.getProgramStages() )
             {
                 if ( ps.isRepeatable() )
                 {
-                    programs.add( program );
+                    progr.add( program );
                 }
             }
         }
-        return programs;
+        return progr;
     }
 }

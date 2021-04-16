@@ -3,14 +3,12 @@ package org.hisp.dhis;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
-import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.config.DecoderConfig;
 import io.restassured.config.EncoderConfig;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.mapper.ObjectMapperType;
 import io.restassured.specification.RequestSpecification;
-import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.utils.AuthFilter;
 
 import java.time.Instant;
@@ -21,9 +19,13 @@ import static org.aeonbits.owner.ConfigFactory.create;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class Configuration
+public class RestAssuredConfig
 {
-    private static final LocustConfig cfg = create( LocustConfig.class );
+    private RestAssuredConfig()
+    {
+    }
+
+    private static final TestConfig cfg = create( TestConfig.class );
 
     public static void init()
     {
@@ -42,9 +44,9 @@ public class Configuration
                         .create() )
         );
 
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        RestAssured.requestSpecification = defaultRequestSpecification();
-        RestAssured.baseURI = cfg.targetUri();
+        io.restassured.RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        io.restassured.RestAssured.requestSpecification = defaultRequestSpecification();
+        io.restassured.RestAssured.baseURI = cfg.targetUri();
     }
 
     private static RequestSpecification defaultRequestSpecification()

@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasks.tracker.importer;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
@@ -28,16 +27,15 @@ public class AddTrackerTeiTask
 
     private TrackerApiResponse response;
 
-    public AddTrackerTeiTask( int weight, EntitiesCache entitiesCache )
+    public AddTrackerTeiTask( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
     }
 
-    public AddTrackerTeiTask( int weight, EntitiesCache cache, TrackedEntities trackedEntityInstance,
+    public AddTrackerTeiTask( int weight, TrackedEntities trackedEntityInstance,
         UserCredentials userCredentials )
     {
-        this( weight, cache );
+        this( weight );
         trackedEntityInstanceBody = trackedEntityInstance;
         this.userCredentials = userCredentials;
 

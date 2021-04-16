@@ -1,8 +1,8 @@
 package org.hisp.dhis.tasks.tracker;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
@@ -27,10 +27,9 @@ public class PostRelationshipTask
 
     private RelationshipRandomizer relationshipRandomizer;
 
-    public PostRelationshipTask( int weight, EntitiesCache cache )
+    public PostRelationshipTask( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = cache;
+        super( weight );
         this.relationshipRandomizer = new RelationshipRandomizer();
     }
 
@@ -65,7 +64,7 @@ public class PostRelationshipTask
         }
 
         org.hisp.dhis.dxf2.events.trackedentity.Relationship relationship = relationshipRandomizer
-            .create( entitiesCache, context, uids.get( 0 ), uids.get( 1 ) );
+            .create( entitiesCache, uids.get( 0 ), uids.get( 1 ) );
 
         performTaskAndRecord( () -> actions.post( relationship ) );
 
@@ -83,20 +82,17 @@ public class PostRelationshipTask
         trackedEntityInstances.getTrackedEntityInstances()
             .forEach( p -> generateAttributes( context.getProgram(), p, user.getUserCredentials() ) );
 
-        ApiResponse body = new AddTeiTask( 1, entitiesCache, trackedEntityInstances, user.getUserCredentials() )
+        ApiResponse body = new AddTeiTask( 1, trackedEntityInstances, user.getUserCredentials() )
             .executeAndGetResponse();
 
-        List<String> uids = body.extractUids();
-
-        return uids;
+        return body.extractUids();
     }
 
     private void generateAttributes( Program program, TrackedEntityInstance tei, UserCredentials userCredentials )
     {
 
-        program.getAttributes().stream().filter( p ->
-            p.isGenerated()
-        ).forEach( att -> {
+        program.getAttributes().stream().filter( TrackedEntityAttribute::isGenerated )
+            .forEach( att -> {
                 ApiResponse response = new GenerateTrackedEntityAttributeValueTask( 1, att.getTrackedEntityAttribute(),
                     userCredentials ).executeAndGetResponse();
 

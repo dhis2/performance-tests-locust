@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasks.aggregate;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.dxf2.datavalue.DataValue;
 import org.hisp.dhis.random.DataValueRandomizer;
@@ -18,10 +17,9 @@ public class AddDataValueTask
 {
     private String endpoint = "/api/dataValues";
 
-    public AddDataValueTask( final int weight, final EntitiesCache entitiesCache )
+    public AddDataValueTask( final int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
     }
 
     @Override

@@ -44,6 +44,7 @@ public class GetHeavyAnalyticsTask
 
     public GetHeavyAnalyticsTask( final int weight, final int apiVersion )
     {
+        super( weight );
         this.weight = weight;
         this.apiVersion = apiVersion;
     }

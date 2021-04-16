@@ -5,9 +5,9 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 import de.javakaffee.kryoserializers.UnmodifiableCollectionsSerializer;
+import org.hisp.dhis.TestConfig;
 import org.hisp.dhis.cache.*;
 import org.hisp.dhis.common.ValueType;
-import org.hisp.dhis.locust.LocustConfig;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -17,11 +17,12 @@ import java.util.logging.Logger;
 
 public class CacheUtils
 {
+    private CacheUtils() { }
     private static Logger logger = Logger.getLogger( CacheUtils.class.getName() );
 
-    private static String TMP = System.getProperty( "java.io.tmpdir" );
+    private static String tmp = System.getProperty( "java.io.tmpdir" );
 
-    public static String CACHE_FILE = TMP + System.getProperty( "file.separator" ) + "locust-cache.dat";
+    private static String cacheFile = tmp + System.getProperty( "file.separator" ) + "locust-cache.dat";
 
     private static Kryo kryo;
 
@@ -54,33 +55,32 @@ public class CacheUtils
 
     }
 
-    public static void serializeCache( EntitiesCache cache )
+    private static void serializeCache( EntitiesCache cache )
         throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Output output = new Output( baos );
         kryo.writeObject( output, cache );
         output.flush();
-        try (OutputStream outputStream = new FileOutputStream( CACHE_FILE ))
+        try (OutputStream outputStream = new FileOutputStream( cacheFile ))
         {
             baos.writeTo( outputStream );
         }
     }
 
-    public static EntitiesCache deserializeCache()
+    private static EntitiesCache deserializeCache()
         throws FileNotFoundException
     {
-        try (Input input = new Input( new FileInputStream( CACHE_FILE ) ))
+        try (Input input = new Input( new FileInputStream( cacheFile ) ))
         {
             return kryo.readObject( input, EntitiesCache.class );
         }
 
     }
 
-    public static EntitiesCache initCache( LocustConfig cfg )
+    public static EntitiesCache initCache( TestConfig cfg )
         throws IOException
     {
-
         EntitiesCache cache;
 
         if ( !cacheExists() || !cfg.reuseCache() )
@@ -107,22 +107,21 @@ public class CacheUtils
         return cache;
     }
 
-    public static EntitiesCache createAndSerializeCache()
+    private static EntitiesCache createAndSerializeCache()
         throws IOException
     {
-        EntitiesCache cache = new EntitiesCache();
-        cache.loadAll();
+        EntitiesCache cache = EntitiesCache.getInstance();
         serializeCache( cache );
         return cache;
     }
 
-    public static boolean cacheExists()
+    private static boolean cacheExists()
     {
-        return new File( CACHE_FILE ).exists();
+        return new File( cacheFile ).exists();
     }
 
-    public static String getCachePath()
+    private static String getCachePath()
     {
-        return CACHE_FILE;
+        return cacheFile;
     }
 }

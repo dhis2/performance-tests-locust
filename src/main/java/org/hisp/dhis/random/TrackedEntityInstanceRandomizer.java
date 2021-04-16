@@ -37,8 +37,6 @@ public class TrackedEntityInstanceRandomizer
 
     private int minEVent = 1;
 
-    private EventRandomizer eventRandomizer;
-
     private EnrollmentRandomizer enrollmentRandomizer;
 
     public TrackedEntityInstanceRandomizer( int maxEvent, int minEVent )
@@ -46,13 +44,11 @@ public class TrackedEntityInstanceRandomizer
         this.maxEvent = maxEvent;
         this.minEVent = minEVent;
 
-        eventRandomizer = new EventRandomizer();
         enrollmentRandomizer = new EnrollmentRandomizer( minEVent, maxEvent );
     }
 
     public TrackedEntityInstanceRandomizer()
     {
-        eventRandomizer = new EventRandomizer();
         enrollmentRandomizer = new EnrollmentRandomizer( minEVent, maxEvent );
     }
 
@@ -76,7 +72,7 @@ public class TrackedEntityInstanceRandomizer
 
         TrackedEntityInstance tei = new TrackedEntityInstance();
 
-        tei.setTrackedEntityType( program.getEntityType() );
+        tei.setTrackedEntityType( program.getTrackedEntityType() );
         tei.setInactive( false );
         tei.setDeleted( false );
         tei.setFeatureType( FeatureType.NONE );
@@ -108,19 +104,6 @@ public class TrackedEntityInstanceRandomizer
         TrackedEntityInstances teis = new TrackedEntityInstances();
         teis.setTrackedEntityInstances( rndTeis );
         return teis;
-    }
-
-    private TrackedEntityInstance createTrackedEntityInstance( EntitiesCache cache )
-    {
-        try
-        {
-            return create( cache, new RandomizerContext() );
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public List<Attribute> getRandomAttributesList( Program program )
@@ -210,13 +193,13 @@ public class TrackedEntityInstanceRandomizer
 
     private TextPatternSegment getGeneratedSegment( TextPattern textPattern )
     {
-        return textPattern.getSegments().stream().filter( ( tp ) -> tp.getMethod().isGenerated() ).findFirst()
+        return textPattern.getSegments().stream().filter( tp -> tp.getMethod().isGenerated() ).findFirst()
             .orElse( null );
     }
 
     private TextPatternSegment getValueSegment( TextPattern textPattern )
     {
-        return textPattern.getSegments().stream().filter( ( tp ) -> !tp.getMethod().isGenerated() ).findFirst()
+        return textPattern.getSegments().stream().filter( tp -> !tp.getMethod().isGenerated() ).findFirst()
             .orElse( null );
     }
 }

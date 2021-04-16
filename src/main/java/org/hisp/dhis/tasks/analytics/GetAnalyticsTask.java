@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasks.analytics;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.cache.Visualization;
 import org.hisp.dhis.tasks.DhisAbstractTask;
@@ -21,15 +20,9 @@ public class GetAnalyticsTask
 
     private Visualization visualization;
 
-    public GetAnalyticsTask( int weight, EntitiesCache cache )
+    public GetAnalyticsTask( int weight, Visualization visualization, UserCredentials userCredentials )
     {
-        this.weight = weight;
-        this.entitiesCache = cache;
-    }
-
-    public GetAnalyticsTask( int weight, EntitiesCache cache, Visualization visualization, UserCredentials userCredentials )
-    {
-        this( weight, cache );
+        super( weight );
         this.visualization = visualization;
         this.userCredentials = userCredentials;
     }

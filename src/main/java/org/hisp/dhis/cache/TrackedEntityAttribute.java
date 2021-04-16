@@ -41,6 +41,7 @@ import java.util.List;
  * @author Luciano Fiandesio
  */
 @Getter
+@Setter
 @AllArgsConstructor
 public class TrackedEntityAttribute
 {
@@ -48,6 +49,7 @@ public class TrackedEntityAttribute
 
     private ValueType valueType;
 
+    @Setter
     @JsonAdapter( ObjectIdDeserializer.class )
     private String trackedEntityAttribute;
 
@@ -63,7 +65,6 @@ public class TrackedEntityAttribute
 
     private String displayName;
 
-    @Setter
     private String lastValue;
 
     public TrackedEntityAttribute()

@@ -24,6 +24,14 @@ public class DataSetsCacheBuilder
     @Override
     public void load( EntitiesCache cache )
     {
+        List<DataSet> dataSets = get();
+        cache.setDataSets( dataSets );
+        logger.info( "Data sets loaded in cache. Size: " + dataSets.size() );
+    }
+
+    @Override
+    public List<DataSet> get()
+    {
         List<DataSet> dataSets = new ArrayList<>();
         List<JsonObject> sets = getPayload( "/api/dataSets?fields=periodType,dataSetElements[dataElement[*]],id" )
             .extractList( "dataSets", JsonObject.class );
@@ -53,8 +61,7 @@ public class DataSetsCacheBuilder
                 dataSets.add( new DataSet( obj.get( "id" ).getAsString(), dataElements, obj.get( "periodType" ).getAsString() ) );
             } );
 
-        cache.setDataSets( dataSets );
-        logger.info( "Data sets loaded in cache. Size: " + dataSets.size() );
+        return dataSets;
     }
 
     private ApiResponse getPayload( String url )

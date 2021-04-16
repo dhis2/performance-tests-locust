@@ -15,17 +15,11 @@ public class QueryTrackerEventsTask
 
     private String query;
 
-    private boolean savePayload = false;
-
     public QueryTrackerEventsTask( String query, UserCredentials userCredentials )
     {
+        super( 1 );
         this.query = query;
         this.userCredentials = userCredentials;
-    }
-
-    public int getWeight()
-    {
-        return 1;
     }
 
     public String getName()
@@ -43,7 +37,6 @@ public class QueryTrackerEventsTask
         throws Exception
     {
         performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query ) );
-
     }
 }
 

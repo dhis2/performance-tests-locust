@@ -31,8 +31,7 @@ public class RelationshipRandomizer
         return relationship;
     }
 
-    public Relationship create( EntitiesCache cache, RandomizerContext randomizerContext, String from,
-        String to )
+    public Relationship create( EntitiesCache cache, String from, String to )
     {
         RelationshipType relationshipType = DataRandomizer.randomElementFromList( cache.getRelationshipTypes().stream().filter(
             p -> p.getFromConstraint().getTrackedEntityType() != null && p.getToConstraint().getTrackedEntityType() != null )
@@ -59,7 +58,7 @@ public class RelationshipRandomizer
             if ( relationshipConstraint.getProgram() != null )
             {
                 randomTei = DataRandomizer
-                    .randomElementFromList( cache.getTeis().get( relationshipConstraint.getProgram().getUid() ) );
+                    .randomElementFromList( cache.getTeis().get( relationshipConstraint.getProgram().getId() ) );
             }
             else
             {
@@ -67,7 +66,7 @@ public class RelationshipRandomizer
                     .get( DataRandomizer.randomIntInRange( 0, cache.getTeis().size() ) );
                 context.setProgram( randomProgram );
 
-                randomTei = DataRandomizer.randomElementFromList( cache.getTeis().get( randomProgram.getUid() ) );
+                randomTei = DataRandomizer.randomElementFromList( cache.getTeis().get( randomProgram.getId() ) );
             }
 
             TrackedEntityInstance trackedEntityInstance = new TrackedEntityInstance();

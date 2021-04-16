@@ -19,12 +19,13 @@ public class GetTeiTask
 
     public GetTeiTask( String teiId )
     {
+        super( 1 );
         this.tei = teiId;
     }
 
     public GetTeiTask( String teiId, UserCredentials userCredentials )
     {
-        this.tei = teiId;
+        this( teiId );
         this.userCredentials = userCredentials;
     }
 

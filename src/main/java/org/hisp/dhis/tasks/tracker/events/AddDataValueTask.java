@@ -23,7 +23,7 @@ public class AddDataValueTask
 
     public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program )
     {
-        this.weight = weight;
+        super( weight );
         this.eventId = eventId;
         this.dataValue = dataValue;
         this.eventProgram = program;

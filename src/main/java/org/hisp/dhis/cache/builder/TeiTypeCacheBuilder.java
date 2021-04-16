@@ -19,11 +19,17 @@ public class TeiTypeCacheBuilder
     @Override
     public void load( EntitiesCache cache )
     {
-        List<TeiType> teiTypes = getPayload( "/api/trackedEntityTypes?fields=*" )
-            .extractList( "trackedEntityTypes", TeiType.class );
+        List<TeiType> teiTypes = get();
 
         logger.info( "Tei types loaded in cache. Size: " + teiTypes.size() );
         cache.setTeiTypes( teiTypes );
+    }
+
+    @Override
+    public List<TeiType> get()
+    {
+        return getPayload( "/api/trackedEntityTypes?fields=*" )
+            .extractList( "trackedEntityTypes", TeiType.class );
     }
 
     private ApiResponse getPayload( String url )

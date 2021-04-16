@@ -11,7 +11,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -31,20 +30,9 @@ public class ProgramCacheBuilder
     @Override
     public void load( EntitiesCache cache )
     {
-        List<String> programUids = getPayload( "/api/programs" ).extractList( "programs.id" );
-
-        List<Program> programs = programUids.parallelStream()
-            .map( ( String uid ) -> new Program( uid, getOrgUnitsFromProgram( uid ),
-                getStagesFromProgram( uid ).parallelStream()
-                    .map( psUid -> new ProgramStage( psUid, getDataElementsFromStage( psUid ),
-                        getStageInstanceRepeatableStatus( psUid ) ) )
-                    .collect( toList() ),
-                getTrackerAttributesFromProgram( uid ), getTrackedEntityTypeUid( uid ), hasProgramRegistration( uid ),
-                getMinAttributesRequiredToSearch( uid ) ) )
-            .collect( toList() );
-
+        List<Program> programs = get();
         cache.setPrograms( programs );
-        cache.setTrackerPrograms( programs.stream().filter( program -> program.isHasRegistration() ).collect( toList() ) );
+        cache.setTrackerPrograms( programs.stream().filter( Program::isHasRegistration ).collect( toList() ) );
         cache.setEventPrograms( programs.stream().filter( program -> !program.isHasRegistration() ).collect( toList() ) );
 
         logger.info( "Programs loaded in cache. Size: " + cache.getPrograms().size() );
@@ -52,37 +40,63 @@ public class ProgramCacheBuilder
         programCache = null;
     }
 
-    private List<String> getStagesFromProgram( String programUid )
+    @Override
+    public List<Program> get()
     {
-        ApiResponse response = programCache.get( programUid );
+        List<String> programUids = getPayload( "/api/programs?fields=id" ).extractList( "programs.id" );
 
-        return response.extractList( "programStages.id" );
+        return programUids.stream()
+            .map( ( String uid ) -> buildProgram( uid ) )
+            .collect( toList() );
     }
 
-    private List<DataElement> getDataElementsFromStage( String programStageUid )
+    private Program buildProgram( String uid )
     {
-        return getPayload( "/api/programStages/" + programStageUid ).extractList( "programStageDataElements.dataElement.id" )
-            .parallelStream()
-            .map( uid -> getDataElement( (String) uid ) ).collect( toList() );
+        ApiResponse response = programCache.get( uid );
+
+        Program program = response.extractObject( "", Program.class );
+
+        program.setAttributes( getTrackerAttributesFromProgram( uid ) );
+        program.setProgramStages( getProgramStages( uid ) );
+
+        return program;
     }
 
-    private int getMinAttributesRequiredToSearch( String programId )
+    private List<ProgramStage> getProgramStages( String uid )
     {
-        ApiResponse response = programCache.get( programId );
-        return (int) response.extract( "minAttributesRequiredToSearch" );
+        ApiResponse response = programCache.get( uid );
+        List<ProgramStage> programStages = new ArrayList<>();
+
+        List<JsonObject> stages = response.extractList( "programStages", JsonObject.class );
+
+        stages.forEach( stage -> {
+            ProgramStage ps = new ProgramStage( stage.get( "id" ).getAsString(), getDataElementsFromStage( stage ),
+                stage.get( "repeatable" ).getAsBoolean() );
+
+            programStages.add( ps );
+        } );
+
+        return programStages;
     }
 
-    private List<String> getOrgUnitsFromProgram( String programUid )
+    private List<DataElement> getDataElementsFromStage( JsonObject programStage )
     {
-        ApiResponse response = programCache.get( programUid );
-        return response.extractList( "organisationUnits.id" );
-    }
+        List<DataElement> dataElements = new ArrayList<>();
 
-    private boolean getStageInstanceRepeatableStatus( String programStageUid )
-    {
-        ApiResponse response = getPayload( "/api/programStages/" + programStageUid );
+        programStage.get( "programStageDataElements" ).getAsJsonArray()
+            .forEach( ( p ) -> {
+                JsonObject de = p.getAsJsonObject().get( "dataElement" ).getAsJsonObject();
+                DataElement element = new DataElement(
+                    de.get( "id" ).getAsString(),
+                    ValueType.valueOf( de.get( "valueType" ).getAsString() ),
+                    dataElementHasOptionSet( de )
+                        ? getOptionValuesFromOptionSet( de.get( "optionSet" ).getAsJsonObject().get( "id" ).getAsString() )
+                        : null );
 
-        return Boolean.parseBoolean( response.extractString( "repeatable" ) );
+                dataElements.add( element );
+            } );
+
+        return dataElements;
     }
 
     private ApiResponse getPayload( String url )
@@ -93,44 +107,42 @@ public class ProgramCacheBuilder
     private List<TrackedEntityAttribute> getTrackerAttributesFromProgram( String programUid )
     {
         ApiResponse response = programCache.get( programUid );
-        List<TrackedEntityAttribute> programAttributes = new ArrayList<>();
-        List<Map<String, Object>> atts = response.extractList( "programTrackedEntityAttributes" );
 
-        for ( Map<String, Object> att : atts )
-        {
-            ApiResponse trackedEntityAttribute = getAttributeUniqueness(
-                (String) ((Map) att.get( "trackedEntityAttribute" )).get( "id" ) );
-            programAttributes
-                .add( new TrackedEntityAttribute( (String) att.get( "id" ), ValueType.valueOf( (String) att.get( "valueType" ) ),
-                    (String) ((Map) att.get( "trackedEntityAttribute" )).get( "id" ),
-                    trackedEntityAttribute.extractObject( "generated", Boolean.class ),
-                    trackedEntityAttribute.extractObject( "unique", Boolean.class ),
-                    trackedEntityAttribute.extractString( "pattern" ),
-                    getProgramAttributeOptionValues( trackedEntityAttribute ),
-                    (Boolean) att.get( "searchable" ),
-                    (String) att.get( "displayName" ),
-                    null ) );
-        }
+        List<TrackedEntityAttribute> programAttributes = response
+            .extractList( "programTrackedEntityAttributes", TrackedEntityAttribute.class );
 
-        programAttributes.stream().filter( p -> p.getPattern() != null && !p.getPattern().isEmpty() ).forEach( p -> {
-            p.setLastValue( getAttributeLastValue( p.getTrackedEntityAttribute() ) );
+        programAttributes.forEach( p -> {
+            JsonObject object = response.extractObject( String
+                .format( "programTrackedEntityAttributes.trackedEntityAttribute.find{it.id == '%s'}",
+                    p.getTrackedEntityAttribute() ), JsonObject.class );
+
+            p.setOptions( getProgramAttributeOptionValues( object ) );
+            p.setGenerated( object.get( "generated" ).getAsBoolean() );
+            p.setUnique( object.get( "unique" ).getAsBoolean());
+            p.setPattern( object.get( "pattern" ).getAsString() );
+            if ( p.isUnique()) p.setSearchable( true ); // unique attributes are always searchable
+            if ( p.getPattern() != null && !p.getPattern().isEmpty() )
+            {
+                p.setLastValue( getAttributeLastValue( p.getTrackedEntityAttribute() ) );
+            }
         } );
 
         return programAttributes;
     }
 
-    private List<String> getProgramAttributeOptionValues( ApiResponse trackedEntityAttribute )
+    private List<String> getProgramAttributeOptionValues( JsonObject trackedEntityAttribute )
     {
         String optionSetUid = null;
-        JsonObject optionSet = trackedEntityAttribute.extractJsonObject( "optionSet" );
+        JsonObject optionSet = trackedEntityAttribute.getAsJsonObject( "optionSet" );
         if ( optionSet != null )
         {
             optionSetUid = optionSet.get( "id" ).getAsString();
         }
         if ( !StringUtils.isEmpty( optionSetUid ) )
         {
-            return getValuesFromOptionSet( optionSetUid );
+            return getOptionValuesFromOptionSet( optionSetUid );
         }
+
         return null;
     }
 
@@ -139,70 +151,28 @@ public class ProgramCacheBuilder
         return getPayload( "/api/trackedEntityAttributes/" + attributeId + "/generate" ).extractString( "value" );
     }
 
-    private ApiResponse getAttributeUniqueness( String trackerAttributeUid )
-    {
-        return getPayload( "/api/trackedEntityAttributes/" + trackerAttributeUid );
-    }
-
     private ApiResponse getProgram( String programUid )
     {
-        return getPayload( "/api/programs/" + programUid );
+        return getPayload( "/api/programs/" + programUid +
+            "?fields=*,organisationUnits~pluck,programStages[*,programStageDataElements[id,dataElement[*]]],programTrackedEntityAttributes[*,trackedEntityAttribute[*]],registration~rename(hasRegistration)" );
     }
 
-    private String getTrackedEntityTypeUid( String programUid )
+    private boolean dataElementHasOptionSet( JsonObject dataElement )
     {
-        Map map = programCache.get( programUid ).extractObject( "trackedEntityType", Map.class );
-        if ( map != null )
-        {
-            return (String) map.get( "id" );
-        }
-        return null;
-    }
-
-    private boolean hasProgramRegistration( String programUid )
-    {
-        ApiResponse response = programCache.get( programUid );
-
-        return response.extractObject( "registration", Boolean.class );
-    }
-
-    private DataElement getDataElement( String dataElementUid )
-    {
-        ApiResponse response = getPayload( "/api/dataElements/" + dataElementUid );
-
-        return new DataElement( dataElementUid, ValueType.valueOf( response.extractString( "valueType" ) ),
-            dataElementHasOptionSet( response )
-                ? getValuesFromOptionSet( response.extractString( "optionSet.id" ) )
-                : null );
-    }
-
-    private boolean dataElementHasOptionSet( ApiResponse response )
-    {
-        Object optionSet = response.extract( "optionSetValue" );
+        Boolean optionSet = dataElement.get( "optionSetValue" ).getAsBoolean();
         if ( optionSet != null )
         {
-            return (Boolean) optionSet;
+            return optionSet;
         }
+
         return false;
     }
 
-    private List<String> getValuesFromOptionSet( String optionSetUid )
+    private List<String> getOptionValuesFromOptionSet( String optionSetUid )
     {
-        List<String> optionValues = new ArrayList<>();
-        ApiResponse response = getPayload( "/api/optionSets/" + optionSetUid );
-        List<Map> options = response.extractList( "options" );
-        for ( Map optionMap : options )
-        {
-            optionValues.add( getOptionSetValue( (String) optionMap.get( "id" ) ) );
-        }
+        ApiResponse response = getPayload( String.format( "/api/optionSets/%s?fields=options[code,id]", optionSetUid ) );
 
-        return optionValues;
-    }
-
-    private String getOptionSetValue( String optionSetValueId )
-    {
-        ApiResponse response = getPayload( "/api/options/" + optionSetValueId );
-        return response.extractString( "code" );
+        return response.extractList( "options.code" );
     }
 
 }

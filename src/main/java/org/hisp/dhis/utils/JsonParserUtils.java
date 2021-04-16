@@ -26,8 +26,6 @@ public class JsonParserUtils
 
         }
 
-        JsonObject jsonObject = parser.parse( gson.toJson( object ) ).getAsJsonObject();
-
-        return jsonObject;
+        return parser.parse( gson.toJson( object ) ).getAsJsonObject();
     }
 }

@@ -1,46 +1,53 @@
 # performance-tests
-DHIS2 performance tests using locust.io 
+
+DHIS2 performance tests using locust.io
 
 ## Requirements
-Running locust locally will require the following instalations: 
+
+Running locust locally will require the following instalations:
+
 1. docker engine
 2. docker-compose
 
 ## Getting started
 
 1. Build performance-tests project by executing the following command: `mvn -s settings.xml compile`
-Please note, that repository uses GitHub packages and the following environment variables should be configured on your machine: 
+   Please note, that repository uses GitHub packages and the following environment variables should be configured on
+   your machine:
 
-- GITHUB_USERNAME - your GitHub username. 
-- GITHUB_TOKEN - personal access token [created on GitHub.](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line)
+- GITHUB_USERNAME - your GitHub username.
+- GITHUB_TOKEN - personal access
+  token [created on GitHub.](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line)
 
 To configure the environment variables, run:   
 `export GITHUB_USERNAME=$yourUsername`  
 `export GITHUB_TOKEN=$yourToken`
-	
-2. Locust performance tests expect the DHIS2 instance to be available on `http://localhost:8080/dhis`. This can be changed 
-   by changing the value of `target.base_uri` in [locust.properties](src/main/resources/locust.properties) 
+
+2. Locust performance tests expect the DHIS2 instance to be available on `http://localhost:8080/dhis`. This can be
+   changed by changing the value of `target.base_uri` in [locust.properties](src/main/resources/locust.properties)
    file. DHIS2 does not have to run on the localhost. A remote instance can be used as well.
-   
+
    For more configuration options, see [configuration section](#test-configuration)
-   
+
 3. Start locust master. From the root directory execute the following commands:
+
 ```
 $ docker pull dhis2/locustio:latest
 $ docker-compose up
 ```
 
 4. Run [main() method](src/main/java/org/hisp/dhis/Main.java).
-    - You can run it directly via your IDE -> open `Main` class and click on a green arrow next to the `main()` method 
+    - You can run it directly via your IDE -> open `Main` class and click on a green arrow next to the `main()` method
     - or by using the following maven command: `mvn clean compile exec:java`
-    
+
 5. Visit localhost:8089
 
-6. Enter user count and hatch rate and start swarming. 	
+6. Enter user count and hatch rate and start swarming.
 
 ## Test configuration
 
-[locust.properties](src/main/resources/locust.properties) is based on the performance test database, but should work with SL database as well. 
+[locust.properties](src/main/resources/locust.properties) is based on the performance test database, but should work
+with SL database as well.
 
 | Key | Default value | Description |
 | --- | :----------:| ---- : |

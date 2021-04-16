@@ -1,6 +1,5 @@
 package org.hisp.dhis.tasksets.tracker.importer;
 
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.models.Events;
@@ -20,10 +19,9 @@ import org.hisp.dhis.utils.DataRandomizer;
 public class Capture_importer_addEventTaskSet
     extends DhisAbstractTask
 {
-    public Capture_importer_addEventTaskSet( int weight, EntitiesCache entitiesCache )
+    public Capture_importer_addEventTaskSet( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
     }
 
     @Override
@@ -47,17 +45,17 @@ public class Capture_importer_addEventTaskSet
         Program program = DataRandomizer.randomElementFromList( entitiesCache.getEventPrograms() );
 
         new QueryTrackerEventsTask( String
-            .format( "?page=1&pageSize=15&totalPages=true&order=occurredAt:desc&program=%s&orgUnit=%s", program.getUid(), ou ),
+            .format( "?page=1&pageSize=15&totalPages=true&order=occurredAt:desc&program=%s&orgUnit=%s", program.getId(), ou ),
             user.getUserCredentials() ).execute();
 
         RandomizerContext context = new RandomizerContext();
         context.setProgram( program );
-        context.setProgramStage( DataRandomizer.randomElementFromList( program.getStages() ) );
+        context.setProgramStage( DataRandomizer.randomElementFromList( program.getProgramStages() ) );
         context.setOrgUnitUid( ou );
 
         Event event = new EventMapperImpl().from( new EventRandomizer().create( entitiesCache, context ) );
 
-        new AddTrackerDataTask( 1, entitiesCache, user.getUserCredentials(), Events.builder().build().addEvent( event ), true,
+        new AddTrackerDataTask( 1, user.getUserCredentials(), Events.builder().build().addEvent( event ), true,
             "identifier=events" ).execute();
         //new AddTrackerEventsTask( 1, entitiesCache, Events.builder().build().addEvent(event), user.getUserCredentials() ).execute();
 

@@ -42,34 +42,24 @@ public class QueryFilterTeiTask
 {
     private String endpoint = "/api/trackedEntityInstances/query";
 
-    private String idetifier = "";
+    private String identifier = "";
 
-    private String query = "?ou=DiszpKrYNg8&attribute=TfdH5KvFmMy&filter=TfdH5KvFmMy:GE:Karoline";
+    private String query;
 
     private ApiResponse response;
 
-    public QueryFilterTeiTask( int weight )
-    {
-        this.weight = weight;
-    }
-
     public QueryFilterTeiTask( int weight, String query, UserCredentials userCredentials, String customIdentifier )
     {
-        this.weight = weight;
+        super( weight );
         this.query = query;
         this.userCredentials = userCredentials;
-        this.idetifier = String.format( " ( %s )", customIdentifier );
-    }
-
-    public int getWeight()
-    {
-        return this.weight;
+        this.identifier = String.format( " ( %s )", customIdentifier );
     }
 
     @Override
     public String getName()
     {
-        return endpoint + idetifier;
+        return endpoint + identifier;
     }
 
     @Override

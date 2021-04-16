@@ -19,12 +19,18 @@ public class RelationshipTypeCacheBuilder
     @Override
     public void load( EntitiesCache cache )
     {
-        ApiResponse response = getPayload( "/api/relationshipTypes?fields=*" );
-
-        List<RelationshipType> relationshipTypes = response.extractList( "relationshipTypes", RelationshipType.class );
+        List<RelationshipType> relationshipTypes = get();
 
         cache.setRelationshipTypes( relationshipTypes );
         logger.info( "Relationship types loaded in cache. Size: " + cache.getRelationshipTypes().size() );
+    }
+
+    @Override
+    public List<RelationshipType> get()
+    {
+        ApiResponse response = getPayload( "/api/relationshipTypes?fields=*" );
+
+        return response.extractList( "relationshipTypes", RelationshipType.class );
     }
 
     private ApiResponse getPayload( String url )

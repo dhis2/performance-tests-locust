@@ -19,7 +19,7 @@ public class GetImportJobTask
 
     public GetImportJobTask( int weight, UserCredentials userCredentials, String jobId )
     {
-        this.weight = weight;
+        super( weight );
         this.userCredentials = userCredentials;
         this.jobId = jobId;
     }

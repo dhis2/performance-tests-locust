@@ -9,9 +9,9 @@ import java.util.List;
 @AllArgsConstructor
 public class ProgramStage
 {
-    private String uid;
+    private String id;
 
-    private List<DataElement> dataElements;
+    private List<DataElement> programStageDataElements;
 
     private boolean repeatable;
 
@@ -19,8 +19,8 @@ public class ProgramStage
     {
     }
 
-    public ProgramStage( String uid )
+    public ProgramStage( String id )
     {
-        this.uid = uid;
+        this.id = id;
     }
 }

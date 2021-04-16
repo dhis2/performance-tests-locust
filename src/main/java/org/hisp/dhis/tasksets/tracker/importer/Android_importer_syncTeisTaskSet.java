@@ -1,7 +1,7 @@
 package org.hisp.dhis.tasksets.tracker.importer;
 
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
@@ -29,16 +29,15 @@ public class Android_importer_syncTeisTaskSet
 {
     private String endpoint = "/api/tracker";
 
-    public Android_importer_syncTeisTaskSet( int weight, EntitiesCache cache )
+    public Android_importer_syncTeisTaskSet( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = cache;
+        super( weight );
     }
 
     @Override
     public String getName()
     {
-        return "Android: sync teis (importer)";
+        return String.format( "Android: sync teis (%s)", endpoint );
     }
 
     @Override
@@ -62,20 +61,17 @@ public class Android_importer_syncTeisTaskSet
 
         TrackedEntities trackedEntities = TrackedEntities.builder()
             .trackedEntities( instances.getTrackedEntityInstances().stream().
-                map( p -> {
-                    return new TrackedEntityMapperImpl().from( p );
-                } ).collect( Collectors.toList() ) )
+                map( p -> new TrackedEntityMapperImpl().from( p ) ).collect( Collectors.toList() ) )
             .build();
 
-        new AddTrackerDataTask( 1, entitiesCache, user.getUserCredentials(), trackedEntities, true, "identifier=FULL" ).execute();
+        new AddTrackerDataTask( 1, user.getUserCredentials(), trackedEntities, true, "identifier=FULL" ).execute();
 
         waitBetweenTasks();
     }
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
     {
-        program.getAttributes().stream().filter( p ->
-            p.isGenerated()
+        program.getAttributes().stream().filter( TrackedEntityAttribute::isGenerated
         ).forEach( att -> {
             ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
                 userCredentials, teis.size() ).executeAndGetResponse();

@@ -1,12 +1,10 @@
-package org.hisp.dhis.locust;
-
-import org.aeonbits.owner.Config;
+package org.hisp.dhis;
 
 @org.aeonbits.owner.Config.LoadPolicy( org.aeonbits.owner.Config.LoadType.MERGE )
-@Config.Sources( { "system:properties", "system:env", "classpath:locust.properties" } )
-public interface LocustConfig
+@org.aeonbits.owner.Config.Sources( { "system:properties", "system:env", "classpath:locust.properties" } )
+public interface TestConfig
     extends
-    Config
+    org.aeonbits.owner.Config
 {
     @Key( "locust.master.port" )
     int locustMasterPort();
@@ -45,5 +43,5 @@ public interface LocustConfig
     String cacheUsersPassword();
 
     @Key( "cache.reuse_cache" )
-    Boolean reuseCache();
+    boolean reuseCache();
 }

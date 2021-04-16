@@ -13,15 +13,13 @@ public class GenerateTrackedEntityAttributeValueTask
 {
     private String teiAttributeId;
 
-    private UserCredentials userCredentials;
-
     private String endpoint = "/api/trackedEntityAttributes/id/generate";
 
     private ApiResponse response;
 
     public GenerateTrackedEntityAttributeValueTask( int weight, String trackedEntityAttributeId, UserCredentials userCredentials )
     {
-        this.weight = weight;
+        super( weight );
         this.teiAttributeId = trackedEntityAttributeId;
         this.userCredentials = userCredentials;
     }

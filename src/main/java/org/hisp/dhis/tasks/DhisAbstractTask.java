@@ -4,10 +4,10 @@ import com.github.myzhan.locust4j.AbstractTask;
 import com.github.myzhan.locust4j.Locust;
 import io.restassured.response.Response;
 import org.aeonbits.owner.ConfigFactory;
+import org.hisp.dhis.TestConfig;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
-import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.utils.DataRandomizer;
@@ -31,7 +31,13 @@ public abstract class DhisAbstractTask
 
     protected EntitiesCache entitiesCache;
 
-    LocustConfig cfg = create( LocustConfig.class );
+    TestConfig cfg = create( TestConfig.class );
+
+    protected DhisAbstractTask( int weight )
+    {
+        this.weight = weight;
+        this.entitiesCache = EntitiesCache.getInstance();
+    }
 
     public int getWeight()
     {
@@ -57,7 +63,6 @@ public abstract class DhisAbstractTask
 
     protected UserCredentials getUserCredentials()
     {
-
         if ( this.userCredentials != null )
         {
             return this.userCredentials;
@@ -74,7 +79,6 @@ public abstract class DhisAbstractTask
             return this.user;
         }
 
-        User user;
         if ( this.userCredentials == null )
         {
             if ( this.entitiesCache != null )
@@ -83,7 +87,7 @@ public abstract class DhisAbstractTask
                 return user;
             }
 
-            LocustConfig conf = ConfigFactory.create( LocustConfig.class );
+            TestConfig conf = ConfigFactory.create( TestConfig.class );
             return new User( new UserCredentials( conf.adminUsername(), conf.adminPassword() ) );
         }
 
@@ -142,7 +146,7 @@ public abstract class DhisAbstractTask
     protected ApiResponse performTaskAndRecord( Callable<ApiResponse> function, int expectedStatusCode )
         throws Exception
     {
-        return performTaskAndRecord( function, response -> response.statusCode() == expectedStatusCode ? true : false );
+        return performTaskAndRecord( function, response -> response.statusCode() == expectedStatusCode );
     }
 
     protected ApiResponse performTaskAndRecord( Callable<ApiResponse> function )

@@ -1,7 +1,10 @@
 package org.hisp.dhis.cache;
 
+import com.google.gson.annotations.JsonAdapter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
+import org.hisp.dhis.cache.serializer.ObjectIdDeserializer;
 
 import java.util.List;
 
@@ -9,15 +12,19 @@ import java.util.List;
 @AllArgsConstructor
 public class Program
 {
-    private String uid;
+    private String id;
 
-    private List<String> orgUnits;
+    private List<String> organisationUnits;
 
-    private List<ProgramStage> stages;
+    @Setter
+    private List<ProgramStage> programStages;
 
+    @Setter
     private List<TrackedEntityAttribute> attributes;
 
-    private String entityType;
+    @Setter
+    @JsonAdapter( ObjectIdDeserializer.class )
+    private String trackedEntityType;
 
     private boolean hasRegistration;
 
@@ -29,6 +36,6 @@ public class Program
 
     public String getOrgUnit( int index )
     {
-        return this.orgUnits.get( index );
+        return this.organisationUnits.get( index );
     }
 }

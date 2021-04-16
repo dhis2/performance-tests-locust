@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasks.analytics;
 
 import org.hisp.dhis.cache.Dashboard;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Visualization;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.DataRandomizer;
@@ -14,10 +13,9 @@ import java.util.List;
 public class LoadDashboardTask
     extends DhisAbstractTask
 {
-    public LoadDashboardTask( int weight, EntitiesCache cache )
+    public LoadDashboardTask( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = cache;
+        super( weight );
     }
 
     @Override
@@ -48,7 +46,7 @@ public class LoadDashboardTask
                 Visualization vi = dashboard.getDashboardItems().get( o ).getVisualization();
                 if ( vi != null )
                 {
-                    new GetAnalyticsTask( 1, entitiesCache, vi, user.getUserCredentials() ).execute();
+                    new GetAnalyticsTask( 1, vi, user.getUserCredentials() ).execute();
                 }
             } );
         waitBetweenTasks();

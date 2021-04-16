@@ -3,11 +3,9 @@ package org.hisp.dhis.tasks.tracker.tei;
 import com.google.gson.JsonObject;
 import io.restassured.http.ContentType;
 import org.hisp.dhis.actions.RestApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.Tei;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
-import org.hisp.dhis.random.EnrollmentRandomizer;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
@@ -25,14 +23,9 @@ public class GetAndUpdateTeiTask
 {
     private RestApiActions teiActions = new RestApiActions( "/api/trackedEntityInstances" );
 
-    private EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer();
-
-    private EntitiesCache entitiesCache;
-
-    public GetAndUpdateTeiTask( int weight, EntitiesCache cache )
+    public GetAndUpdateTeiTask( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = cache;
+        super( weight );
     }
 
     @Override
@@ -54,12 +47,12 @@ public class GetAndUpdateTeiTask
         Program program = new Program();
 
         // Some programs in cache doesn't necessarily have TEIs.
-        while ( teis == null || teis.size() == 0 )
+        while ( teis == null || teis.isEmpty() )
         {
             program = entitiesCache.getTrackerPrograms()
                 .get( DataRandomizer.randomIntInRange( 0, entitiesCache.getTrackerPrograms().size() ) );
 
-            teis = entitiesCache.getTeis().get( program.getUid() );
+            teis = entitiesCache.getTeis().get( program.getId() );
         }
 
         List<Attribute> attributes = new TrackedEntityInstanceRandomizer().getRandomAttributesList( program );

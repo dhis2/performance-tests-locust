@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasksets.aggregate;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSet;
 import org.hisp.dhis.random.DataValueRandomizer;
@@ -17,10 +16,9 @@ public class Android_syncDataValuesTaskSet
 {
     private String endpoint = "/api/dataValueSets";
 
-    public Android_syncDataValuesTaskSet( int weight, EntitiesCache entitiesCache )
+    public Android_syncDataValuesTaskSet( int weight )
     {
-        this.entitiesCache = entitiesCache;
-        this.weight = weight;
+        super( weight );
     }
 
     @Override

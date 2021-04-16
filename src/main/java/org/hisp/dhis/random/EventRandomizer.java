@@ -68,12 +68,12 @@ public class EventRandomizer
 
         Event event = new Event();
         event.setEnrollment( ctx.getEnrollmentId() );
-        event.setDueDate( DEFAULT_DATEFORMAT.format( new Date() ) );
-        event.setProgram( program.getUid() );
-        event.setProgramStage( programStage.getUid() );
+        event.setDueDate( simpleDateFormat.format( new Date() ) );
+        event.setProgram( program.getId() );
+        event.setProgramStage( programStage.getId() );
         event.setOrgUnit( orgUnitUid );
         event.setStatus( EventStatus.ACTIVE );
-        event.setEventDate( DEFAULT_DATEFORMAT.format( new Date() ) );
+        event.setEventDate( simpleDateFormat.format( new Date() ) );
         event.setFollowup( false );
         event.setDeleted( false );
         event.setAttributeOptionCombo( "" ); // TODO
@@ -86,9 +86,9 @@ public class EventRandomizer
                 return event;
             }
 
-            if ( cache.getTeis().get( program.getUid() ) != null )
+            if ( cache.getTeis().get( program.getId() ) != null )
             {
-                String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( program.getUid() ) )
+                String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( program.getId() ) )
                     .getUid();
                 event.setTrackedEntityInstance( teiUid );
             }
@@ -118,9 +118,7 @@ public class EventRandomizer
         ListOrderedSet dataValues = new ListOrderedSet();
         int numberOfDataValuesToCreate = DataRandomizer.randomIntInRange( min, max );
 
-        DataRandomizer.randomElementsFromList( programStage.getDataElements(), numberOfDataValuesToCreate ).forEach( p -> {
-            dataValues.add( withRandomValue( p ) );
-        } );
+        DataRandomizer.randomElementsFromList( programStage.getProgramStageDataElements(), numberOfDataValuesToCreate ).forEach( p -> dataValues.add( withRandomValue( p ) ) );
 
         return dataValues;
     }
@@ -147,6 +145,6 @@ public class EventRandomizer
     private ProgramStage getRepeatableRandomProgramStageFromProgram( Program program )
     {
         return DataRandomizer.randomElementFromList(
-            program.getStages().stream().filter( ProgramStage::isRepeatable ).collect( Collectors.toList() ) );
+            program.getProgramStages().stream().filter( ProgramStage::isRepeatable ).collect( Collectors.toList() ) );
     }
 }

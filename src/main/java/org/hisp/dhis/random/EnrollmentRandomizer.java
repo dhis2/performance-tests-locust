@@ -75,7 +75,7 @@ public class EnrollmentRandomizer
         ctx.setProgramStage( programStage );
 
         Enrollment enrollment = new Enrollment();
-        enrollment.setProgram( program.getUid() );
+        enrollment.setProgram( program.getId() );
         enrollment.setOrgUnit( orgUnitUid );
         enrollment.setEnrollmentDate( new Date() );
         enrollment.setIncidentDate( new Date() );
@@ -88,7 +88,7 @@ public class EnrollmentRandomizer
             if ( ctx.getTeiId() == null )
             {
                 enrollment
-                    .setTrackedEntityInstance( DataRandomizer.randomElementFromList( cache.getTeis().get( program ) ).getUid() );
+                    .setTrackedEntityInstance( DataRandomizer.randomElementFromList( cache.getTeis().get( program.getId() ) ).getUid() );
             }
 
             else

@@ -2,7 +2,6 @@ package org.hisp.dhis.tasks.tracker.importer;
 
 import com.google.common.collect.Lists;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.models.Enrollments;
 import org.hisp.dhis.random.EnrollmentRandomizer;
@@ -25,15 +24,14 @@ public class AddTrackerEnrollmentTask
 
     private TrackerApiResponse response;
 
-    public AddTrackerEnrollmentTask( int weight, EntitiesCache entitiesCache )
+    public AddTrackerEnrollmentTask( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
     }
 
-    public AddTrackerEnrollmentTask( int weight, EntitiesCache cache, RandomizerContext context, UserCredentials userCredentials )
+    public AddTrackerEnrollmentTask( int weight, RandomizerContext context, UserCredentials userCredentials )
     {
-        this( weight, cache );
+        this( weight );
         this.ctx = context;
         this.userCredentials = userCredentials;
     }

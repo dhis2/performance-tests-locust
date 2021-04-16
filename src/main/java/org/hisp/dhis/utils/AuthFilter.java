@@ -48,6 +48,7 @@ public class AuthFilter
             if ( getPair( username ) != null )
             {
                 String finalUsername = username;
+
                 Cookie cookie = auth.stream().filter( p -> p.getKey().equalsIgnoreCase( finalUsername ) )
                     .findFirst().orElse( null ).getValue();
 
@@ -77,10 +78,11 @@ public class AuthFilter
         {
             return new Cookie( "JSESSIONID", response.getCookie( "JSESSIONID" ) );
         }
-        else
-        {
+        else if ( response.getCookie( "SESSION" ) != null) {
             return new Cookie( "SESSION", response.getCookie( "SESSION" ) );
         }
+
+        return null;
     }
 
     private Pair<String, Cookie> getPair( String username )

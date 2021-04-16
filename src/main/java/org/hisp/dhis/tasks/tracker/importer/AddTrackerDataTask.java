@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasks.tracker.importer;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
@@ -37,16 +36,15 @@ public class AddTrackerDataTask
 
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
-    public AddTrackerDataTask( int weight, EntitiesCache entitiesCache )
+    public AddTrackerDataTask( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
     }
 
-    public AddTrackerDataTask( int weight, EntitiesCache cache, UserCredentials userCredentials, Object payload,
+    public AddTrackerDataTask( int weight, UserCredentials userCredentials, Object payload,
         boolean isAsync, String extraHeaders )
     {
-        this( weight, cache );
+        this( weight );
         this.userCredentials = userCredentials;
         this.payload = payload;
         this.async = isAsync;
@@ -82,9 +80,7 @@ public class AddTrackerDataTask
 
             payload = TrackedEntities.builder()
                 .trackedEntities( instances.getTrackedEntityInstances().stream().
-                    map( p -> {
-                        return new TrackedEntityMapperImpl().from( p );
-                    } ).collect( Collectors.toList() ) )
+                    map( p -> new TrackedEntityMapperImpl().from( p ) ).collect( Collectors.toList() ) )
                 .build();
         }
 

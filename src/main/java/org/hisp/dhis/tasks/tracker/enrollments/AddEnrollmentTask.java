@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasks.tracker.enrollments;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.random.EnrollmentRandomizer;
@@ -21,15 +20,14 @@ public class AddEnrollmentTask
 
     private ApiResponse response;
 
-    public AddEnrollmentTask( int weight, EntitiesCache entitiesCache )
+    public AddEnrollmentTask( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
     }
 
-    public AddEnrollmentTask( int weight, EntitiesCache cache, RandomizerContext context, UserCredentials userCredentials )
+    public AddEnrollmentTask( int weight, RandomizerContext context, UserCredentials userCredentials )
     {
-        this( weight, cache );
+        this( weight );
         this.ctx = context;
         this.userCredentials = userCredentials;
     }

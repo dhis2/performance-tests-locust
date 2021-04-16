@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.models.Events;
 import org.hisp.dhis.random.EventRandomizer;
@@ -41,16 +40,15 @@ public class AddTrackerEventsTask
 
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
-    public AddTrackerEventsTask( int weight, EntitiesCache entitiesCache )
+    public AddTrackerEventsTask( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
         eventRandomizer = new EventRandomizer();
     }
 
-    public AddTrackerEventsTask( int weight, EntitiesCache entitiesCache, Events events, UserCredentials userCredentials )
+    public AddTrackerEventsTask( int weight, Events events, UserCredentials userCredentials )
     {
-        this( weight, entitiesCache );
+        this( weight );
         this.events = events;
         this.userCredentials = userCredentials;
     }
@@ -113,46 +111,5 @@ public class AddTrackerEventsTask
         return response;
     }
 
-    /**
-     * A new PSI, must be linked to a Program Instance.
-     * Since it is not possible to fetch Program Instances via API (and therefore cache them),
-     * in order to avoid reusing invalid Tracked Entity Instances (which are the link between a PSI and a PI),
-     * this method analyzed the response payload and checks if one of the ImportSummaries contains an error
-     * ending for: 'is not enrolled in program". This error signal that there was Program Instance found by Tei + Program.
-     * <p>
-     * If the message is found the TEI uid is extracted and added to a "Tei Black List", so that the same tei is not reused
-     * in the context of the performance test
-     *
-     * @param response
-     */
-    private void addTeiToBlacklist( ApiResponse response )
-    {
-
-        try
-        {
-            String errorString = response.getAsString();
-            Map<String, Object> map = new ObjectMapper().readValue( errorString, Map.class );
-            Map<String, Object> responseJson = (Map<String, Object>) map.get( "response" );
-            List importSummaries = (List) responseJson.get( "importSummaries" );
-            for ( Object importSummary : importSummaries )
-            {
-
-                Map is = (Map) importSummary;
-                if ( is.get( "status" ).equals( "ERROR" ) )
-                {
-                    String desc = (String) is.get( "description" );
-                    if ( desc != null && desc.contains( "is not enrolled in program" ) )
-                    {
-                        blackListedTeis.add( StringUtils.substringBetween( desc, "instance: ", " is not" ) );
-                    }
-                }
-
-            }
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace();
-        }
-    }
 }
 

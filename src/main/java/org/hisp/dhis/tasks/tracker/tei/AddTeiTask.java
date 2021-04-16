@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasks.tracker.tei;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.random.RandomizerContext;
@@ -19,16 +18,15 @@ public class AddTeiTask
 
     private ApiResponse response;
 
-    public AddTeiTask( int weight, EntitiesCache entitiesCache )
+    public AddTeiTask( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
     }
 
-    public AddTeiTask( int weight, EntitiesCache cache, TrackedEntityInstances trackedEntityInstance,
+    public AddTeiTask( int weight, TrackedEntityInstances trackedEntityInstance,
         UserCredentials userCredentials )
     {
-        this( weight, cache );
+        this( weight );
         trackedEntityInstanceBody = trackedEntityInstance;
         this.userCredentials = userCredentials;
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.actions.RestApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.random.EventRandomizer;
@@ -36,20 +35,17 @@ public class AddEventsTask
 
     private List<Event> events;
 
-    private boolean storeResponse = false;
-
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
-    public AddEventsTask( int weight, EntitiesCache entitiesCache )
+    public AddEventsTask( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
         eventRandomizer = new EventRandomizer();
     }
 
-    public AddEventsTask( int weight, EntitiesCache entitiesCache, List<Event> events, UserCredentials userCredentials )
+    public AddEventsTask( int weight, List<Event> events, UserCredentials userCredentials )
     {
-        this( weight, entitiesCache );
+        super( weight );
         this.events = events;
         this.userCredentials = userCredentials;
     }
@@ -94,71 +90,20 @@ public class AddEventsTask
 
     @Override
     public void execute()
+        throws Exception
     {
         List<Event> rndEvents = events != null ? events : createRandomEvents();
 
-        RestApiActions apiActions = new AuthenticatedApiActions( this.endpoint, getUserCredentials() );
         EventWrapper ew = new EventWrapper( rndEvents );
-        response = apiActions.post( ew );
 
-        if ( response.statusCode() == STATUS_CODE_OK )
-        {
-            recordSuccess( response.getRaw() );
-        }
-        else
-        {
-            addTeiToBlacklist( response );
-            recordFailure( response.getRaw() );
-        }
+        response = performTaskAndRecord( () ->  new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( ew ) );
     }
 
     public ApiResponse executeAndGetResponse()
+        throws Exception
     {
         this.execute();
         return response;
-    }
-
-    /**
-     * A new PSI, must be linked to a Program Instance.
-     * Since it is not possible to fetch Program Instances via API (and therefore cache them),
-     * in order to avoid reusing invalid Tracked Entity Instances (which are the link between a PSI and a PI),
-     * this method analyzed the response payload and checks if one of the ImportSummaries contains an error
-     * ending for: 'is not enrolled in program". This error signal that there was Program Instance found by Tei + Program.
-     * <p>
-     * If the message is found the TEI uid is extracted and added to a "Tei Black List", so that the same tei is not reused
-     * in the context of the performance test
-     *
-     * @param response
-     */
-    private void addTeiToBlacklist( ApiResponse response )
-    {
-
-        try
-        {
-            List importSummaries = response.extractObject( "importSummaries", List.class );
-            if ( importSummaries == null )
-            {
-                return;
-            }
-            for ( Object importSummary : importSummaries )
-            {
-
-                Map is = (Map) importSummary;
-                if ( is.get( "status" ).equals( "ERROR" ) )
-                {
-                    String desc = (String) is.get( "description" );
-                    if ( desc != null && desc.contains( "is not enrolled in program" ) )
-                    {
-                        blackListedTeis.add( StringUtils.substringBetween( desc, "instance: ", " is not" ) );
-                    }
-                }
-
-            }
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
     }
 
     // We need to wrap the list of events with a root element

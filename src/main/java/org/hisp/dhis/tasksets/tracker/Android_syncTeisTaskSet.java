@@ -1,8 +1,8 @@
 package org.hisp.dhis.tasksets.tracker;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
@@ -29,15 +29,14 @@ public class Android_syncTeisTaskSet
 
     private int maxPayload = 10;
 
-    public Android_syncTeisTaskSet( int weight, EntitiesCache cache )
+    public Android_syncTeisTaskSet( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = cache;
+        super( weight );
     }
 
-    public Android_syncTeisTaskSet( int weight, EntitiesCache cache, int payloadSize )
+    public Android_syncTeisTaskSet( int weight, int payloadSize )
     {
-        this( weight, cache );
+        this( weight );
         this.minPayload = payloadSize;
         this.maxPayload = payloadSize;
     }
@@ -79,21 +78,20 @@ public class Android_syncTeisTaskSet
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
     {
-        program.getAttributes().stream().filter( p ->
-            p.isGenerated()
-        ).forEach( att -> {
-            ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
-                userCredentials, teis.size() ).executeAndGetResponse();
-            List<String> values = response.extractList( "value" );
+        program.getAttributes().stream().filter( TrackedEntityAttribute::isGenerated )
+            .forEach( att -> {
+                ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
+                    userCredentials, teis.size() ).executeAndGetResponse();
+                List<String> values = response.extractList( "value" );
 
-            for ( int i = 0; i < teis.size(); i++ )
-            {
-                Attribute attribute = teis.get( i ).getAttributes().stream()
-                    .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
-                    .findFirst().orElse( null );
+                for ( int i = 0; i < teis.size(); i++ )
+                {
+                    Attribute attribute = teis.get( i ).getAttributes().stream()
+                        .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
+                        .findFirst().orElse( null );
 
-                attribute.setValue( values.get( i ) );
-            }
+                    attribute.setValue( values.get( i ) );
+                }
         } );
     }
 }

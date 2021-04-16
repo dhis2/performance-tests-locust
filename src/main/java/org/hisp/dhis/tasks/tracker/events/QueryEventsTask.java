@@ -23,18 +23,14 @@ public class QueryEventsTask
 
     public QueryEventsTask( String query )
     {
+        super( 1 );
         this.query = query;
     }
 
     public QueryEventsTask( String query, UserCredentials userCredentials )
     {
-        this.query = query;
+        this( query );
         this.userCredentials = userCredentials;
-    }
-
-    public int getWeight()
-    {
-        return 1;
     }
 
     public String getName()

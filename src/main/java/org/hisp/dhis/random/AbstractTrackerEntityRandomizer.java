@@ -44,7 +44,7 @@ public abstract class AbstractTrackerEntityRandomizer<T>
     implements
     DhisEntityRandomizer<T>
 {
-    protected DateFormat DEFAULT_DATEFORMAT = new SimpleDateFormat( "yyyy-MM-dd" );
+    protected DateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
 
     protected Program getProgramFromContextOrRnd( RandomizerContext ctx, EntitiesCache cache )
     {
@@ -81,12 +81,12 @@ public abstract class AbstractTrackerEntityRandomizer<T>
 
     protected String getRandomOrgUnitFromProgram( Program program )
     {
-        return DataRandomizer.randomElementFromList( program.getOrgUnits() );
+        return DataRandomizer.randomElementFromList( program.getOrganisationUnits() );
     }
 
     protected ProgramStage getProgramStageFromProgram( Program program )
     {
-        return DataRandomizer.randomElementFromList( program.getStages() );
+        return DataRandomizer.randomElementFromList( program.getProgramStages() );
     }
 
     protected String rndValueFrom( ValueType valueType )

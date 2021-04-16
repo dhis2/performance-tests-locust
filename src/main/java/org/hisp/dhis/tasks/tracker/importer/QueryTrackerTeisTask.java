@@ -21,19 +21,14 @@ public class QueryTrackerTeisTask
 
     public QueryTrackerTeisTask( int weight )
     {
-        this.weight = weight;
+        super( weight );
     }
 
     public QueryTrackerTeisTask( int weight, String query, UserCredentials userCredentials )
     {
-        this.weight = weight;
+        this( weight );
         this.query = query;
         this.userCredentials = userCredentials;
-    }
-
-    public int getWeight()
-    {
-        return this.weight;
     }
 
     @Override

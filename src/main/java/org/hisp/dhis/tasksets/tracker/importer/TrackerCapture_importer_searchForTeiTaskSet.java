@@ -1,6 +1,5 @@
 package org.hisp.dhis.tasksets.tracker.importer;
 
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
@@ -25,10 +24,9 @@ public class TrackerCapture_importer_searchForTeiTaskSet
 {
     HashMap<String, List<TrackedEntityAttribute>> attributes = new HashMap<>();
 
-    public TrackerCapture_importer_searchForTeiTaskSet( int weight, EntitiesCache entitiesCache )
+    public TrackerCapture_importer_searchForTeiTaskSet( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
     }
 
     @Override
@@ -52,12 +50,12 @@ public class TrackerCapture_importer_searchForTeiTaskSet
         String ou = DataRandomizer.randomElementFromList( user.getOrganisationUnits() );
 
         ApiResponse response = new QueryTrackerTeisTask( 1,
-            String.format( "?orgUnit=%s&ouMode=ACCESSIBLE&program=%s%s", ou, program.getUid(), getAttributesQuery( program ) ),
+            String.format( "?orgUnit=%s&ouMode=ACCESSIBLE&program=%s%s", ou, program.getId(), getAttributesQuery( program ) ),
             user.getUserCredentials() ).executeAndGetResponse();
 
         List<HashMap> rows = response.extractList( "instances" );
 
-        if ( rows != null && rows.size() > 0 )
+        if ( rows != null && !rows.isEmpty() )
         {
             HashMap row = DataRandomizer.randomElementFromList( rows );
 
@@ -71,7 +69,7 @@ public class TrackerCapture_importer_searchForTeiTaskSet
     {
         AtomicReference<String> query = new AtomicReference<>( "" );
 
-        getRandomAttributes( program.getUid(), program.getMinAttributesRequiredToSearch() )
+        getRandomAttributes( program.getId(), program.getMinAttributesRequiredToSearch() )
             .forEach( p -> {
                 query.set( query +
                     String.format( "&attribute=%s:EQ:%s", p.getTrackedEntityAttribute(), DataRandomizer.randomString( 2 ) ) );
@@ -104,7 +102,7 @@ public class TrackerCapture_importer_searchForTeiTaskSet
                 return;
             }
 
-            attributes.put( program.getUid(), searchableAttributes );
+            attributes.put( program.getId(), searchableAttributes );
         }
 
     }

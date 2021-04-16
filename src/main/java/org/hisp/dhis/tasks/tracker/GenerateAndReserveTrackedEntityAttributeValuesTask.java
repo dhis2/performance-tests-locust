@@ -14,9 +14,7 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask
 {
     private String teiAttributeId;
 
-    private UserCredentials userCredentials;
-
-    private int numberToReserve = 0;
+    private int numberToReserve;
 
     private String endpoint = "/api/trackedEntityAttributes/id/generateAndReserve";
 
@@ -25,7 +23,7 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask
     public GenerateAndReserveTrackedEntityAttributeValuesTask( int weight, String trackedEntityAttributeId,
         UserCredentials userCredentials, int numberToReserve )
     {
-        this.weight = weight;
+        super( weight );
         this.teiAttributeId = trackedEntityAttributeId;
         this.userCredentials = userCredentials;
         this.numberToReserve = numberToReserve;

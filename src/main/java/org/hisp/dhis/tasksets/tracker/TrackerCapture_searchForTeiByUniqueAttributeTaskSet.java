@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasksets.tracker;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.response.dto.ApiResponse;
@@ -26,10 +25,9 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
 {
     HashMap<String, List<TrackedEntityAttribute>> attributes = new HashMap<>();
 
-    public TrackerCapture_searchForTeiByUniqueAttributeTaskSet( int weight, EntitiesCache entitiesCache )
+    public TrackerCapture_searchForTeiByUniqueAttributeTaskSet( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
     }
 
     @Override
@@ -51,17 +49,17 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
         Program program = getProgramWithAttributes();
         user = getUser();
 
-        TrackedEntityAttribute randomAttribute = getRandomAttribute( program.getUid() );
+        TrackedEntityAttribute randomAttribute = getRandomAttribute( program.getId() );
 
         ApiResponse response = new QueryFilterTeiTask( 1,
-            String.format( "?ouMode=ACCESSIBLE&program=%s&attribute=%s:EQ:%s", program.getUid(), randomAttribute
+            String.format( "?ouMode=ACCESSIBLE&program=%s&attribute=%s:EQ:%s", program.getId(), randomAttribute
                 .getTrackedEntityAttribute(), getRandomAttributeValue( randomAttribute ) ), user.getUserCredentials(),
             "search by unique attribute" )
             .executeAndGetResponse();
 
         List<HashMap> rows = response.extractList( "instances" );
 
-        if ( rows != null && rows.size() > 0 )
+        if ( rows != null && !rows.isEmpty() )
         {
             HashMap row = DataRandomizer.randomElementFromList( rows );
 
@@ -79,10 +77,11 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
         {
             preloadAttributes();
         }
+
         int index = DataRandomizer.randomIntInRange( 0, attributes.size() );
 
         String id = attributes.keySet().toArray()[index].toString();
-        return entitiesCache.getTrackerPrograms().stream().filter( p -> p.getUid().equals( id ) ).findFirst().orElse( null );
+        return entitiesCache.getTrackerPrograms().stream().filter( p -> p.getId().equals( id ) ).findFirst().orElse( null );
     }
 
     private TrackedEntityAttribute getRandomAttribute( String programId )
@@ -108,7 +107,7 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
                 return;
             }
 
-            attributes.put( program.getUid(), searchableAttributes );
+            attributes.put( program.getId(), searchableAttributes );
         }
 
     }
@@ -117,11 +116,11 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
         throws TextPatternParser.TextPatternParsingException
     {
         TextPattern pattern = TextPatternParser.parse( entityAttribute.getPattern() );
-        TextPatternSegment staticSegment = pattern.getSegments().stream().filter( ( tp ) -> !tp.getMethod().isGenerated() )
+        TextPatternSegment staticSegment = pattern.getSegments().stream().filter( tp -> !tp.getMethod().isGenerated() )
             .findFirst()
             .orElse( null );
 
-        int valueSegmentLength = pattern.getSegments().stream().filter( ( tp ) -> tp.getMethod().isGenerated() )
+        int valueSegmentLength = pattern.getSegments().stream().filter( tp -> tp.getMethod().isGenerated() )
             .findFirst().get().getParameter().length();
 
         int topValue = Integer.parseInt( entityAttribute.getLastValue().replace( staticSegment.getParameter(), "" ) );

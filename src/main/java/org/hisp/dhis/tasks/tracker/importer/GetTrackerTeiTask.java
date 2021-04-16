@@ -19,12 +19,13 @@ public class GetTrackerTeiTask
 
     public GetTrackerTeiTask( String teiId )
     {
+        super( 1 );
         this.tei = teiId;
     }
 
     public GetTrackerTeiTask( String teiId, UserCredentials userCredentials )
     {
-        this.tei = teiId;
+        this( teiId );
         this.userCredentials = userCredentials;
     }
 

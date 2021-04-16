@@ -15,14 +15,11 @@ public class DhisDelayedTaskSet
 {
     private int delay;
 
-    private TimeUnit timeUnit;
-
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
-    public DhisDelayedTaskSet( int delay, TimeUnit timeUnit )
+    public DhisDelayedTaskSet( int delay )
     {
         this.delay = delay;
-        this.timeUnit = timeUnit;
     }
 
     @Override

@@ -1,9 +1,9 @@
 package org.hisp.dhis.cache.builder;
 
+import org.hisp.dhis.TestConfig;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
-import org.hisp.dhis.locust.LocustConfig;
 import org.hisp.dhis.response.dto.ApiResponse;
 
 import java.util.ArrayList;
@@ -18,12 +18,23 @@ import static org.aeonbits.owner.ConfigFactory.create;
 public class UserCacheBuilder
     implements CacheBuilder<User>
 {
-    private static final LocustConfig cfg = create( LocustConfig.class );
+    private static final TestConfig cfg = create( TestConfig.class );
 
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
     @Override
     public void load( EntitiesCache cache )
+    {
+        cache.setDefaultUser( getDefaultUser() );
+
+        List<User> users = get();
+
+        cache.setUsers( users );
+        logger.info( "Users loaded in cache. Size: " + users.size() );
+    }
+
+    @Override
+    public List<User> get()
     {
         List<User> users = getPayload(
             String.format(
@@ -41,21 +52,23 @@ public class UserCacheBuilder
             p.getUserCredentials().setPassword( cfg.cacheUsersPassword() );
         } );
 
+        if ( cfg.useDefaultUser() || users.isEmpty())
+        {
+            users = new ArrayList<>( users ); // extractList returns unmodifiable collection
+            users.add( getDefaultUser() );
+        }
+
+        return users;
+    }
+
+    public User getDefaultUser()
+    {
         User defaultUser = getPayload( String.format(
             "/api/users?filter=userCredentials.username:eq:%s&fields=id,organisationUnits~pluck,userCredentials[username]",
             cfg.adminUsername() ) ).extractList( "users", User.class ).get( 0 );
         defaultUser.getUserCredentials().setPassword( cfg.adminPassword() );
 
-        if ( cfg.useDefaultUser() )
-        {
-            users = new ArrayList<>( users ); // extractList returns unmodifiable collection
-            users.add( defaultUser );
-        }
-
-        cache.setDefaultUser( defaultUser );
-
-        logger.info( "Users loaded in cache. Size: " + users.size() );
-        cache.setUsers( users );
+        return defaultUser;
     }
 
     private ApiResponse getPayload( String url )
