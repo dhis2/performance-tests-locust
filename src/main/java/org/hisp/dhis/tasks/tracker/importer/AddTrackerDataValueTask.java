@@ -24,7 +24,6 @@ public class AddTrackerDataValueTask
 
     private DataValue dataValue;
 
-
     public AddTrackerDataValueTask( int weight, Event event, DataValue dataValue )
     {
         super( weight );
@@ -32,7 +31,7 @@ public class AddTrackerDataValueTask
         this.dataValue = dataValue;
     }
 
-    public AddTrackerDataValueTask( int weight, Event event, DataValue dataValue,  UserCredentials userCredentials )
+    public AddTrackerDataValueTask( int weight, Event event, DataValue dataValue, UserCredentials userCredentials )
     {
         this( weight, event, dataValue );
         this.userCredentials = userCredentials;

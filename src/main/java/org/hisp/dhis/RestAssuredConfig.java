@@ -21,11 +21,11 @@ import static org.aeonbits.owner.ConfigFactory.create;
  */
 public class RestAssuredConfig
 {
+    private static final TestConfig cfg = create( TestConfig.class );
+
     private RestAssuredConfig()
     {
     }
-
-    private static final TestConfig cfg = create( TestConfig.class );
 
     public static void init()
     {

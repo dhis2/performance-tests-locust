@@ -52,7 +52,7 @@ public class UserCacheBuilder
             p.getUserCredentials().setPassword( cfg.cacheUsersPassword() );
         } );
 
-        if ( cfg.useDefaultUser() || users.isEmpty())
+        if ( cfg.useDefaultUser() || users.isEmpty() )
         {
             users = new ArrayList<>( users ); // extractList returns unmodifiable collection
             users.add( getDefaultUser() );

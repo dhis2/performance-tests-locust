@@ -4,7 +4,6 @@ import com.github.myzhan.locust4j.AbstractTask;
 import com.github.myzhan.locust4j.Locust;
 import org.aeonbits.owner.ConfigFactory;
 import org.hisp.dhis.TestConfig;
-import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tests.Category;
 import org.hisp.dhis.tests.CategoryType;
 import org.hisp.dhis.tests.PerformanceTest;
@@ -44,7 +43,7 @@ public class LocustSlave
     {
         com.github.myzhan.locust4j.Locust locust = init();
 
-        locust.run(  tasks );
+        locust.run( tasks );
     }
 
     public void runTasks( CategoryType... categories )

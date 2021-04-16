@@ -3,7 +3,6 @@ package org.hisp.dhis.tasks;
 import com.github.myzhan.locust4j.AbstractTask;
 import com.github.myzhan.locust4j.taskset.AbstractTaskSet;
 
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 

@@ -150,7 +150,7 @@ public class TrackerCapture_importer_addTeiTaskSet
                     .findFirst().orElse( null );
 
                 attribute.setValue( value );
-        } );
+            } );
     }
 }
 

@@ -78,7 +78,8 @@ public class AuthFilter
         {
             return new Cookie( "JSESSIONID", response.getCookie( "JSESSIONID" ) );
         }
-        else if ( response.getCookie( "SESSION" ) != null) {
+        else if ( response.getCookie( "SESSION" ) != null )
+        {
             return new Cookie( "SESSION", response.getCookie( "SESSION" ) );
         }
 

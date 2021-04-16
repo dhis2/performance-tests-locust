@@ -88,7 +88,8 @@ public class EnrollmentRandomizer
             if ( ctx.getTeiId() == null )
             {
                 enrollment
-                    .setTrackedEntityInstance( DataRandomizer.randomElementFromList( cache.getTeis().get( program.getId() ) ).getUid() );
+                    .setTrackedEntityInstance(
+                        DataRandomizer.randomElementFromList( cache.getTeis().get( program.getId() ) ).getUid() );
             }
 
             else

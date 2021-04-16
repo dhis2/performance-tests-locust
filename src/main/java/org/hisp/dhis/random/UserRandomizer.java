@@ -13,7 +13,7 @@ public class UserRandomizer
 {
     public User getRandomUser( EntitiesCache entitiesCache )
     {
-        return DataRandomizer.randomElementFromList( entitiesCache.getUsers());
+        return DataRandomizer.randomElementFromList( entitiesCache.getUsers() );
     }
 
     public User getRandomUserNotAdmin( EntitiesCache cache )

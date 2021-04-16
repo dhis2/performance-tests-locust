@@ -118,7 +118,8 @@ public class EventRandomizer
         ListOrderedSet dataValues = new ListOrderedSet();
         int numberOfDataValuesToCreate = DataRandomizer.randomIntInRange( min, max );
 
-        DataRandomizer.randomElementsFromList( programStage.getProgramStageDataElements(), numberOfDataValuesToCreate ).forEach( p -> dataValues.add( withRandomValue( p ) ) );
+        DataRandomizer.randomElementsFromList( programStage.getProgramStageDataElements(), numberOfDataValuesToCreate )
+            .forEach( p -> dataValues.add( withRandomValue( p ) ) );
 
         return dataValues;
     }

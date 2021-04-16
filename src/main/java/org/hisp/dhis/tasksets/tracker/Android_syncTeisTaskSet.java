@@ -92,6 +92,6 @@ public class Android_syncTeisTaskSet
 
                     attribute.setValue( values.get( i ) );
                 }
-        } );
+            } );
     }
 }

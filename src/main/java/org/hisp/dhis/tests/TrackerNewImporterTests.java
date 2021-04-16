@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-@Category(category = CategoryType.NTI)
+@Category( category = CategoryType.NTI )
 public class TrackerNewImporterTests
     implements PerformanceTest
 {

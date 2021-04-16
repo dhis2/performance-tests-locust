@@ -18,7 +18,6 @@ import org.hisp.dhis.tests.CategoryType;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 import static io.restassured.RestAssured.preemptive;
 import static org.aeonbits.owner.ConfigFactory.create;
@@ -38,11 +37,11 @@ public class Main
 
         RestAssured.authentication = preemptive().basic( cfg.adminUsername(), cfg.adminPassword() );
 
-        EntitiesCache.setInstance( initCache( cfg ));
+        EntitiesCache.setInstance( initCache( cfg ) );
 
         LocustSlave locust = LocustSlave.newInstance();
 
-       //ß locust.runTasks(  new TrackerCapture_addTeiTaskSet( 1 ) ) ;
+        //ß locust.runTasks(  new TrackerCapture_addTeiTaskSet( 1 ) ) ;
         // categories are under /src/main/tests
         locust.runTasks( CategoryType.ALL, CategoryType.NTI );
     }

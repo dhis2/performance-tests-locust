@@ -57,7 +57,8 @@ public class EntitiesCache
         return cache;
     }
 
-    public static void setInstance( EntitiesCache entitiesCache ) {
+    public static void setInstance( EntitiesCache entitiesCache )
+    {
         cache = entitiesCache;
     }
 

@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 public class CacheUtils
 {
-    private CacheUtils() { }
     private static Logger logger = Logger.getLogger( CacheUtils.class.getName() );
 
     private static String tmp = System.getProperty( "java.io.tmpdir" );
@@ -53,6 +52,10 @@ public class CacheUtils
         kryo.register( RelationshipConstraint.class, 214 );
         kryo.register( RelationshipType.class, 215 );
 
+    }
+
+    private CacheUtils()
+    {
     }
 
     private static void serializeCache( EntitiesCache cache )

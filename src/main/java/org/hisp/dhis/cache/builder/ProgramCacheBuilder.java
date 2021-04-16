@@ -118,9 +118,12 @@ public class ProgramCacheBuilder
 
             p.setOptions( getProgramAttributeOptionValues( object ) );
             p.setGenerated( object.get( "generated" ).getAsBoolean() );
-            p.setUnique( object.get( "unique" ).getAsBoolean());
+            p.setUnique( object.get( "unique" ).getAsBoolean() );
             p.setPattern( object.get( "pattern" ).getAsString() );
-            if ( p.isUnique()) p.setSearchable( true ); // unique attributes are always searchable
+            if ( p.isUnique() )
+            {
+                p.setSearchable( true ); // unique attributes are always searchable
+            }
             if ( p.getPattern() != null && !p.getPattern().isEmpty() )
             {
                 p.setLastValue( getAttributeLastValue( p.getTrackedEntityAttribute() ) );

@@ -1,9 +1,7 @@
 package org.hisp.dhis.tasks.tracker.events;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.random.EventRandomizer;
@@ -14,10 +12,7 @@ import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
-
-import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
 
 /**
  * @author Luciano Fiandesio <luciano@dhis2.org>
@@ -96,7 +91,7 @@ public class AddEventsTask
 
         EventWrapper ew = new EventWrapper( rndEvents );
 
-        response = performTaskAndRecord( () ->  new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( ew ) );
+        response = performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( ew ) );
     }
 
     public ApiResponse executeAndGetResponse()

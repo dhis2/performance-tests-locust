@@ -147,6 +147,6 @@ public class TrackerCapture_addTeiTaskSet
                     .findFirst().orElse( null );
 
                 attribute.setValue( value );
-        } );
+            } );
     }
 }

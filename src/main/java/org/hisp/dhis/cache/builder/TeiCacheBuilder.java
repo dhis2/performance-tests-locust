@@ -33,7 +33,7 @@ public class TeiCacheBuilder
     {
         Map<String, List<Tei>> tempMap = get().get( 0 );
         cache.setTeis( tempMap );
-        
+
         logger.info( "TEIs loaded in cache. Size: " + tempMap.values().stream().mapToInt( Collection::size ).sum() );
 
     }

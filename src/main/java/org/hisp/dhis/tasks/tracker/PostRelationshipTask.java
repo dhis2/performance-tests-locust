@@ -93,18 +93,18 @@ public class PostRelationshipTask
 
         program.getAttributes().stream().filter( TrackedEntityAttribute::isGenerated )
             .forEach( att -> {
-                ApiResponse response = new GenerateTrackedEntityAttributeValueTask( 1, att.getTrackedEntityAttribute(),
-                    userCredentials ).executeAndGetResponse();
+                    ApiResponse response = new GenerateTrackedEntityAttributeValueTask( 1, att.getTrackedEntityAttribute(),
+                        userCredentials ).executeAndGetResponse();
 
-                String value = response.extractString( "value" );
+                    String value = response.extractString( "value" );
 
-                Attribute attribute = tei.getAttributes().stream()
-                    .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
-                    .findFirst().orElse( new Attribute() );
+                    Attribute attribute = tei.getAttributes().stream()
+                        .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
+                        .findFirst().orElse( new Attribute() );
 
-                attribute.setValue( value );
-            }
-        );
+                    attribute.setValue( value );
+                }
+            );
 
     }
 

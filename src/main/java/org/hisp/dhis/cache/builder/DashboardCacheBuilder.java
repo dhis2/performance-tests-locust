@@ -8,7 +8,6 @@ import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Visualization;
 import org.hisp.dhis.response.dto.ApiResponse;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -77,7 +76,7 @@ public class DashboardCacheBuilder
     private ApiResponse getPayload( String url )
     {
         ApiResponse response = new RestApiActions( "" ).get( url );
-        response.validate().statusCode( 200 ) ;
+        response.validate().statusCode( 200 );
         return response;
     }
 }
