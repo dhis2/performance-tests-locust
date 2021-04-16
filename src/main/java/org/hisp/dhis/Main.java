@@ -11,8 +11,6 @@ import static io.restassured.RestAssured.preemptive;
 import static org.aeonbits.owner.ConfigFactory.create;
 import static org.hisp.dhis.utils.CacheUtils.initCache;
 
-÷is.tasks.aggregate.AddDataValueTask;
-
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
@@ -31,7 +29,7 @@ public class Main
 
         LocustSlave locust = LocustSlave.newInstance();
 
-        //ß locust.runTasks(  new TrackerCapture_addTeiTaskSet( 1 ) ) ;
+        // locust.runTasks(  new TrackerCapture_addTeiTaskSet( 1 ) ) ;
         // categories are under /src/main/tests
         locust.runTasks( CategoryType.ALL, CategoryType.NTI );
     }
