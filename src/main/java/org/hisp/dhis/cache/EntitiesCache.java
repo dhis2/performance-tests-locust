@@ -79,7 +79,6 @@ public class EntitiesCache
         new DataSetsCacheBuilder().load( this );
         new UserCacheBuilder().load( this );
         new TeiTypeCacheBuilder().load( this );
-
         new TeiCacheBuilder( this ).load( this );
         new RelationshipTypeCacheBuilder().load( this );
 

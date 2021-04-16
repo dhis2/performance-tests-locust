@@ -44,4 +44,7 @@ public interface TestConfig
 
     @Key( "cache.reuse_cache" )
     boolean reuseCache();
+
+    @Key( "cache.users.ou_level" )
+    int cacheUsersOuLevel();
 }

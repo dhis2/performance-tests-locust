@@ -4,6 +4,7 @@ import org.hisp.dhis.TestConfig;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
+import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
 
 import java.util.ArrayList;
@@ -26,22 +27,26 @@ public class UserCacheBuilder
     public void load( EntitiesCache cache )
     {
         cache.setDefaultUser( getDefaultUser() );
-
         List<User> users = get();
-
         cache.setUsers( users );
+
         logger.info( "Users loaded in cache. Size: " + users.size() );
     }
 
     @Override
     public List<User> get()
     {
-        List<User> users = getPayload(
-            String.format(
-                "/api/users?filter=organisationUnits.level:eq:5&fields=id,organisationUnits~pluck,userCredentials[username]&filter=displayName:like:%s&pageSize=%d",
-                cfg.cacheUsersIdentifier(),
-                cfg.cacheUserPoolSize() ) )
-            .extractList( "users", User.class );
+        QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder();
+
+        queryParamsBuilder.addAll( "fields=id,organisationUnits~pluck,userCredentials[username]",
+            "filter=displayName:like:" + cfg.cacheUsersIdentifier(),
+            "pageSize=" + cfg.cacheUserPoolSize());
+
+        if (cfg.cacheUsersOuLevel() != 0) {
+            queryParamsBuilder.add( "filter=organisationUnits.level:eq:" + cfg.cacheUsersOuLevel() );
+        }
+
+        List<User> users = getPayload("/api/users", queryParamsBuilder).extractList( "users", User.class );
 
         if ( users.isEmpty() )
         {
@@ -75,4 +80,8 @@ public class UserCacheBuilder
     {
         return new RestApiActions( "" ).get( url );
     }
-}
+
+    private ApiResponse getPayload(String url, QueryParamsBuilder queryParamsBuilder ) {
+        return new RestApiActions("" ).get(url, queryParamsBuilder);
+    }
+ }

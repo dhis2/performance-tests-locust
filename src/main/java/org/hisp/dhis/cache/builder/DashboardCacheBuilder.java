@@ -76,7 +76,6 @@ public class DashboardCacheBuilder
     private ApiResponse getPayload( String url )
     {
         ApiResponse response = new RestApiActions( "" ).get( url );
-        response.validate().statusCode( 200 );
         return response;
     }
 }

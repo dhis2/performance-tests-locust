@@ -35,6 +35,7 @@ To configure the environment variables, run:
 $ docker pull dhis2/locustio:latest
 $ docker-compose up
 ```
+Note: you can also run locust without docker. [Read more](#Running-tests-without-docker)
 
 4. Run [main() method](src/main/java/org/hisp/dhis/Main.java).
     - You can run it directly via your IDE -> open `Main` class and click on a green arrow next to the `main()` method
@@ -43,6 +44,24 @@ $ docker-compose up
 5. Visit localhost:8089
 
 6. Enter user count and hatch rate and start swarming.
+
+
+### Running tests without Docker
+
+#### Requirements
+1. Python 3
+2. Locust 1.2+
+3. Working DHIS2 server
+
+#### Running
+1. Install Locust (will upgrade if already exists): `pip3 install locust --upgrade`
+2. Start Locust master node: `locust -f locust-master.py --master --master-bind-host 127.0.0.1 --master-bind-port 5557 --web-host=127.0.0.1`
+3. Start the DHIS2 server now if you have not already
+3. Make sure `locust.properties` are pointing to your local DHIS2 server
+4. Compile and run this project from the command line: `mvn clean compile exec:java` (you can also start it from IntelliJ via Main.class file)
+5. Open your browser and go to `http://localhost:8089` enter you desired number of workers and spawn rate, point `Host` to: `127.0.0.1` "Locust master"
+6. Watch the tests and listen to your machine heats up
+
 
 ## Test configuration
 
@@ -63,22 +82,18 @@ with SL database as well.
 | cache.users.password | Test1212? | Password of users loaded in the cache | 
 | locust.min_wait | 20000 | Indicates how long should locust thread wait between the tasks. The value will be a random number of ms between min_wait and max_wait values. |
 | locust.max_wait | 30000 |  | 
+| cache.users.ou_level | 5 | Used in filtering users to populate the cache | 
+
+## Required database setup 
+Tests will generate data based on the database configuration, but the following assumptions are made due to limitations in data randomizer: 
+- *Programs assignment*: programs should be assigned to org units that your users have access to. For example, if you only use one user (admin) that has capture access to root OU, tests won't get the whole orgUnit hierarchy, so the data will be registered to root OU.
+- *User pool (`cache.users` )*
+   - all users should have same password and matching usernames (configurable)
+   - all users should have access to all metadata. There are no sharing checks performed in tests. 
+   - all users should have capture access to programs
+   - Required user authorities: `F_VIEW_EVENT_ANALYTICS`, `F_DATAVALUE_ADD`, `F_TRACKER_IMPORTER_EXPERIMENTAL` (if NTI category is included)
+   
+   
 
 
 
-
-## Running tests locally (without Docker!)
-
-## Requirements
-1. Python 3
-2. Locust 1.2+
-3. Working DHIS2 server
-
-## Running
-1. Install Locust (will upgrade if already exists): `pip3 install locust --upgrade`
-2. Start Locust master node: `locust -f locust-master.py --master --master-bind-host 127.0.0.1 --master-bind-port 5557 --web-host=127.0.0.1`
-3. Start the DHIS2 server now if you have not already
-3. Make sure `locust.properties` are pointing to your local DHIS2 server
-4. Compile and run this project from the command line: `mvn clean compile exec:java` (you can also start it from IntelliJ via Main.class file)
-5. Open your browser and go to `http://localhost:8089` enter you desired number of workers and spawn rate, point `Host` to: `127.0.0.1` "Locust master"
-6. Watch the tests and listen to your machine heats up
