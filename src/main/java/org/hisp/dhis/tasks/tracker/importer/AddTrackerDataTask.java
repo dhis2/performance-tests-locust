@@ -28,13 +28,13 @@ public class AddTrackerDataTask
 {
     private String endpoint = "/api/tracker";
 
-    private String extraHeaders = "";
-
     private Object payload;
 
     private boolean async = false;
 
     private Logger logger = Logger.getLogger( this.getClass().getName() );
+
+    private String identifier = "";
 
     public AddTrackerDataTask( int weight )
     {
@@ -42,19 +42,19 @@ public class AddTrackerDataTask
     }
 
     public AddTrackerDataTask( int weight, UserCredentials userCredentials, Object payload,
-        boolean isAsync, String extraHeaders )
+        boolean isAsync, String identifier )
     {
         this( weight );
         this.userCredentials = userCredentials;
         this.payload = payload;
         this.async = isAsync;
-        this.extraHeaders = extraHeaders;
+        this.identifier = identifier;
     }
 
     @Override
     public String getName()
     {
-        return endpoint;
+        return endpoint + ": " + this.identifier;
     }
 
     @Override
@@ -86,7 +86,7 @@ public class AddTrackerDataTask
 
         performTaskAndRecord( () -> {
             ApiResponse response = trackerActions
-                .post( payload, new QueryParamsBuilder().addAll( "async=" + this.async, extraHeaders ) );
+                .post( payload, new QueryParamsBuilder().addAll( "async=" + this.async, "identifier=" + identifier ) );
 
             if ( this.async )
             {

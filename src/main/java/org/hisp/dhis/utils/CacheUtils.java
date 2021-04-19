@@ -35,6 +35,7 @@ public class CacheUtils
         kryo.register( LinkedList.class, serializer );
         kryo.register( ArrayList.class, serializer );
         kryo.register( HashMap.class );
+        kryo.register( OrganisationUnit.class, 199 );
         kryo.register( ValueType.class, 200 );
         kryo.register( EntitiesCache.class, 201 );
         kryo.register( DataElement.class, 202 );

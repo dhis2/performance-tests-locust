@@ -41,8 +41,8 @@ public class Capture_importer_addEventTaskSet
         throws Exception
     {
         User user = new UserRandomizer().getRandomUser( entitiesCache );
-        String ou = new UserRandomizer().getRandomUserOrgUnit( user );
         Program program = DataRandomizer.randomElementFromList( entitiesCache.getEventPrograms() );
+        String ou = new UserRandomizer().getRandomUserOrProgramOrgUnit( user, program );
 
         new QueryTrackerEventsTask( String
             .format( "?page=1&pageSize=15&totalPages=true&order=occurredAt:desc&program=%s&orgUnit=%s", program.getId(), ou ),
@@ -56,7 +56,7 @@ public class Capture_importer_addEventTaskSet
         Event event = new EventMapperImpl().from( new EventRandomizer().create( entitiesCache, context ) );
 
         new AddTrackerDataTask( 1, user.getUserCredentials(), Events.builder().build().addEvent( event ), true,
-            "identifier=events" ).execute();
+            "events" ).execute();
         //new AddTrackerEventsTask( 1, entitiesCache, Events.builder().build().addEvent(event), user.getUserCredentials() ).execute();
 
         waitBetweenTasks();

@@ -40,8 +40,8 @@ public class Capture_addEventTaskSet
         throws Exception
     {
         User user = new UserRandomizer().getRandomUser( entitiesCache );
-        String ou = new UserRandomizer().getRandomUserOrgUnit( user );
         Program program = DataRandomizer.randomElementFromList( entitiesCache.getEventPrograms() );
+        String ou = new UserRandomizer().getRandomUserOrProgramOrgUnit( user, program );
 
         new QueryEventsTask(
             String.format( "?page=1&pageSize=15&totalPages=true&order=eventDate:desc&program=%s&orgUnit=%s", program.getId(), ou ),

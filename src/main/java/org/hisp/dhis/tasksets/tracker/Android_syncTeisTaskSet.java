@@ -58,8 +58,8 @@ public class Android_syncTeisTaskSet
         throws Exception
     {
         User user = new UserRandomizer().getRandomUser( entitiesCache );
-        String ou = new UserRandomizer().getRandomUserOrgUnit( user );
         Program program = DataRandomizer.randomElementFromList( entitiesCache.getTrackerPrograms() );
+        String ou = new UserRandomizer().getRandomUserOrProgramOrgUnit( user, program );
 
         RandomizerContext context = new RandomizerContext();
         context.setProgram( program );

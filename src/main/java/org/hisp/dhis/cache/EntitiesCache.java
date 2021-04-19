@@ -42,6 +42,8 @@ public class EntitiesCache
 
     private User defaultUser;
 
+    private OrganisationUnit rootOu;
+
     private EntitiesCache()
     {
     }
@@ -62,18 +64,9 @@ public class EntitiesCache
         cache = entitiesCache;
     }
 
-    public static <T> List<T> randomElementsFromList( List<T> list, int elements )
-    {
-        Collections.shuffle( list );
-        if ( elements > list.size() )
-        {
-            elements = list.size();
-        }
-        return list.subList( 0, elements );
-    }
-
     private void loadAll()
     {
+        this.rootOu = new OuCacheBuilder().getRootOu();
         new ProgramCacheBuilder().load( this );
         new DashboardCacheBuilder().load( this );
         new DataSetsCacheBuilder().load( this );

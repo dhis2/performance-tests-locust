@@ -51,9 +51,10 @@ public class Android_importer_syncTeisTaskSet
         throws Exception
     {
         User user = new UserRandomizer().getRandomUser( entitiesCache );
+        Program program = DataRandomizer.randomElementFromList( entitiesCache.getTrackerPrograms() );
 
         RandomizerContext context = new RandomizerContext();
-        context.setOrgUnitUid( DataRandomizer.randomElementFromList( user.getOrganisationUnits() ) );
+        context.setOrgUnitUid( new UserRandomizer().getRandomUserOrProgramOrgUnit( user, program ));
 
         TrackedEntityInstances instances = new TrackedEntityInstanceRandomizer().create( entitiesCache, context, 3, 10 );
 
@@ -64,7 +65,7 @@ public class Android_importer_syncTeisTaskSet
                 map( p -> new TrackedEntityMapperImpl().from( p ) ).collect( Collectors.toList() ) )
             .build();
 
-        new AddTrackerDataTask( 1, user.getUserCredentials(), trackedEntities, true, "identifier=FULL" ).execute();
+        new AddTrackerDataTask( 1, user.getUserCredentials(), trackedEntities, true, "FULL" ).execute();
 
         waitBetweenTasks();
     }

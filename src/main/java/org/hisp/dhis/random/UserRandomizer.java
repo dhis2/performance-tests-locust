@@ -1,6 +1,7 @@
 package org.hisp.dhis.random;
 
 import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.utils.DataRandomizer;
 
@@ -27,5 +28,19 @@ public class UserRandomizer
     public String getRandomUserOrgUnit( User user )
     {
         return DataRandomizer.randomElementFromList( user.getOrganisationUnits() );
+    }
+
+    /**
+     * If user is assigned to root OU only, program ou will be used.
+     * @param user
+     * @param program
+     * @return
+     */
+    public String getRandomUserOrProgramOrgUnit( User user, Program program ) {
+        if ( user.getOrganisationUnits().contains( EntitiesCache.getInstance().getRootOu().getId() )) {
+            return DataRandomizer.randomElementFromList( program.getOrganisationUnits() );
+        }
+
+        return getRandomUserOrgUnit( user );
     }
 }
