@@ -15,5 +15,6 @@ import lombok.Setter;
 public class OrganisationUnit
 {
     private String id;
+
     private int level;
 }

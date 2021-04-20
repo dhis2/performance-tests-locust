@@ -5,7 +5,6 @@ import lombok.Setter;
 import org.hisp.dhis.cache.builder.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
