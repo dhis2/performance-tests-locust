@@ -15,12 +15,22 @@
     <dependency>
       <groupId>com.github.myzhan</groupId>
       <artifactId>locust4j</artifactId>
-      <version>1.0.12</version>
+      <version>1.0.13</version>
+    </dependency>
+    <dependency>
+      <groupId>org.locationtech.jts</groupId>
+      <artifactId>jts-core</artifactId>
+      <version>1.18.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.9.12</version>
     </dependency>
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
-      <version>4.3.1</version>
+      <version>4.3.3</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -33,9 +43,19 @@
       <version>1.0.10</version>
     </dependency>
     <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+      <version>2.5.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-dxf2</artifactId>
-      <version>2.35-SNAPSHOT</version>
+      <version>2.36.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hisp.dhis</groupId>
+      <artifactId>dhis-service-tracker</artifactId>
+      <version>2.36.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -50,7 +70,12 @@
     <dependency>
       <groupId>com.esotericsoftware</groupId>
       <artifactId>kryo</artifactId>
-      <version>4.0.2</version>
+      <version>5.0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>de.javakaffee</groupId>
+      <artifactId>kryo-serializers</artifactId>
+      <version>0.45</version>
     </dependency>
     <dependency>
       <groupId>com.github.javafaker</groupId>
@@ -60,7 +85,7 @@
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>api-test-utils</artifactId>
-      <version>1.1.2</version>
+      <version>1.1.6</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>

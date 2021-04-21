@@ -39,9 +39,13 @@ import lombok.Getter;
 @AllArgsConstructor
 public class Tei
 {
-    public Tei() {
-    }
-
     private String uid;
+
     private String program;
+
+    private String orgUnit;
+
+    public Tei()
+    {
+    }
 }

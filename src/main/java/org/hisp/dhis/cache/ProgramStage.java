@@ -1,26 +1,26 @@
 package org.hisp.dhis.cache;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
 public class ProgramStage
 {
-    private String uid;
+    private String id;
 
-    private List<DataElement> dataElements;
+    private List<DataElement> programStageDataElements;
 
     private boolean repeatable;
 
     public ProgramStage()
     {
     }
-    
-    public ProgramStage( String uid )
+
+    public ProgramStage( String id )
     {
-        this.uid = uid;
+        this.id = id;
     }
 }

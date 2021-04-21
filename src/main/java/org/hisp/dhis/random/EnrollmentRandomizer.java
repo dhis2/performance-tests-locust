@@ -28,28 +28,29 @@ package org.hisp.dhis.random;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.ProgramStage;
+import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
+import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
+import org.hisp.dhis.utils.DataRandomizer;
+
 import java.util.Date;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import org.hisp.dhis.cache.EntitiesCache;
-import org.hisp.dhis.cache.Program;
-import org.hisp.dhis.cache.ProgramStage;
-import org.hisp.dhis.common.CodeGenerator;
-import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
-import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
-import org.hisp.dhis.utils.DataRandomizer;
 
 /**
  * @author Luciano Fiandesio
  */
 public class EnrollmentRandomizer
     extends
-        AbstractTrackerEntityRandomizer<Enrollment>
+    AbstractTrackerEntityRandomizer<Enrollment>
 {
     private int maxEvent;
+
     private int minEVent;
+
     private EventRandomizer eventRandomizer = new EventRandomizer();
 
     public EnrollmentRandomizer( int minEVent, int maxEvent )
@@ -64,23 +65,17 @@ public class EnrollmentRandomizer
         this.maxEvent = 5;
     }
 
-    @Override
-    public Enrollment create( EntitiesCache cache, RandomizerContext ctx )
+    public Enrollment createWithoutEvents( EntitiesCache cache, RandomizerContext ctx )
     {
         Program program = getProgramFromContextOrRnd( ctx, cache );
-        String orgUnitUid = ctx.getOrgUnitUid();
-        
-        if ( orgUnitUid == null )
-        {
-            orgUnitUid = getRandomOrgUnitFromProgram( program );
-        }
+        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, program );
 
         // Pick a random program stage to pass to the events
         ProgramStage programStage = getProgramStageFromProgram( program );
         ctx.setProgramStage( programStage );
-        
+
         Enrollment enrollment = new Enrollment();
-        enrollment.setProgram( program.getUid() );
+        enrollment.setProgram( program.getId() );
         enrollment.setOrgUnit( orgUnitUid );
         enrollment.setEnrollmentDate( new Date() );
         enrollment.setIncidentDate( new Date() );
@@ -88,8 +83,31 @@ public class EnrollmentRandomizer
         enrollment.setFollowup( false );
         enrollment.setDeleted( false );
 
+        if ( !ctx.isSkipTeiInEnrollment() )
+        {
+            if ( ctx.getTeiId() == null )
+            {
+                enrollment
+                    .setTrackedEntityInstance(
+                        DataRandomizer.randomElementFromList( cache.getTeis().get( program.getId() ) ).getUid() );
+            }
+
+            else
+            {
+                enrollment.setTrackedEntityInstance( ctx.getTeiId() );
+            }
+        }
+
+        return enrollment;
+    }
+
+    @Override
+    public Enrollment create( EntitiesCache cache, RandomizerContext ctx )
+    {
+        Enrollment enrollment = createWithoutEvents( cache, ctx );
+
         // if program stage is NON-REPEATABLE generate just one event
-        int eventsSize = programStage.isRepeatable() ? DataRandomizer.randomIntInRange( minEVent, maxEvent ) : 1;
+        int eventsSize = ctx.getProgramStage().isRepeatable() ? DataRandomizer.randomIntInRange( minEVent, maxEvent ) : 1;
 
         enrollment.setEvents( IntStream.rangeClosed( 1, eventsSize )
             .mapToObj( i -> eventRandomizer.create( cache, ctx ) )

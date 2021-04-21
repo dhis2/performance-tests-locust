@@ -28,8 +28,11 @@ package org.hisp.dhis.cache;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.gson.annotations.JsonAdapter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
+import org.hisp.dhis.cache.serializer.ObjectIdDeserializer;
 import org.hisp.dhis.common.ValueType;
 
 import java.util.List;
@@ -38,14 +41,19 @@ import java.util.List;
  * @author Luciano Fiandesio
  */
 @Getter
+@Setter
 @AllArgsConstructor
-public class ProgramAttribute
+public class TrackedEntityAttribute
 {
-    private String uid;
+    private String id;
 
     private ValueType valueType;
 
-    private String trackedEntityAttributeUid;
+    @Setter
+    @JsonAdapter( ObjectIdDeserializer.class )
+    private String trackedEntityAttribute;
+
+    private boolean generated;
 
     private boolean unique;
 
@@ -53,8 +61,15 @@ public class ProgramAttribute
 
     private List<String> options;
 
-    public ProgramAttribute()
+    private boolean searchable;
+
+    private String displayName;
+
+    private String lastValue;
+
+    public TrackedEntityAttribute()
     {
     }
 
 }
+

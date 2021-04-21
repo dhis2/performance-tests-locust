@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasks.analytics;
 
 import org.hisp.dhis.actions.RestApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
@@ -42,15 +41,12 @@ public class GetHeavyAnalyticsRandomTask
             "n0GE1ISYrdM", "nfG18MJZX5o", "nkjlWUMIdHh", "oTOpKabJA1v", "puykO1tbcdi", "qmCKRmVj4WX", "ryFBhJdetdM",
             "sB79w2hiLp8", "sMTMkudvLCD", "tcs5YGnjiKo", "ulgL07PF8rq", "vKWOc4itBo2", "vihpFUg2WTy" ) );
 
-    private final EntitiesCache entitiesCache;
-
     private final int apiVersion;
 
-    public GetHeavyAnalyticsRandomTask( final int weight, final int apiVersion, final EntitiesCache entitiesCache )
+    public GetHeavyAnalyticsRandomTask( final int weight, final int apiVersion )
     {
-        this.weight = weight;
+        super( weight );
         this.apiVersion = apiVersion;
-        this.entitiesCache = entitiesCache;
     }
 
     public String getName()
@@ -68,7 +64,7 @@ public class GetHeavyAnalyticsRandomTask
     {
         // Given
         final Program aRandomProgram = randomProgram();
-        final String aRandomOrgUnitUid = randomOrgUnitUid( aRandomProgram.getOrgUnits() );
+        final String aRandomOrgUnitUid = randomOrgUnitUid( aRandomProgram.getOrganisationUnits() );
 
         ApiResponse response = new RestApiActions( "api/analytics" )
             .get( "", new QueryParamsBuilder()

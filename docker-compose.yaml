@@ -4,8 +4,6 @@ services:
   locust:
     restart: always
     image: "dhis2/locustio:latest"
-    build:
-      context: ./docker
     environment:
       LOCUST_MASTER_NODE_HOST: "127.0.0.1"
       LOCUST_MASTER_NODE_PORT: "5557"

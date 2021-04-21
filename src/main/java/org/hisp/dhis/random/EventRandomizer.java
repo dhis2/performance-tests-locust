@@ -28,88 +28,98 @@ package org.hisp.dhis.random;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import org.apache.commons.collections.set.ListOrderedSet;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.ProgramStage;
-import org.hisp.dhis.cache.Tei;
 import org.hisp.dhis.dxf2.events.event.DataValue;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.utils.DataRandomizer;
+
+import java.util.Date;
+import java.util.stream.Collectors;
 
 /**
  * @author Luciano Fiandesio
  */
 public class EventRandomizer
     extends
-        AbstractTrackerEntityRandomizer<Event>
+    AbstractTrackerEntityRandomizer<Event>
 {
-    @Override
-    public Event create( EntitiesCache cache, RandomizerContext ctx )
+    public Event createWithoutDataValues( EntitiesCache cache, RandomizerContext ctx )
     {
         Program program = ctx.getProgram();
         if ( program == null )
         {
             program = DataRandomizer.randomElementFromList( cache.getProgramsWithAtLeastOnRepeatableStage() );
+            ctx.setProgram( program );
         }
-        
+
         ProgramStage programStage = ctx.getProgramStage();
         if ( programStage == null )
         {
             programStage = getRepeatableRandomProgramStageFromProgram( program );
+            ctx.setProgramStage( programStage );
         }
-        String orgUnitUid = ctx.getOrgUnitUid();
-        if ( orgUnitUid == null )
-        {
-            orgUnitUid = getRandomOrgUnitFromProgram( program );
-        }
-        
+
+        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, program );
+
         Event event = new Event();
-        event.setDueDate( DEFAULT_DATEFORMAT.format( new Date() ) );
-        event.setProgram( program.getUid() );
-        event.setProgramStage( programStage.getUid() );
+        event.setEnrollment( ctx.getEnrollmentId() );
+        event.setDueDate( simpleDateFormat.format( new Date() ) );
+        event.setProgram( program.getId() );
+        event.setProgramStage( programStage.getId() );
         event.setOrgUnit( orgUnitUid );
         event.setStatus( EventStatus.ACTIVE );
-        event.setEventDate( DEFAULT_DATEFORMAT.format( new Date() ) );
+        event.setEventDate( simpleDateFormat.format( new Date() ) );
         event.setFollowup( false );
         event.setDeleted( false );
         event.setAttributeOptionCombo( "" ); // TODO
-        event.setDataValues( createDataValues( programStage, 1, 8 ) );
-        if ( !ctx.isSkipTeiInEvent() )
+
+        if ( !ctx.isSkipTeiInEvent() && program.isHasRegistration() )
         {
-            try
+            if ( ctx.getTeiId() != null )
             {
-                String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( program.getUid() ) )
+                event.setTrackedEntityInstance( ctx.getTeiId() );
+                return event;
+            }
+
+            if ( cache.getTeis().get( program.getId() ) != null )
+            {
+                String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( program.getId() ) )
                     .getUid();
                 event.setTrackedEntityInstance( teiUid );
             }
-            catch ( Exception e )
+
+            else
             {
                 return null;
             }
         }
+
         return event;
     }
 
-    private Set<DataValue> createDataValues( ProgramStage programStage, int min, int max )
+    @Override
+    public Event create( EntitiesCache cache, RandomizerContext ctx )
     {
-        Set<DataValue> dataValues = new HashSet<>();
-        int numberOfDataValuesToCreate = DataRandomizer.randomIntInRange( min, max );
-        List<Integer> indexes = DataRandomizer.randomSequence( programStage.getDataElements().size(),
-            numberOfDataValuesToCreate );
+        Event event = createWithoutDataValues( cache, ctx );
+        ProgramStage programStage = ctx.getProgramStage();
 
-        for ( Integer index : indexes )
-        {
-            dataValues.add( withRandomValue( programStage.getDataElements().get( index ) ) );
-        }
+        event.setDataValues( createDataValues( programStage, 1, 8 ) );
+
+        return event;
+    }
+
+    public ListOrderedSet createDataValues( ProgramStage programStage, int min, int max )
+    {
+        ListOrderedSet dataValues = new ListOrderedSet();
+        int numberOfDataValuesToCreate = DataRandomizer.randomIntInRange( min, max );
+
+        DataRandomizer.randomElementsFromList( programStage.getProgramStageDataElements(), numberOfDataValuesToCreate )
+            .forEach( p -> dataValues.add( withRandomValue( p ) ) );
 
         return dataValues;
     }
@@ -120,16 +130,15 @@ public class EventRandomizer
         dataValue.setDataElement( dataElement.getUid() );
         dataValue.setProvidedElsewhere( false );
         String val;
-        // TODO commenting out logic to generate a random value for an option set, since it's not working properly
-        //        if ( dataElement.getOptionSet() != null && !dataElement.getOptionSet().isEmpty() )
-//        {
-//            val = DataRandomizer.randomElementFromList( dataElement.getOptionSet() );
-//        }
-//        else
-//        {
+        if ( dataElement.getOptionSet() != null && !dataElement.getOptionSet().isEmpty() )
+        {
+            val = DataRandomizer.randomElementFromList( dataElement.getOptionSet() );
+        }
+        else
+        {
+            val = rndValueFrom( dataElement.getValueType() );
+        }
 
-//        }
-        val = rndValueFrom( dataElement.getValueType() );
         dataValue.setValue( val );
         return dataValue;
     }
@@ -137,6 +146,6 @@ public class EventRandomizer
     private ProgramStage getRepeatableRandomProgramStageFromProgram( Program program )
     {
         return DataRandomizer.randomElementFromList(
-            program.getStages().stream().filter( ProgramStage::isRepeatable ).collect( Collectors.toList() ) );
+            program.getProgramStages().stream().filter( ProgramStage::isRepeatable ).collect( Collectors.toList() ) );
     }
 }

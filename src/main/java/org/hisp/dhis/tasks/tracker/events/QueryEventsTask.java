@@ -1,7 +1,8 @@
 package org.hisp.dhis.tasks.tracker.events;
 
 import com.google.gson.JsonObject;
-import org.hisp.dhis.actions.RestApiActions;
+import org.hisp.dhis.actions.AuthenticatedApiActions;
+import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 
@@ -12,25 +13,29 @@ public class QueryEventsTask
     extends
     DhisAbstractTask
 {
-    private RestApiActions apiActions = new RestApiActions( "/api/events" );
+    private String endpoint = "/api/events";
 
     private String query;
 
     private JsonObject responseBody;
 
+    private boolean saveResponse = false;
+
     public QueryEventsTask( String query )
     {
+        super( 1 );
         this.query = query;
     }
 
-    public int getWeight()
+    public QueryEventsTask( String query, UserCredentials userCredentials )
     {
-        return 1;
+        this( query );
+        this.userCredentials = userCredentials;
     }
 
     public String getName()
     {
-        return "/events" + this.query;
+        return "/api/events";
     }
 
     @Override
@@ -41,21 +46,19 @@ public class QueryEventsTask
 
     public void execute()
     {
-        ApiResponse response = apiActions.get(this.query);
+        ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query );
 
-        this.responseBody = response.getBody();
-
-        if ( response.statusCode() == 200 )
+        if ( saveResponse )
         {
-            recordSuccess( response.getRaw() );
-            return;
+            this.responseBody = response.getBody();
         }
 
-        recordFailure( response.getRaw() );
+        record( response.getRaw() );
     }
 
     public JsonObject executeAndGetBody()
     {
+        this.saveResponse = true;
         execute();
         return responseBody;
     }

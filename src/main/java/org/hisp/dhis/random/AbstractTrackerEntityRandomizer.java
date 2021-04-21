@@ -28,15 +28,14 @@ package org.hisp.dhis.random;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
-
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.ProgramStage;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.utils.DataRandomizer;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * @author Luciano Fiandesio
@@ -45,7 +44,7 @@ public abstract class AbstractTrackerEntityRandomizer<T>
     implements
     DhisEntityRandomizer<T>
 {
-    protected DateFormat DEFAULT_DATEFORMAT = new SimpleDateFormat( "yyyy-MM-dd" );
+    protected DateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
 
     protected Program getProgramFromContextOrRnd( RandomizerContext ctx, EntitiesCache cache )
     {
@@ -62,64 +61,37 @@ public abstract class AbstractTrackerEntityRandomizer<T>
         return program;
     }
 
+    protected String getOrgUnitFromContextOrRndFromProgram( RandomizerContext ctx, Program program )
+    {
+        if ( ctx.getOrgUnitUid() == null )
+        {
+            return getRandomOrgUnitFromProgram( program );
+        }
+
+        String uid = ctx.getOrgUnitUid();
+        ctx.setOrgUnitUid( uid );
+
+        return uid;
+    }
+
     private Program getRandomProgram( EntitiesCache cache )
     {
-        return DataRandomizer.randomElementFromList( cache.getPrograms() );
+        return DataRandomizer.randomElementFromList( cache.getTrackerPrograms() );
     }
 
     protected String getRandomOrgUnitFromProgram( Program program )
     {
-        return DataRandomizer.randomElementFromList( program.getOrgUnits() );
+        return DataRandomizer.randomElementFromList( program.getOrganisationUnits() );
     }
 
-    protected ProgramStage getProgramStageFromProgram(Program program )
+    protected ProgramStage getProgramStageFromProgram( Program program )
     {
-        return DataRandomizer.randomElementFromList( program.getStages() );
+        return DataRandomizer.randomElementFromList( program.getProgramStages() );
     }
 
     protected String rndValueFrom( ValueType valueType )
     {
-        String val = null;
-
-        if ( valueType.equals( ValueType.BOOLEAN ) )
-        {
-            val = String.valueOf( DataRandomizer.randomBoolean() );
-        }
-        else if ( valueType.equals( ValueType.TRUE_ONLY ) )
-        {
-            return "true";
-        }
-        else if ( valueType.isDate() )
-        {
-            val = DataRandomizer.randomDate( DateTimeFormatter.ISO_LOCAL_DATE );
-        }
-        else if ( valueType.equals( ValueType.PERCENTAGE ) )
-        {
-            val = String.valueOf( DataRandomizer.randomIntInRange( 1, 100 ) );
-        }
-        else if ( valueType.isNumeric() )
-        {
-            val = String.valueOf( DataRandomizer.randomIntInRange( 1, 100000 ) );
-        }
-        else if ( valueType.isDecimal() )
-        {
-            val = String.valueOf( DataRandomizer.randomDoubleInRange( 100, 1000, 1 ) );
-        }
-        else if ( valueType.isText() )
-        {
-            val = DataRandomizer.randomString();
-        }
-        else if ( valueType.isOrganisationUnit() )
-        {
-            val = ""; // TODO
-        }
-        else if ( valueType.isGeo() )
-        {
-//            Point p = createRandomPoint();
-//            val = p.getY() + ", " + p.getY();
-            val = ""; // TODO
-        }
-
-        return val;
+        return new DataValueRandomizer().rndValueFrom( valueType );
     }
+
 }

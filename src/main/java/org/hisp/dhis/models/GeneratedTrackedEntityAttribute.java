@@ -1,4 +1,4 @@
-package org.hisp.dhis.cache;
+package org.hisp.dhis.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

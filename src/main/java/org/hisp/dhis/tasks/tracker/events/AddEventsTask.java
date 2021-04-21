@@ -1,18 +1,8 @@
 package org.hisp.dhis.tasks.tracker.events;
 
-import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-
-import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import com.google.gson.JsonParseException;
-import org.hisp.dhis.actions.RestApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hisp.dhis.actions.AuthenticatedApiActions;
+import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
@@ -20,8 +10,9 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.DataRandomizer;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hisp.dhis.utils.JsonParserUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * @author Luciano Fiandesio <luciano@dhis2.org>
@@ -29,7 +20,7 @@ import org.hisp.dhis.utils.JsonParserUtils;
 public class AddEventsTask
     extends DhisAbstractTask
 {
-    private EntitiesCache entitiesCache;
+    ApiResponse response;
 
     private EventRandomizer eventRandomizer;
 
@@ -37,11 +28,21 @@ public class AddEventsTask
 
     private List<String> blackListedTeis = new ArrayList<>();
 
-    public AddEventsTask( int weight, EntitiesCache entitiesCache )
+    private List<Event> events;
+
+    private Logger logger = Logger.getLogger( this.getClass().getName() );
+
+    public AddEventsTask( int weight )
     {
-        this.weight = weight;
-        this.entitiesCache = entitiesCache;
+        super( weight );
         eventRandomizer = new EventRandomizer();
+    }
+
+    public AddEventsTask( int weight, List<Event> events, UserCredentials userCredentials )
+    {
+        super( weight );
+        this.events = events;
+        this.userCredentials = userCredentials;
     }
 
     @Override
@@ -56,48 +57,48 @@ public class AddEventsTask
         return "POST";
     }
 
-    private Event createRandomEvent()
+    private List<Event> createRandomEvents()
     {
-        try
-        {
-            return eventRandomizer.create( entitiesCache, RandomizerContext.EMPTY_CONTEXT() );
-        }
-        catch ( Exception e )
-        {
-            System.out.println( "An error occurred while creating a random event: " + e.getMessage() );
-        }
-        return null;
-    }
 
-    @Override
-    public void execute()
-    {
         List<Event> rndEvents = new ArrayList<>();
         for ( int i = 0; i < DataRandomizer.randomIntInRange( 5, 10 ); i++ )
         {
-            Event randomEvent = createRandomEvent();
+            Event randomEvent = null;
+            try
+            {
+                randomEvent = eventRandomizer.create( entitiesCache, RandomizerContext.EMPTY_CONTEXT() );
+
+            }
+            catch ( Exception e )
+            {
+                logger.warning( "An error occurred while creating a random event: " + e.getMessage() );
+            }
 
             if ( randomEvent != null && !blackListedTeis.contains( randomEvent.getTrackedEntityInstance() ) )
             {
-
                 rndEvents.add( randomEvent );
             }
         }
 
-        RestApiActions apiActions = new RestApiActions( this.endpoint );
+        return rndEvents;
+    }
+
+    @Override
+    public void execute()
+        throws Exception
+    {
+        List<Event> rndEvents = events != null ? events : createRandomEvents();
+
         EventWrapper ew = new EventWrapper( rndEvents );
-        ApiResponse response = apiActions.post( ew );
 
-        if ( response.statusCode() == STATUS_CODE_OK )
-        {
-            recordSuccess( response.getRaw() );
-        }
-        else
-        {
-            addTeiToBlacklist( response );
+        response = performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( ew ) );
+    }
 
-            recordFailure( response.getRaw() );
-        }
+    public ApiResponse executeAndGetResponse()
+        throws Exception
+    {
+        this.execute();
+        return response;
     }
 
     // We need to wrap the list of events with a root element
@@ -114,48 +115,6 @@ public class AddEventsTask
         public List<Event> getEvents()
         {
             return events;
-        }
-    }
-
-    /**
-     * A new PSI, must be linked to a Program Instance.
-     * Since it is not possible to fetch Program Instances via API (and therefore cache them),
-     * in order to avoid reusing invalid Tracked Entity Instances (which are the link between a PSI and a PI),
-     * this method analyzed the response payload and checks if one of the ImportSummaries contains an error
-     * ending for: 'is not enrolled in program". This error signal that there was Program Instance found by Tei + Program.
-     *
-     * If the message is found the TEI uid is extracted and added to a "Tei Black List", so that the same tei is not reused
-     * in the context of the performance test
-     *
-     * @param response
-     */
-    private void addTeiToBlacklist( ApiResponse response )
-    {
-
-        try
-        {
-            String errorString = response.getAsString();
-            Map<String, Object> map = new ObjectMapper().readValue( errorString, Map.class );
-            Map<String, Object> responseJson = (Map<String, Object>) map.get( "response" );
-            List importSummaries = (List) responseJson.get( "importSummaries" );
-            for ( Object importSummary : importSummaries )
-            {
-
-                Map is = (Map) importSummary;
-                if ( is.get( "status" ).equals( "ERROR" ) )
-                {
-                    String desc = (String) is.get( "description" );
-                    if ( desc != null && desc.contains( "is not enrolled in program" ) )
-                    {
-                        blackListedTeis.add( StringUtils.substringBetween( desc, "instance: ", " is not" ) );
-                    }
-                }
-
-            }
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace();
         }
     }
 }

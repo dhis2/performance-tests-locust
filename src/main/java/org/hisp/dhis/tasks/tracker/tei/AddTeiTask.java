@@ -1,10 +1,9 @@
 package org.hisp.dhis.tasks.tracker.tei;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.hisp.dhis.actions.RestApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.actions.AuthenticatedApiActions;
+import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
+import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
@@ -13,14 +12,24 @@ public class AddTeiTask
     extends
     DhisAbstractTask
 {
-    private EntitiesCache cache;
-
     private String endpoint = "/api/trackedEntityInstances";
 
-    public AddTeiTask( int weight, EntitiesCache entitiesCache )
+    private TrackedEntityInstances trackedEntityInstanceBody;
+
+    private ApiResponse response;
+
+    public AddTeiTask( int weight )
     {
-        this.weight = weight;
-        this.cache = entitiesCache;
+        super( weight );
+    }
+
+    public AddTeiTask( int weight, TrackedEntityInstances trackedEntityInstance,
+        UserCredentials userCredentials )
+    {
+        this( weight );
+        trackedEntityInstanceBody = trackedEntityInstance;
+        this.userCredentials = userCredentials;
+
     }
 
     public String getName()
@@ -35,33 +44,22 @@ public class AddTeiTask
     }
 
     public void execute()
+        throws Exception
     {
-        TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstanceRandomizer().create( this.cache, 5 );
-
-        long time = System.currentTimeMillis();
-
-        ApiResponse response = null;
-        boolean hasFailed = false;
-        try
+        if ( trackedEntityInstanceBody == null )
         {
-            response = new RestApiActions( this.endpoint ).post( trackedEntityInstances );
-        }
-        catch ( Exception e )
-        {
-            recordFailure( System.currentTimeMillis() - time, e.getMessage() );
-            hasFailed = true;
+            trackedEntityInstanceBody = new TrackedEntityInstanceRandomizer()
+                .create( this.entitiesCache, RandomizerContext.EMPTY_CONTEXT(), 5 );
         }
 
-        if ( !hasFailed )
-        {
-            if ( response.statusCode() == 200 )
-            {
-                recordSuccess( response.getRaw() );
-            }
-            else
-            {
-                recordFailure( response.getRaw() );
-            }
-        }
+        this.response = performTaskAndRecord(
+            () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( trackedEntityInstanceBody ) );
+    }
+
+    public ApiResponse executeAndGetResponse()
+        throws Exception
+    {
+        this.execute();
+        return this.response;
     }
 }

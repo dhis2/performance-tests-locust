@@ -1,7 +1,7 @@
 FROM python:3.8-alpine
 
 RUN apk --no-cache add g++ zeromq-dev libffi-dev file make musl-dev
-RUN pip install locust==1.2.3 pyzmq Jinja2 \
+RUN pip install locust==1.4.3 pyzmq Jinja2 \
       && mkdir /locust \
       && mkdir /templates
 

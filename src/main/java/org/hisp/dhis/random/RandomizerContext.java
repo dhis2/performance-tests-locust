@@ -41,18 +41,28 @@ import org.hisp.dhis.cache.ProgramStage;
 public class RandomizerContext
 {
 
-    public static RandomizerContext EMPTY_CONTEXT()
-    {
-        return new RandomizerContext();
-    }
-
     private Program program;
 
     private ProgramStage programStage;
 
     private String orgUnitUid;
+
+    private String teiId;
+
+    private String enrollmentId;
+
     /**
      * if true, a TEI is not generated when creating a new random event
      */
     private boolean skipTeiInEvent;
+
+    /**
+     * if true, a TEI reference is not used when creating a new ranndom enrollment
+     */
+    private boolean skipTeiInEnrollment;
+
+    public static RandomizerContext EMPTY_CONTEXT()
+    {
+        return new RandomizerContext();
+    }
 }

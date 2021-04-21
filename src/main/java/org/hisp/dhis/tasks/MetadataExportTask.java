@@ -14,9 +14,9 @@ public class MetadataExportTask
 
     private String endpoint = "/api/metadata";
 
-    public int getWeight()
+    protected MetadataExportTask()
     {
-        return 1;
+        super( 1 );
     }
 
     public String getName()

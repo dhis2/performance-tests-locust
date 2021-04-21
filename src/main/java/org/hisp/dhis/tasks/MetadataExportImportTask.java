@@ -11,16 +11,9 @@ import org.hisp.dhis.response.dto.ApiResponse;
 public class MetadataExportImportTask
     extends DhisAbstractTask
 {
-    private int weight;
-
     public MetadataExportImportTask( int weight )
     {
-        this.weight = weight;
-    }
-
-    public int getWeight()
-    {
-        return this.weight;
+        super( weight );
     }
 
     public String getName()
@@ -37,8 +30,6 @@ public class MetadataExportImportTask
     public void execute()
         throws Exception
     {
-        new LoginTask().execute();
-
         JsonObject metadata = new MetadataExportTask().executeAndGetBody();
 
         long time = System.currentTimeMillis();
