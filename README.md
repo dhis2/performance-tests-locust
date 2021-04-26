@@ -65,19 +65,18 @@ Note: you can also run locust without docker. [Read more](#Running-tests-without
 
 ## Test configuration
 
-[locust.properties](src/main/resources/locust.properties) is based on the performance test database, but should work
-with SL database as well.
+[locust.properties](src/main/resources/locust.properties) is based on the performance test database, but should work with SL database as well.
 
 | Key | Default value | Description |
-| --- | :----------:| ---- : |
+| :---: | :--:| ------------  |
 | locust.master.port | 5557 | |
-| locust.master.host | 127.0.0.1 | Location of the locust master
+| locust.master.host | 127.0.0.1 | Location of the locust master |
 | target.base_uri |  `http://localhost:8080/dhis` | URL of DHIS2 instance | 
 | user.admin.username | admin | Super user used to populate the cache and run tests |
 | user.admin.password | district | |
 | cache.reuse_cache | true | Indicates if the local cache should be reused in next test execution|
 | cache.users.pool.size | 40 | Indicates how many DHIS2 users should be stored in the cache. Note that users should exist in DHIS2 DB.  |
-| cache.users.use_admin_user | false | Indicates if the admin user should be used when running the tests. If there are no users matching identifier configured in `cache.users.identifier`, admin user will be used anyway.
+| cache.users.use_admin_user | false | Indicates if the admin user should be used when running the tests. If there are no users matching identifier configured in `cache.users.identifier`, only admin user will be used |
 | cache.users.identifier | uio | Identifier used to look up users. Users will be filtered by `displayName` property |
 | cache.users.password | Test1212? | Password of users loaded in the cache | 
 | locust.min_wait | 20000 | Indicates how long should locust thread wait between the tasks. The value will be a random number of ms between min_wait and max_wait values. |
