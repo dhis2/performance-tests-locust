@@ -75,7 +75,7 @@ public class EntitiesCache
         new RelationshipTypeCacheBuilder().load( this );
 
         // remove programs without tei
-        this.trackerPrograms = trackerPrograms.stream().filter( p -> teis.containsKey( p.getId() ) ).collect( toList() );
+        //this.trackerPrograms = trackerPrograms.stream().filter( p -> teis.containsKey( p.getId() ) ).collect( toList() );
     }
 
     public List<Program> getProgramsWithAtLeastOnRepeatableStage()
