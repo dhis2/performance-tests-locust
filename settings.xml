@@ -11,20 +11,19 @@
       <id>default</id>
       <repositories>
         <repository>
-          <id>github</id>
-          <name>GitHub DHIS2 Apache Maven Packages</name>
-          <url>https://maven.pkg.github.com/dhis2/api-test-utils</url>
+          <id>ossrh</id>
+          <name>Sonatype OSS</name>
+          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
         <repository>
           <id>jcenter</id>
           <url>https://jcenter.bintray.com/</url>
         </repository>
         <repository>
-          <id>ossrh</id>
-          <name>Sonatype OSS</name>
-          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+          <id>github</id>
+          <name>GitHub DHIS2 Apache Maven Packages</name>
+          <url>https://maven.pkg.github.com/dhis2/api-test-utils</url>
         </repository>
-
         <repository>
           <id>osgeo</id>
           <name>Open Source Geospatial Foundation Repository</name>
