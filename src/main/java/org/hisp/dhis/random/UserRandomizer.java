@@ -44,6 +44,7 @@ public class UserRandomizer
             return DataRandomizer.randomElementFromList( program.getOrganisationUnits() );
         }
 
+
         return getRandomUserOrgUnit( user );
     }
 }
