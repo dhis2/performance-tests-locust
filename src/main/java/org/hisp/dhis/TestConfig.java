@@ -21,9 +21,6 @@ public interface TestConfig
     @Key( "target.base_uri" )
     String targetUri();
 
-    @Key( "analytics.api.version" )
-    int analyticsApiVersion();
-
     @Key( "user.admin.username" )
     String adminUsername();
 
