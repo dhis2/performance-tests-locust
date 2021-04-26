@@ -27,7 +27,6 @@ public class AllTests
             new TrackerCapture_addTeiTaskSet( 2 ),
             new Capture_addEventTaskSet( 2 ),
             new TrackerCapture_searchForTeiTaskSet( 1 ),
-            new LoadDashboardTask( 1 ),
             new PostRelationshipTask( 1 ),
             new TrackerCapture_searchForTeiByUniqueAttributeTaskSet( 1 )
         );

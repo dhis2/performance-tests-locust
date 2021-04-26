@@ -3,6 +3,8 @@ package org.hisp.dhis.tasksets.tracker;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
+import org.hisp.dhis.cache.User;
+import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.importer.GetTrackerTeiTask;
@@ -47,7 +49,7 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
         throws Exception
     {
         Program program = getProgramWithAttributes();
-        user = getUser();
+        User user = new UserRandomizer().getRandomUser( entitiesCache );
 
         TrackedEntityAttribute randomAttribute = getRandomAttribute( program.getId() );
 

@@ -1,6 +1,7 @@
 package org.hisp.dhis.tasks.analytics;
 
 import org.hisp.dhis.cache.Dashboard;
+import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.Visualization;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.DataRandomizer;
@@ -34,7 +35,7 @@ public class LoadDashboardTask
     public void execute()
         throws Exception
     {
-        user = getUser();
+        User user = getUser();
 
         Dashboard dashboard = DataRandomizer.randomElementFromList( entitiesCache.getDashboards() );
 
