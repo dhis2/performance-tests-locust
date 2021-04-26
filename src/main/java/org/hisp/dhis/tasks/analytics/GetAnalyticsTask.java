@@ -1,6 +1,7 @@
 package org.hisp.dhis.tasks.analytics;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
+import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.cache.Visualization;
 import org.hisp.dhis.tasks.DhisAbstractTask;
@@ -42,7 +43,7 @@ public class GetAnalyticsTask
     @Override
     public void execute()
     {
-        user = getUser();
+        User user = getUser();
 
         if ( visualization == null )
         {
