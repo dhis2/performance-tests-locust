@@ -11,7 +11,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class TeiType
 {
-    private String uid;
+    private String id;
 
     private String name;
 
