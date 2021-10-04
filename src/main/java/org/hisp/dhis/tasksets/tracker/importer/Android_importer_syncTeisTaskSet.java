@@ -65,7 +65,8 @@ public class Android_importer_syncTeisTaskSet
                 map( p -> new TrackedEntityMapperImpl().from( p ) ).collect( Collectors.toList() ) )
             .build();
 
-        new AddTrackerDataTask( 1, user.getUserCredentials(), trackedEntities, true, "FULL" ).execute();
+
+        new AddTrackerDataTask( 1, user.getUserCredentials(), payload, "FULL" ).execute();
 
         waitBetweenTasks();
     }

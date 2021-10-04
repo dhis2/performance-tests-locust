@@ -44,4 +44,7 @@ public interface TestConfig
 
     @Key( "cache.users.ou_level" )
     int cacheUsersOuLevel();
+
+    @Key( "tracker.importer.async")
+    boolean useAsyncTrackerImporter();
 }
