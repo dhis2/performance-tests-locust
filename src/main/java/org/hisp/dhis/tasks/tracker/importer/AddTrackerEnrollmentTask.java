@@ -55,17 +55,10 @@ public class AddTrackerEnrollmentTask
         EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer();
 
         Enrollment enrollment = new EnrollmentMapperImpl().from( enrollmentRandomizer.createWithoutEvents( entitiesCache, ctx ) );
-
-        AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, getUserCredentials() );
-
         Enrollments enrollments = new Enrollments();
         enrollments.setEnrollments( Lists.newArrayList( enrollment ) );
 
-        response = (TrackerApiResponse) performTaskAndRecord(
-            () -> new TrackerApiResponse( authenticatedApiActions
-                .post( enrollments, new QueryParamsBuilder().addAll( "async=false", "identifier=enrollment" ) ) )
-        );
-
+        response = new AddTrackerDataTask( 1, getUserCredentials(), enrollments, "enrollment"  ).executeAndGetBody();
     }
 
     public TrackerApiResponse executeAndGetBody()

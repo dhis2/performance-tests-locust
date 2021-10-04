@@ -55,9 +55,8 @@ public class Capture_importer_addEventTaskSet
 
         Event event = new EventMapperImpl().from( new EventRandomizer().create( entitiesCache, context ) );
 
-        new AddTrackerDataTask( 1, user.getUserCredentials(), Events.builder().build().addEvent( event ), true,
+        new AddTrackerDataTask( 1, user.getUserCredentials(), Events.builder().build().addEvent( event ),
             "events" ).execute();
-        //new AddTrackerEventsTask( 1, entitiesCache, Events.builder().build().addEvent(event), user.getUserCredentials() ).execute();
 
         waitBetweenTasks();
     }

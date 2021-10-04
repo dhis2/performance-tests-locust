@@ -82,6 +82,7 @@ Note: you can also run locust without docker. [Read more](#Running-tests-without
 | locust.min_wait | 20000 | Indicates how long should locust thread wait between the tasks. The value will be a random number of ms between min_wait and max_wait values. |
 | locust.max_wait | 30000 |  | 
 | cache.users.ou_level | 5 | Used in filtering users to populate the cache | 
+| tracker.importer.async | true | Only applicable to the new tracker importer. Used as a query param in tests interacting with /tracker endpoint. |
 
 ## Required database setup 
 Tests will generate data based on the database configuration, but the following assumptions are made due to limitations in data randomizer: 

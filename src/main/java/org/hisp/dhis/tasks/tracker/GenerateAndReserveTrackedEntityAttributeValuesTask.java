@@ -20,6 +20,8 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask
 
     private ApiResponse response;
 
+    private String name = "";
+
     public GenerateAndReserveTrackedEntityAttributeValuesTask( int weight, String trackedEntityAttributeId,
         UserCredentials userCredentials, int numberToReserve )
     {
@@ -29,10 +31,19 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask
         this.numberToReserve = numberToReserve;
     }
 
+    public GenerateAndReserveTrackedEntityAttributeValuesTask( int weight, String trackedEntityAttributeId,
+        UserCredentials userCredentials, int numberToReserve, String name )
+    {
+        super( weight );
+        this.teiAttributeId = trackedEntityAttributeId;
+        this.userCredentials = userCredentials;
+        this.numberToReserve = numberToReserve;
+        this.name = name;
+    }
     @Override
     public String getName()
     {
-        return endpoint;
+        return endpoint + name;
     }
 
     @Override
