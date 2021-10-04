@@ -1,5 +1,6 @@
 package org.hisp.dhis.tasksets.tracker;
 
+import jdk.nashorn.internal.parser.JSONParser;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
@@ -16,6 +17,7 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
 import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.JsonParserUtils;
 
 import java.util.List;
 
@@ -25,7 +27,7 @@ import java.util.List;
 public class Android_syncTeisTaskSet
     extends DhisAbstractTask
 {
-    private int minPayload = 3;
+    private int minPayload = 10;
 
     private int maxPayload = 10;
 
@@ -70,8 +72,12 @@ public class Android_syncTeisTaskSet
 
         generateAttributes( program, teis.getTrackedEntityInstances(), user.getUserCredentials() );
 
-        performTaskAndRecord( () -> new AuthenticatedApiActions( "/api/trackedEntityInstances", user.getUserCredentials() )
-            .post( teis, new QueryParamsBuilder().add( "strategy=SYNC" ) ) );
+        performTaskAndRecord( () -> {
+            ApiResponse response = new AuthenticatedApiActions( "/api/trackedEntityInstances", user.getUserCredentials() )
+                .post( teis, new QueryParamsBuilder().add( "strategy=SYNC" ) );
+
+            return response;
+        }, response -> response.extractString( "status" ).equalsIgnoreCase( "ERROR" ) ? false : true );
 
         waitBetweenTasks();
     }

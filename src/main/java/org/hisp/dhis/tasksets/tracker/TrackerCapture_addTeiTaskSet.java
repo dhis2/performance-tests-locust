@@ -118,10 +118,10 @@ public class TrackerCapture_addTeiTaskSet
         ListOrderedSet dataValueSet = new EventRandomizer()
             .createDataValues( context.getProgramStage(), dataValuesToCreate / 4, dataValuesToCreate );
 
-        DhisDelayedTaskSet taskSet = new DhisDelayedTaskSet( 5 );
+        DhisDelayedTaskSet taskSet = new DhisDelayedTaskSet( 2 );
         dataValueSet.forEach( dv -> {
             taskSet.addTask(
-                new AddDataValueTask( 1, eventId, (DataValue) dv, program.getId(), user.getUserCredentials() )
+                new AddDataValueTask( 1, eventId, (DataValue) dv, program.getId(), tei.getTrackedEntityInstance(), user.getUserCredentials() )
             );
         } );
 

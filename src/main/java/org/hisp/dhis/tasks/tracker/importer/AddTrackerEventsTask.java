@@ -95,8 +95,7 @@ public class AddTrackerEventsTask
 
         RestApiActions apiActions = new AuthenticatedApiActions( this.endpoint, getUserCredentials() );
 
-        response = (TrackerApiResponse) performTaskAndRecord( () -> new TrackerApiResponse(
-            apiActions.post( rndEvents, new QueryParamsBuilder().addAll( "async=false", "identifier=events" ) ) ) );
+        response = new AddTrackerDataTask( 1, getUserCredentials(), rndEvents, "events" ).executeAndGetBody();
     }
 
     public TrackerApiResponse executeAndGetResponse()

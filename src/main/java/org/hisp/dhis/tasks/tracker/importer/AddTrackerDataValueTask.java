@@ -55,8 +55,6 @@ public class AddTrackerDataValueTask
     {
         event.setDataValues( Sets.newHashSet( this.dataValue ) );
 
-        performTaskAndRecord( () -> new AuthenticatedApiActions( "/api/tracker", this.userCredentials )
-            .post( Events.builder().events( Arrays.asList( event ) ).build(),
-                new QueryParamsBuilder().addAll( "async=false", "identifier=eventdatavalues" ) ) );
+        new AddTrackerDataTask( 1, this.userCredentials, Events.builder().events( Arrays.asList( event ) ).build(), "event_data_values"  ).execute();
     }
 }

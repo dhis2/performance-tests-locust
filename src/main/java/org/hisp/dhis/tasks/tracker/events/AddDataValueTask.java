@@ -21,17 +21,20 @@ public class AddDataValueTask
 
     private String eventProgram;
 
-    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program )
+    private String tei;
+
+    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program, String tei )
     {
         super( weight );
         this.eventId = eventId;
         this.dataValue = dataValue;
         this.eventProgram = program;
+        this.tei = tei;
     }
 
-    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program, UserCredentials userCredentials )
+    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program, String tei, UserCredentials userCredentials )
     {
-        this( weight, eventId, dataValue, program );
+        this( weight, eventId, dataValue, program, tei );
         this.userCredentials = userCredentials;
     }
 
@@ -53,6 +56,8 @@ public class AddDataValueTask
     {
         JsonObject payload = new JsonObjectBuilder()
             .addProperty( "program", eventProgram )
+            .addProperty( "trackedEntityInstance", tei )
+            .addProperty( "event", eventId )
             .addOrAppendToArray( "dataValues", JsonParserUtils.toJsonObject( dataValue ).getAsJsonObject() )
             .build();
 

@@ -69,9 +69,7 @@ public class AddTrackerTeiTask
                     .toList() ) ).build();
         }
 
-        response = new TrackerApiResponse( performTaskAndRecord(
-            () -> new AuthenticatedApiActions( this.endpoint, user.getUserCredentials() )
-                .post( trackedEntityInstanceBody, new QueryParamsBuilder().addAll( "async=false", "identifier=teis" ) ) ) );
+        response = new AddTrackerDataTask( 1, user.getUserCredentials(), trackedEntityInstanceBody, "teis" ).executeAndGetBody();
     }
 
     public TrackerApiResponse executeAndGetResponse()

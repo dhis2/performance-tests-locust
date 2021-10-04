@@ -31,7 +31,7 @@ public abstract class DhisAbstractTask
 
     protected EntitiesCache entitiesCache;
 
-    TestConfig cfg = create( TestConfig.class );
+    protected TestConfig cfg = create( TestConfig.class );
 
     protected DhisAbstractTask( int weight )
     {
@@ -115,7 +115,7 @@ public abstract class DhisAbstractTask
         try
         {
             response = function.call();
-        }
+                  }
 
         catch ( Exception e )
         {

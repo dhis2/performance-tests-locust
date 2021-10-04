@@ -12,6 +12,7 @@ import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
 import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
@@ -33,6 +34,8 @@ public class AddTrackerDataTask
 
     private boolean async = false;
 
+    private TrackerApiResponse response;
+
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
     private String identifier = "";
@@ -43,12 +46,12 @@ public class AddTrackerDataTask
     }
 
     public AddTrackerDataTask( int weight, UserCredentials userCredentials, Object payload,
-        boolean isAsync, String identifier )
+   String identifier )
     {
         this( weight );
         this.userCredentials = userCredentials;
         this.payload = payload;
-        this.async = isAsync;
+        this.async = super.cfg.useAsyncTrackerImporter();
         this.identifier = identifier;
     }
 
@@ -85,7 +88,7 @@ public class AddTrackerDataTask
                 .build();
         }
 
-        performTaskAndRecord( () -> {
+        response = (TrackerApiResponse) performTaskAndRecord( () -> {
             ApiResponse response = trackerActions
                 .post( payload, new QueryParamsBuilder().addAll( "async=" + this.async, "identifier=" + identifier ) );
 
@@ -98,8 +101,15 @@ public class AddTrackerDataTask
                 response = trackerActions.get( String.format( "/jobs/%s/report?reportMode=%s", jobId, "FULL" ) );
             }
 
-            return response;
+            return new TrackerApiResponse( response );
         }, response -> response.extractString( "status" ).equalsIgnoreCase( "ERROR" ) ? false : true );
+    }
+
+    public TrackerApiResponse executeAndGetBody()
+        throws Exception
+    {
+        this.execute();
+        return response;
     }
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )

@@ -88,9 +88,6 @@ public class TrackerCapture_importer_addTeiTaskSet
 
         context.setTeiId( body.extractImportedTeis().get( 0 ) );
 
-        //EnrollmentRandomizer randomizer = new EnrollmentRandomizer();
-        //Enrollment enrollment = randomizer.createWithoutEvents( entitiesCache, context );
-
         TrackerApiResponse response = new AddTrackerEnrollmentTask( 1, context, user.getUserCredentials() )
             .executeAndGetBody();
 
