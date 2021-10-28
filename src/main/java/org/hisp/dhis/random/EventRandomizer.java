@@ -34,6 +34,7 @@ import org.hisp.dhis.cache.ProgramStage;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.UidGenerator;
 
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -64,6 +65,10 @@ public class EventRandomizer
         String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, program );
 
         Event event = new Event();
+        if ( ctx.isGenerateIds() ) {
+            event.setEvent( UidGenerator.generateUid() );
+        }
+        event.setStoredBy( "performance-test" );
         event.setEnrollment( ctx.getEnrollmentId() );
         event.setDueDate( simpleDateFormat.format( new Date() ) );
         event.setProgram( program.getId() );

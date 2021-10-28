@@ -1,10 +1,16 @@
 package org.hisp.dhis.tasks.tracker;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
+import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
+
+import java.util.List;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -18,10 +24,6 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask
 
     private String endpoint = "/api/trackedEntityAttributes/id/generateAndReserve";
 
-    private ApiResponse response;
-
-    private String name = "";
-
     public GenerateAndReserveTrackedEntityAttributeValuesTask( int weight, String trackedEntityAttributeId,
         UserCredentials userCredentials, int numberToReserve )
     {
@@ -31,19 +33,10 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask
         this.numberToReserve = numberToReserve;
     }
 
-    public GenerateAndReserveTrackedEntityAttributeValuesTask( int weight, String trackedEntityAttributeId,
-        UserCredentials userCredentials, int numberToReserve, String name )
-    {
-        super( weight );
-        this.teiAttributeId = trackedEntityAttributeId;
-        this.userCredentials = userCredentials;
-        this.numberToReserve = numberToReserve;
-        this.name = name;
-    }
     @Override
     public String getName()
     {
-        return endpoint + name;
+        return endpoint ;
     }
 
     @Override
@@ -54,19 +47,49 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask
 
     @Override
     public void execute()
+        throws Exception
+    {
+        this.executeAndGetResponse();
+    }
+
+    public void executeAndAddAttributes( List<TrackedEntityInstance> teis)
+        throws Exception
+    {
+        ApiResponse apiResponse = executeAndGetResponse();
+
+        if ( ! teis.isEmpty() )
+        {
+            List<String> values = apiResponse.extractList( "value" );
+
+            if ( values == null || values.isEmpty()) {
+                throw new Exception("Failed to generate attributes. Attributes weren't added to TEI.");
+            }
+
+            for ( int i = 0; i < teis.size(); i++ )
+            {
+                Attribute attribute = teis.get( i ).getAttributes().stream()
+                    .filter( teiAtr -> teiAtr.getAttribute().equals( this.teiAttributeId ) )
+                    .findFirst().orElse( null );
+
+                if ( attribute == null )
+                {
+                    attribute = new Attribute();
+                    attribute.setAttribute( this.teiAttributeId );
+                }
+
+                attribute.setValue( values.get( i ) );
+            }
+        }
+    }
+    public ApiResponse executeAndGetResponse()
+        throws Exception
     {
         AuthenticatedApiActions apiActions = new AuthenticatedApiActions( "", userCredentials );
 
-        response = apiActions.get( endpoint.replace( "id", teiAttributeId ), new QueryParamsBuilder().add( "numberToReserve",
-            String.valueOf( numberToReserve ) ) );
-
-        record( response.getRaw() );
-    }
-
-    public ApiResponse executeAndGetResponse()
-    {
-        this.execute();
-        return this.response;
+        return performTaskAndRecord( () -> {
+            return apiActions.get( endpoint.replace( "id", teiAttributeId ), new QueryParamsBuilder().add( "numberToReserve",
+                String.valueOf( numberToReserve ) ) );
+        }, response -> ( response.statusCode() == 200 && !CollectionUtils.isEmpty( response.extractList( "value" ))));
     }
 }
 

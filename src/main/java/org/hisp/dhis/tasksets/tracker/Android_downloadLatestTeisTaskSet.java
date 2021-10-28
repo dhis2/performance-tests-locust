@@ -1,7 +1,6 @@
 package org.hisp.dhis.tasksets.tracker;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.request.QueryParamsBuilder;
@@ -25,13 +24,13 @@ public class Android_downloadLatestTeisTaskSet extends DhisAbstractTask
     @Override
     public String getName()
     {
-        return "Android: download teis";
+        return "Android: download latest teis";
     }
 
     @Override
     public String getType()
     {
-        return "http";
+        return "GET";
     }
 
     @Override
@@ -43,17 +42,15 @@ public class Android_downloadLatestTeisTaskSet extends DhisAbstractTask
         QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder()
             .add( "ouMode=DESCENDANTS" )
             .add( "includeDeleted", "true" )
-            .add( "includeAllAttributes",  "true" )
+            .add( "includeAllAttributes", "true" )
             .add( "pageSize", "50" )
             .add( "trackedEntityType", DataRandomizer.randomElementFromList( entitiesCache.getTeiTypes() ).getId() )
             .add( "paging", "true" )
-            .add( "ou", new UserRandomizer().getRandomUserOrgUnit( user ))
+            .add( "ou", new UserRandomizer().getRandomUserOrgUnit( user ) )
             .add( "lastUpdatedStartDate", Instant.now().toString() );
 
-        performTaskAndRecord( () -> {
-            return new AuthenticatedApiActions( endpoint, user.getUserCredentials())
-                .get( "", queryParamsBuilder);
-        }, response -> response.extractList( "trackedEntityInstances" ) != null);
+        performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, user.getUserCredentials() )
+            .get( "", queryParamsBuilder ), response -> response.extractList( "trackedEntityInstances" ) != null );
 
     }
 }

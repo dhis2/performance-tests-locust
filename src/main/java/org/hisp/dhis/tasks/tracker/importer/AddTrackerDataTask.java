@@ -2,6 +2,7 @@ package org.hisp.dhis.tasks.tracker.importer;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
@@ -30,9 +31,11 @@ public class AddTrackerDataTask
 {
     private String endpoint = "/api/tracker";
 
+    private QueryParamsBuilder builder = new QueryParamsBuilder();
+
     private Object payload;
 
-    private boolean async = false;
+    private boolean async = super.cfg.useAsyncTrackerImporter();
 
     private TrackerApiResponse response;
 
@@ -46,19 +49,25 @@ public class AddTrackerDataTask
     }
 
     public AddTrackerDataTask( int weight, UserCredentials userCredentials, Object payload,
-   String identifier )
+        String identifier )
     {
         this( weight );
         this.userCredentials = userCredentials;
         this.payload = payload;
-        this.async = super.cfg.useAsyncTrackerImporter();
         this.identifier = identifier;
+    }
+
+    public AddTrackerDataTask( int weight, UserCredentials userCredentials, Object payload,
+        String identifier, String... params )
+    {
+        this( weight, userCredentials, payload, identifier );
+        this.builder.addAll( params );
     }
 
     @Override
     public String getName()
     {
-        return endpoint + ": " + this.identifier;
+        return endpoint + builder.build() + ": " + this.identifier;
     }
 
     @Override
@@ -72,7 +81,7 @@ public class AddTrackerDataTask
         throws Exception
     {
         User user = getUser();
-        AuthenticatedApiActions trackerActions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
+        AuthenticatedApiActions trackerActions = new AuthenticatedApiActions( endpoint, getUserCredentials() );
 
         if ( payload == null )
         {
@@ -88,9 +97,10 @@ public class AddTrackerDataTask
                 .build();
         }
 
+        builder.addAll( "async=" + this.async, "identifier=" + identifier );
         response = (TrackerApiResponse) performTaskAndRecord( () -> {
             ApiResponse response = trackerActions
-                .post( payload, new QueryParamsBuilder().addAll( "async=" + this.async, "identifier=" + identifier ) );
+                .post( payload, builder );
 
             if ( this.async )
             {
@@ -102,7 +112,7 @@ public class AddTrackerDataTask
             }
 
             return new TrackerApiResponse( response );
-        }, response -> response.extractString( "status" ).equalsIgnoreCase( "ERROR" ) ? false : true );
+        }, response -> response.extractString( "status" ).equalsIgnoreCase( "OK" ) );
     }
 
     public TrackerApiResponse executeAndGetBody()
@@ -113,23 +123,26 @@ public class AddTrackerDataTask
     }
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
+        throws Exception
     {
-        program.getAttributes().stream().filter( p ->
-            p.isGenerated()
-        ).forEach( att -> {
-            ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
-                userCredentials, teis.size() ).executeAndGetResponse();
-            List<String> values = response.extractList( "value" );
-
-            for ( int i = 0; i < teis.size(); i++ )
+        for ( TrackedEntityAttribute att : program.getAttributes() )
+        {
+            if ( att.isGenerated() )
             {
-                Attribute attribute = teis.get( i ).getAttributes().stream()
-                    .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
-                    .findFirst().orElse( null );
+                ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
+                    userCredentials, teis.size() ).executeAndGetResponse();
+                List<String> values = response.extractList( "value" );
 
-                attribute.setValue( values.get( i ) );
+                for ( int i = 0; i < teis.size(); i++ )
+                {
+                    Attribute attribute = teis.get( i ).getAttributes().stream()
+                        .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
+                        .findFirst().orElse( null );
+
+                    attribute.setValue( values.get( i ) );
+                }
             }
-        } );
+        }
     }
 
     public ApiResponse waitUntilJobIsCompleted( String jobId, UserCredentials credentials )

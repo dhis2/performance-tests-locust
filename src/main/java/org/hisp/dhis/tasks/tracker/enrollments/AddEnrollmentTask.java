@@ -54,7 +54,7 @@ public class AddEnrollmentTask
 
         AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, getUserCredentials() );
 
-        response = performTaskAndRecord( () -> authenticatedApiActions.post( enrollment ) );
+        response = performTaskAndRecord( () -> authenticatedApiActions.post( enrollment ), 201 );
     }
 
     public ApiResponse executeAndGetBody()

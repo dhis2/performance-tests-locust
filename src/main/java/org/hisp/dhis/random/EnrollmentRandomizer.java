@@ -34,6 +34,7 @@ import org.hisp.dhis.cache.ProgramStage;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
 import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.UidGenerator;
 
 import java.util.Date;
 import java.util.Objects;
@@ -75,6 +76,10 @@ public class EnrollmentRandomizer
         ctx.setProgramStage( programStage );
 
         Enrollment enrollment = new Enrollment();
+        if ( ctx.isGenerateIds() ) {
+            enrollment.setEnrollment( UidGenerator.generateUid() );
+        }
+        enrollment.setStoredBy( "performance-test" );
         enrollment.setProgram( program.getId() );
         enrollment.setOrgUnit( orgUnitUid );
         enrollment.setEnrollmentDate( new Date() );
@@ -82,6 +87,11 @@ public class EnrollmentRandomizer
         enrollment.setStatus( EnrollmentStatus.ACTIVE );
         enrollment.setFollowup( false );
         enrollment.setDeleted( false );
+
+        if ( ctx.isProgramAttributesInEnrollment() )
+        {
+            enrollment.setAttributes( new TrackedEntityAttributeRandomizer().create(  ctx, true, false ) );
+        }
 
         if ( !ctx.isSkipTeiInEnrollment() )
         {
