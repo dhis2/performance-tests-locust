@@ -111,22 +111,8 @@ public abstract class DhisAbstractTask
         throws Exception
     {
         final long time = System.currentTimeMillis();
-        ApiResponse response = null;
-        try
-        {
-            response = function.call();
-                  }
-
-        catch ( Exception e )
-        {
-            if ( response != null )
-            {
-                recordFailure( System.currentTimeMillis() - time, response.getRaw().print() );
-            }
-
-            throw e;
-        }
-
+        ApiResponse response = function.call();
+      
         if ( expectation != null )
         {
             boolean passed = expectation.apply( response );
@@ -137,7 +123,7 @@ public abstract class DhisAbstractTask
                 return response;
             }
 
-            recordFailure( System.currentTimeMillis() - time, response.getRaw().print() );
+            recordFailure( System.currentTimeMillis() - time, response.getRaw().getBody().asString() );
         }
 
         return response;
@@ -182,7 +168,7 @@ public abstract class DhisAbstractTask
 
         else
         {
-            recordFailure( time, response.print() );
+            recordFailure( time, response.getBody().asString() );
         }
     }
 
@@ -211,6 +197,6 @@ public abstract class DhisAbstractTask
 
     public void recordFailure( Response response )
     {
-        Locust.getInstance().recordFailure( getType(), getName(), response.getTime(), response.getBody().print() );
+        Locust.getInstance().recordFailure( getType(), getName(), response.getTime(), response.getBody().asString() );
     }
 }
