@@ -1,5 +1,6 @@
 package org.hisp.dhis.cache.builder;
 
+import org.apache.logging.log4j.util.Strings;
 import org.hisp.dhis.TestConfig;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
@@ -42,8 +43,8 @@ public class UserCacheBuilder
             "filter=displayName:like:" + cfg.cacheUsersIdentifier(),
             "pageSize=" + cfg.cacheUserPoolSize());
 
-        if (cfg.cacheUsersOuLevel() != 0) {
-            queryParamsBuilder.add( "filter=organisationUnits.level:eq:" + cfg.cacheUsersOuLevel() );
+        if ( !cfg.cacheUsersOuLevels().contains( 0 ) ) {
+            queryParamsBuilder.add( String.format( "filter=organisationUnits.level:in:[%s]", Strings.join( cfg.cacheUsersOuLevels(), ',' )));
         }
 
         List<User> users = getPayload("/api/users", queryParamsBuilder).extractList( "users", User.class );

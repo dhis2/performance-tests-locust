@@ -28,12 +28,9 @@ package org.hisp.dhis.random;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.collections.set.ListOrderedSet;
-import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.ProgramStage;
-import org.hisp.dhis.dxf2.events.event.DataValue;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.utils.DataRandomizer;
