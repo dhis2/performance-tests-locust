@@ -3,7 +3,8 @@ import csv
 import datetime
 
 from jinja2 import Environment, FileSystemLoader
-from locust import User, TaskSet, task, events, runners
+import locust
+from locust import events, runners
 
 WORK_DIR = '/locust/'
 TEMPLATE_NAME = 'report-template.html'
@@ -15,22 +16,17 @@ args, unknown = parser.parse_known_args();
 CSV_PREFIX = args.csv
 HTML_REPORT_NAME = "html_report.html"
 
+class MyTaskSet(locust.TaskSet):
+    @locust.task
+    def my_task(self):
+        print('Locust instance ({}) executing "my_task"'.format(self.user))
 
-class MyTaskSet(TaskSet):
-    @task(20)
-    def hello(self):
-        pass
-
-
-class Dummy(User):
-    task_set = MyTaskSet
-    min_wait = 5000
-    max_wait = 10000
+class MyUser(locust.User):
+    tasks = [MyTaskSet]
 
 @events.quitting.add_listener
 def handle_quit(**kw):
     generate_report()
-
 
 def generate_report():
     print('Generating html report')

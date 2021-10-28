@@ -15,7 +15,7 @@
     <dependency>
       <groupId>com.github.myzhan</groupId>
       <artifactId>locust4j</artifactId>
-      <version>1.0.13</version>
+      <version>LATEST</version>
     </dependency>
     <dependency>
       <groupId>org.locationtech.jts</groupId>
@@ -113,4 +113,32 @@
       </plugin>
     </plugins>
   </build>
+
+
+  <repositories>
+    <repository>
+      <id>central</id>
+      <url>https://repo1.maven.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>ossrh</id>
+      <name>Sonatype OSS</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+    <repository>
+      <id>jcenter</id>
+      <url>https://jcenter.bintray.com/</url>
+    </repository>
+    <repository>
+      <id>osgeo</id>
+      <name>Open Source Geospatial Foundation Repository</name>
+      <url>https://repo.osgeo.org/repository/release/</url>
+    </repository>
+  </repositories>
 </project>

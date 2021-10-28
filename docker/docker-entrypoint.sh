@@ -13,5 +13,5 @@ fi
 
 LOCUST_OPTS="-f ${LOCUST_FILE} --master --host=$HOST $ADDITIONAL_OPTS"
 
-cd /locust
+cd /home/locust
 locust ${LOCUST_OPTS}

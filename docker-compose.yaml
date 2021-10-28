@@ -13,11 +13,8 @@ services:
       HATCH_RATE: ${HATCH_RATE:-1}
       TIME: ${TIME:-10s}
    
-    volumes:
-      - ./locust:/locust
 
     ports:
       - 5557:5557
       - 8089:8089
-      - 5558:5558
 
