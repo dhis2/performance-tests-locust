@@ -9,10 +9,7 @@ import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.event.DataValue;
 import org.hisp.dhis.models.Events;
 import org.hisp.dhis.models.TrackedEntities;
-import org.hisp.dhis.random.EventRandomizer;
-import org.hisp.dhis.random.RandomizerContext;
-import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
-import org.hisp.dhis.random.UserRandomizer;
+import org.hisp.dhis.random.*;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
@@ -100,6 +97,7 @@ public class TrackerCapture_importer_addTeiTaskSet
         context.setEnrollmentId( response.extractImportedEnrollments().get( 0 ) );
         context.setSkipTeiInEnrollment( false );
         context.setSkipTeiInEvent( false );
+        context.setSkipGenerationWhenAssignedByProgramRules( true );
 
         Event event = new EventMapperImpl().from( new EventRandomizer().createWithoutDataValues( entitiesCache, context ) );
         response = new AddTrackerEventsTask( 1, Events.builder().build().addEvent( event ),
@@ -114,11 +112,7 @@ public class TrackerCapture_importer_addTeiTaskSet
         String eventId = response.extractImportedEvents().get( 0 );
         event.setEvent( eventId );
 
-        int dataValuesToCreate = context.getProgramStage().getProgramStageDataElements().size();
-
-        ListOrderedSet dataValueSet = new EventRandomizer()
-            .createDataValues( context.getProgramStage(), dataValuesToCreate / 4, dataValuesToCreate );
-
+        ListOrderedSet dataValueSet = new EventDataValueRandomizer().create( entitiesCache, context );
         DhisDelayedTaskSet taskSet = new DhisDelayedTaskSet( 3 );
 
         dataValueSet.forEach( dv -> {
@@ -127,7 +121,7 @@ public class TrackerCapture_importer_addTeiTaskSet
         } );
 
         taskSet.execute();
-        recordSuccess( System.currentTimeMillis() - time, 0 );
+        //recordSuccess( System.currentTimeMillis() - time, 0 );
 
         waitBetweenTasks();
     }

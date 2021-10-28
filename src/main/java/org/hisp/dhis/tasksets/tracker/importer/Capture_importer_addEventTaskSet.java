@@ -52,6 +52,7 @@ public class Capture_importer_addEventTaskSet
         context.setProgram( program );
         context.setProgramStage( DataRandomizer.randomElementFromList( program.getProgramStages() ) );
         context.setOrgUnitUid( ou );
+        context.setSkipGenerationWhenAssignedByProgramRules( true );
 
         Event event = new EventMapperImpl().from( new EventRandomizer().create( entitiesCache, context ) );
 

@@ -10,6 +10,7 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.importer.GetTrackerTeiTask;
 import org.hisp.dhis.tasks.tracker.importer.QueryTrackerTeisTask;
 import org.hisp.dhis.utils.DataRandomizer;
+import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +56,7 @@ public class TrackerCapture_importer_searchForTeiTaskSet
 
         List<HashMap> rows = response.extractList( "instances" );
 
-        if ( rows != null && !rows.isEmpty() )
+        if ( !CollectionUtils.isEmpty( rows ) )
         {
             HashMap row = DataRandomizer.randomElementFromList( rows );
 
@@ -97,7 +98,7 @@ public class TrackerCapture_importer_searchForTeiTaskSet
                 .getAttributes().stream().filter( a -> a.isSearchable() && a.getValueType().equals( ValueType.TEXT ) )
                 .collect( Collectors.toList() );
 
-            if ( searchableAttributes.isEmpty() )
+            if ( CollectionUtils.isEmpty( searchableAttributes ) )
             {
                 return;
             }

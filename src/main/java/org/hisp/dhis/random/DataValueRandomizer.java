@@ -82,53 +82,39 @@ public class DataValueRandomizer
 
     protected String rndValueFrom( ValueType valueType )
     {
-        String val = null;
-
-        if ( valueType.equals( ValueType.BOOLEAN ) )
+        switch ( valueType )
         {
-            val = String.valueOf( DataRandomizer.randomBoolean() );
-        }
-        else if ( valueType.equals( ValueType.PHONE_NUMBER ) )
-        {
-            val = Faker.instance().phoneNumber().cellPhone();
-            return val;
-        }
-
-        else if ( valueType.equals( ValueType.TRUE_ONLY ) )
-        {
+        case TEXT:
+            return DataRandomizer.randomString( 8 );
+        case LONG_TEXT:
+            return Faker.instance().lorem().sentence( 50 );
+        case LETTER:
+            return DataRandomizer.randomString( 1 );
+        case PHONE_NUMBER:
+            return Faker.instance().phoneNumber().cellPhone();
+        case EMAIL:
+            return Faker.instance().name().username() + "@dhis2.org";
+        case BOOLEAN:
+            return String.valueOf( DataRandomizer.randomBoolean() );
+        case TRUE_ONLY:
             return "true";
-        }
-        else if ( valueType.isDate() )
-        {
-            val = DataRandomizer.randomPastDate( DateTimeFormatter.ISO_LOCAL_DATE );
-        }
-        else if ( valueType.equals( ValueType.PERCENTAGE ) )
-        {
-            val = String.valueOf( DataRandomizer.randomIntInRange( 1, 100 ) );
-        }
-        else if ( valueType.isNumeric() )
-        {
-            val = String.valueOf( DataRandomizer.randomIntInRange( 1, 100000 ) );
-        }
-        else if ( valueType.isDecimal() )
-        {
-            val = String.valueOf( DataRandomizer.randomDoubleInRange( 100, 1000, 1 ) );
-        }
-        else if ( valueType.isText() )
-        {
-            val = DataRandomizer.randomString( 8 );
-        }
-        else if ( valueType.isOrganisationUnit() )
-        {
-            val = ""; // TODO
-        }
-        else if ( valueType.isGeo() )
-        {
-//            Point p = createRandomPoint();
-//            val = p.getY() + ", " + p.getY();
-            val = ""; // TODO
-        }
+        case DATE:
+        case DATETIME:
+            return DataRandomizer.randomPastDate( DateTimeFormatter.ISO_LOCAL_DATE );
+        case NUMBER:
+        case UNIT_INTERVAL:
+            return String.valueOf( DataRandomizer.randomDoubleInRange( 100, 1000, 1 ) );
+        case PERCENTAGE:
+            return String.valueOf( DataRandomizer.randomIntInRange( 1, 100 ) );
+        case INTEGER:
+        case INTEGER_POSITIVE:
+        case INTEGER_ZERO_OR_POSITIVE:
+            return String.valueOf( DataRandomizer.randomIntInRange( 1, 100000 ) );
 
-        return val;
+        case AGE:
+            return String.valueOf( DataRandomizer.randomIntInRange( 1, 80 ) );
+        default:
+            return "";
+        }
     }
 }

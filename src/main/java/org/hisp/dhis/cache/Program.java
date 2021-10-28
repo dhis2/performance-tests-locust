@@ -3,13 +3,16 @@ package org.hisp.dhis.cache;
 import com.google.gson.annotations.JsonAdapter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hisp.dhis.cache.serializer.ObjectIdDeserializer;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class Program
 {
     private String id;
@@ -30,12 +33,13 @@ public class Program
 
     private int minAttributesRequiredToSearch;
 
-    public Program()
+    public List<TrackedEntityAttribute> getAttributesNotAssignedToTet()
     {
+        return attributes.stream().filter( p -> !p.isAssignedToTet() ).collect( Collectors.toList() );
     }
 
-    public String getOrgUnit( int index )
+    public List<TrackedEntityAttribute> getAttributesNotAssignedByProgramRule()
     {
-        return this.organisationUnits.get( index );
+        return attributes.stream().filter( p -> !p.isGeneratedByProgramRule() ).collect( Collectors.toList() );
     }
 }

@@ -7,8 +7,8 @@ import org.hisp.dhis.cache.builder.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static java.util.stream.Collectors.toList;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Cache for DHIS2 entities used to generate random data for the load test
@@ -38,6 +38,8 @@ public class EntitiesCache
     private List<Visualization> visualizations;
 
     private List<RelationshipType> relationshipTypes;
+
+    private List<ProgramRuleAction> programRuleActions;
 
     private User defaultUser;
 
@@ -73,12 +75,57 @@ public class EntitiesCache
         new TeiTypeCacheBuilder().load( this );
         new TeiCacheBuilder( this ).load( this );
         new RelationshipTypeCacheBuilder().load( this );
+        new ProgramRuleActionCacheBuilder().load( this );
 
+        updateProgramAttributes();
         // remove programs without tei
         //this.trackerPrograms = trackerPrograms.stream().filter( p -> teis.containsKey( p.getId() ) ).collect( toList() );
     }
 
-    public List<Program> getProgramsWithAtLeastOnRepeatableStage()
+    private void updateProgramAttributes()
+    {
+        List<String> teiAttributesAssignedByRules = cache.getProgramRuleActions().stream()
+            .map( ProgramRuleAction::getTrackedEntityAttribute )
+            .filter( Objects::nonNull )
+            .collect( Collectors.toList() );
+
+        List<String> dataElementsAssignedByProgramRules = cache.getProgramRuleActions().stream()
+            .map( ProgramRuleAction::getDataElement )
+            .filter( Objects::nonNull )
+            .collect( Collectors.toList() );
+
+        cache.getPrograms().forEach( program -> {
+            if ( program.isHasRegistration() )
+            {
+                List<String> tetAttributes =
+                    getTetById( program.getTrackedEntityType() )
+                        .getTrackedEntityTypeAttributes().stream().map( TrackedEntityAttribute::getTrackedEntityAttribute )
+                        .collect( Collectors.toList() );
+
+                program.getAttributes().forEach( p -> {
+                    if ( tetAttributes.contains( p.getTrackedEntityAttribute() ) )
+                    {
+                        p.setAssignedToTet( true );
+                    }
+
+                    if ( teiAttributesAssignedByRules.contains( p.getTrackedEntityAttribute() ) )
+                    {
+                        p.setGeneratedByProgramRule( true );
+                    }
+                } );
+            }
+
+            program.getProgramStages().forEach( ps -> {
+                ps.getProgramStageDataElements().stream().filter( p -> dataElementsAssignedByProgramRules.contains( p.getUid() ) )
+                    .forEach( p -> {
+                        p.setGeneratedByProgramRules( true );
+                    } );
+            } );
+
+        } );
+    }
+
+    public List<Program> getProgramsWithAtLeastOneRepeatableStage()
     {
         List<Program> progr = new ArrayList<>();
         for ( Program program : this.programs )
@@ -92,5 +139,10 @@ public class EntitiesCache
             }
         }
         return progr;
+    }
+
+    private TeiType getTetById( String uid )
+    {
+        return cache.getTeiTypes().stream().filter( p -> p.getId().equals( uid ) ).findFirst().get();
     }
 }
