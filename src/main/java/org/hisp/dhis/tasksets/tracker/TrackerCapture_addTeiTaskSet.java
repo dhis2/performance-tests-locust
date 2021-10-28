@@ -11,10 +11,7 @@ import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
-import org.hisp.dhis.random.EventRandomizer;
-import org.hisp.dhis.random.RandomizerContext;
-import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
-import org.hisp.dhis.random.UserRandomizer;
+import org.hisp.dhis.random.*;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.DhisDelayedTaskSet;
@@ -113,15 +110,14 @@ public class TrackerCapture_addTeiTaskSet
             return;
         }
 
-        int dataValuesToCreate = context.getProgramStage().getProgramStageDataElements().size();
-
-        ListOrderedSet dataValueSet = new EventRandomizer()
-            .createDataValues( context.getProgramStage(), dataValuesToCreate / 4, dataValuesToCreate );
+        ListOrderedSet dataValueSet = new EventDataValueRandomizer()
+            .create( entitiesCache, context );
 
         DhisDelayedTaskSet taskSet = new DhisDelayedTaskSet( 2 );
         dataValueSet.forEach( dv -> {
             taskSet.addTask(
-                new AddDataValueTask( 1, eventId, (DataValue) dv, program.getId(), tei.getTrackedEntityInstance(), user.getUserCredentials() )
+                new AddDataValueTask( 1, eventId, (DataValue) dv, program.getId(), tei.getTrackedEntityInstance(),
+                    user.getUserCredentials() )
             );
         } );
 
