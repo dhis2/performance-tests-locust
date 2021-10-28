@@ -52,6 +52,7 @@ public class CacheUtils
         kryo.register( Dashboard.class, 213 );
         kryo.register( RelationshipConstraint.class, 214 );
         kryo.register( RelationshipType.class, 215 );
+        kryo.register( ProgramRuleAction.class, 216 );
 
     }
 

@@ -40,7 +40,6 @@ import org.hisp.dhis.cache.ProgramStage;
 @Setter
 public class RandomizerContext
 {
-
     private Program program;
 
     private ProgramStage programStage;
@@ -50,6 +49,22 @@ public class RandomizerContext
     private String teiId;
 
     private String enrollmentId;
+
+    /**
+     * If true, tracked entity attributes assigned to program will be created in enrollment.
+     * Can be used when importing TEIs with NTI.
+     */
+    private boolean programAttributesInEnrollment;
+
+    /**
+     * If true, TrackedEntityInstances, Enrollments and Events will have generated ids.
+     */
+    private boolean generateIds;
+    /**
+     * If true, a TEI is generated without attributes that would be assigned by program rule engine.
+     * Events are generated without data elements assigned by program rules
+     */
+    private boolean skipGenerationWhenAssignedByProgramRules;
 
     /**
      * if true, a TEI is not generated when creating a new random event

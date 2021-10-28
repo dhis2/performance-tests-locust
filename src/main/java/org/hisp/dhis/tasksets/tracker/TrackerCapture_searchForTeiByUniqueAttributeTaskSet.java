@@ -82,7 +82,8 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
 
         int index = DataRandomizer.randomIntInRange( 0, attributes.size() );
 
-        String id = attributes.keySet().toArray()[index].toString();
+
+        String id = attributes.keySet().stream().toArray()[index].toString();
         return entitiesCache.getTrackerPrograms().stream().filter( p -> p.getId().equals( id ) ).findFirst().orElse( null );
     }
 

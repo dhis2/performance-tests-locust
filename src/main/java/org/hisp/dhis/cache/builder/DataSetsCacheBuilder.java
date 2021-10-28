@@ -55,7 +55,7 @@ public class DataSetsCacheBuilder
 
                     dataElements.add( new DataElement( de.get( "id" ).getAsString(),
                         ValueType.valueOf( de.get( "valueType" ).getAsString() ),
-                        optionSets ) );
+                        optionSets, false ) );
                 } );
 
                 dataSets.add( new DataSet( obj.get( "id" ).getAsString(), dataElements, obj.get( "periodType" ).getAsString() ) );

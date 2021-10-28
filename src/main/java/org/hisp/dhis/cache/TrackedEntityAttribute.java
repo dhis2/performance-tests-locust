@@ -67,6 +67,10 @@ public class TrackedEntityAttribute
 
     private String lastValue;
 
+    private boolean generatedByProgramRule;
+
+    private boolean assignedToTet;
+
     public TrackedEntityAttribute()
     {
     }

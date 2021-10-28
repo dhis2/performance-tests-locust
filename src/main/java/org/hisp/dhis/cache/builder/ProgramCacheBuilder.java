@@ -46,7 +46,7 @@ public class ProgramCacheBuilder
         List<String> programUids = getPayload( "/api/programs?fields=id" ).extractList( "programs.id" );
 
         return programUids.stream()
-            .map( ( String uid ) -> buildProgram( uid ) )
+            .map( this::buildProgram )
             .collect( toList() );
     }
 
@@ -84,14 +84,14 @@ public class ProgramCacheBuilder
         List<DataElement> dataElements = new ArrayList<>();
 
         programStage.get( "programStageDataElements" ).getAsJsonArray()
-            .forEach( ( p ) -> {
+            .forEach(  p  -> {
                 JsonObject de = p.getAsJsonObject().get( "dataElement" ).getAsJsonObject();
                 DataElement element = new DataElement(
                     de.get( "id" ).getAsString(),
                     ValueType.valueOf( de.get( "valueType" ).getAsString() ),
                     dataElementHasOptionSet( de )
                         ? getOptionValuesFromOptionSet( de.get( "optionSet" ).getAsJsonObject().get( "id" ).getAsString() )
-                        : null );
+                        : null, false );
 
                 dataElements.add( element );
             } );
@@ -146,7 +146,7 @@ public class ProgramCacheBuilder
             return getOptionValuesFromOptionSet( optionSetUid );
         }
 
-        return null;
+        return new ArrayList<>();
     }
 
     private String getAttributeLastValue( String attributeId )

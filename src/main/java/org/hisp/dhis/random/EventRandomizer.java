@@ -28,12 +28,9 @@ package org.hisp.dhis.random;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.collections.set.ListOrderedSet;
-import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.ProgramStage;
-import org.hisp.dhis.dxf2.events.event.DataValue;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.utils.DataRandomizer;
@@ -53,7 +50,7 @@ public class EventRandomizer
         Program program = ctx.getProgram();
         if ( program == null )
         {
-            program = DataRandomizer.randomElementFromList( cache.getProgramsWithAtLeastOnRepeatableStage() );
+            program = DataRandomizer.randomElementFromList( cache.getProgramsWithAtLeastOneRepeatableStage() );
             ctx.setProgram( program );
         }
 
@@ -106,41 +103,10 @@ public class EventRandomizer
     public Event create( EntitiesCache cache, RandomizerContext ctx )
     {
         Event event = createWithoutDataValues( cache, ctx );
-        ProgramStage programStage = ctx.getProgramStage();
 
-        event.setDataValues( createDataValues( programStage, 1, 8 ) );
+        event.setDataValues( new EventDataValueRandomizer().create( cache, ctx ) );
 
         return event;
-    }
-
-    public ListOrderedSet createDataValues( ProgramStage programStage, int min, int max )
-    {
-        ListOrderedSet dataValues = new ListOrderedSet();
-        int numberOfDataValuesToCreate = DataRandomizer.randomIntInRange( min, max );
-
-        DataRandomizer.randomElementsFromList( programStage.getProgramStageDataElements(), numberOfDataValuesToCreate )
-            .forEach( p -> dataValues.add( withRandomValue( p ) ) );
-
-        return dataValues;
-    }
-
-    private DataValue withRandomValue( DataElement dataElement )
-    {
-        DataValue dataValue = new DataValue();
-        dataValue.setDataElement( dataElement.getUid() );
-        dataValue.setProvidedElsewhere( false );
-        String val;
-        if ( dataElement.getOptionSet() != null && !dataElement.getOptionSet().isEmpty() )
-        {
-            val = DataRandomizer.randomElementFromList( dataElement.getOptionSet() );
-        }
-        else
-        {
-            val = rndValueFrom( dataElement.getValueType() );
-        }
-
-        dataValue.setValue( val );
-        return dataValue;
     }
 
     private ProgramStage getRepeatableRandomProgramStageFromProgram( Program program )

@@ -69,6 +69,7 @@ public class TrackedEntityInstanceRandomizer
     {
         Program program = getProgramFromContextOrRnd( ctx, cache );
         ctx.setSkipTeiInEvent( true );
+        ctx.setProgram( program );
 
         TrackedEntityInstance tei = new TrackedEntityInstance();
 
@@ -77,7 +78,7 @@ public class TrackedEntityInstanceRandomizer
         tei.setDeleted( false );
         tei.setFeatureType( FeatureType.NONE );
         tei.setOrgUnit( getOrgUnitFromContextOrRndFromProgram( ctx, program ) );
-        tei.setAttributes( getRandomAttributesList( program ) );
+        tei.setAttributes( new TrackedEntityAttributeRandomizer().create( ctx, false, ctx.isProgramAttributesInEnrollment() ) );
 
         return tei;
     }
@@ -104,102 +105,5 @@ public class TrackedEntityInstanceRandomizer
         TrackedEntityInstances teis = new TrackedEntityInstances();
         teis.setTrackedEntityInstances( rndTeis );
         return teis;
-    }
-
-    public List<Attribute> getRandomAttributesList( Program program )
-    {
-        return program.getAttributes().stream().map( att -> {
-            if ( !StringUtils.isEmpty( att.getPattern() ) )
-            {
-                try
-                {
-                    String patternValue = withPattern( TextPatternParser.parse( att.getPattern() ) );
-                    if ( att.getValueType().isNumeric() && patternValue.startsWith( "0" ) )
-                    {
-                        // Numeric type should not start with a 0
-                        patternValue = patternValue.replaceAll( "0",
-                            String.valueOf( DataRandomizer.randomIntInRange( 1, 9 ) ) );
-                    }
-                    return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(), patternValue );
-                }
-                catch ( TextPatternParser.TextPatternParsingException e )
-                {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-            else
-            {
-                if ( att.getOptions() == null || att.getOptions().isEmpty() )
-                {
-                    if ( att.getDisplayName().toLowerCase().contains( "firstname" ) ||
-                        att.getDisplayName().toLowerCase().contains( "given name" ) )
-                    {
-                        return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            Faker.instance().name().firstName() );
-                    }
-
-                    if ( att.getDisplayName().toLowerCase().contains( "surname" ) ||
-                        att.getDisplayName().toLowerCase().contains( "given name" ) )
-                    {
-                        return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            Faker.instance().name().lastName() );
-                    }
-
-                    return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                        rndValueFrom( att.getValueType() ) );
-                }
-
-                else
-                {
-                    return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                        DataRandomizer.randomElementFromList( att.getOptions() ) );
-                }
-
-            }
-        } ).filter( Objects::nonNull ).collect( Collectors.toList() );
-    }
-
-    private String withPattern( TextPattern textPattern )
-    {
-        return generateValue( textPattern );
-    }
-
-    private String generateValue( TextPattern textPattern )
-    {
-        TextPatternSegment segment = getGeneratedSegment( textPattern );
-
-        String value = "";
-        if ( segment.getMethod().equals( TextPatternMethod.SEQUENTIAL ) )
-        {
-            value = String.format( "%0" + segment.getParameter().length() + "d", DataRandomizer.randomInt() );
-        }
-        else if ( segment.getMethod().equals( TextPatternMethod.RANDOM ) )
-        {
-            value = TextPatternMethodUtils.generateRandom( new Random(), segment.getParameter() );
-        }
-        else
-        {
-            value = "";
-        }
-
-        if ( getValueSegment( textPattern ) != null )
-        {
-            value = getValueSegment( textPattern ).getParameter() + value;
-        }
-
-        return value;
-    }
-
-    private TextPatternSegment getGeneratedSegment( TextPattern textPattern )
-    {
-        return textPattern.getSegments().stream().filter( tp -> tp.getMethod().isGenerated() ).findFirst()
-            .orElse( null );
-    }
-
-    private TextPatternSegment getValueSegment( TextPattern textPattern )
-    {
-        return textPattern.getSegments().stream().filter( tp -> !tp.getMethod().isGenerated() ).findFirst()
-            .orElse( null );
     }
 }
