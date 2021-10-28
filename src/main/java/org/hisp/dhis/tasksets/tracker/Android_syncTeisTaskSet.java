@@ -83,21 +83,15 @@ public class Android_syncTeisTaskSet
     }
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
+        throws Exception
     {
-        program.getAttributes().stream().filter( TrackedEntityAttribute::isGenerated )
-            .forEach( att -> {
-                ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
-                    userCredentials, teis.size() ).executeAndGetResponse();
-                List<String> values = response.extractList( "value" );
-
-                for ( int i = 0; i < teis.size(); i++ )
-                {
-                    Attribute attribute = teis.get( i ).getAttributes().stream()
-                        .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
-                        .findFirst().orElse( null );
-
-                    attribute.setValue( values.get( i ) );
-                }
-            } );
+        for ( TrackedEntityAttribute att : program.getAttributes() )
+        {
+            if ( att.isGenerated() )
+            {
+                new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
+                    userCredentials, teis.size() ).executeAndAddAttributes( teis );
+            }
+        }
     }
 }

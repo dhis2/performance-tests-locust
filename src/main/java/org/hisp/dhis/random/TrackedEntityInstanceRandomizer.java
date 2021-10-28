@@ -1,19 +1,15 @@
 package org.hisp.dhis.random;
 
-import com.github.javafaker.Faker;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
-import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.organisationunit.FeatureType;
-import org.hisp.dhis.textpattern.*;
 import org.hisp.dhis.utils.DataRandomizer;
-import org.springframework.util.StringUtils;
+import org.hisp.dhis.utils.UidGenerator;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Generates a random Tracked Entity Instance graph.
@@ -56,7 +52,6 @@ public class TrackedEntityInstanceRandomizer
     public TrackedEntityInstance create( EntitiesCache cache, RandomizerContext ctx )
     {
         TrackedEntityInstance tei = createWithoutEnrollment( cache, ctx );
-
         ctx.setSkipTeiInEvent( true );
         ctx.setSkipTeiInEnrollment( true );
         Enrollment enrollment = enrollmentRandomizer.create( cache, ctx );
@@ -72,7 +67,10 @@ public class TrackedEntityInstanceRandomizer
         ctx.setProgram( program );
 
         TrackedEntityInstance tei = new TrackedEntityInstance();
-
+        if ( ctx.isGenerateIds() ) {
+            tei.setTrackedEntityInstance( UidGenerator.generateUid() );
+        }
+        tei.setStoredBy( "performance-test" );
         tei.setTrackedEntityType( program.getTrackedEntityType() );
         tei.setInactive( false );
         tei.setDeleted( false );
