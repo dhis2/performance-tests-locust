@@ -60,7 +60,7 @@ Note: you can also run locust without docker. [Read more](#Running-tests-without
 3. Make sure `locust.properties` are pointing to your local DHIS2 server
 4. Compile and run this project from the command line: `mvn clean compile exec:java` (you can also start it from IntelliJ via Main.class file)
 5. Open your browser and go to `http://localhost:8089` enter you desired number of workers and spawn rate, point `Host` to: `127.0.0.1` "Locust master"
-6. Watch the tests and listen to your machine heats up
+6. Watch the tests and listen to your machine heating up
 
 
 ## Test configuration
@@ -76,6 +76,7 @@ Note: you can also run locust without docker. [Read more](#Running-tests-without
 | user.admin.password | district | |
 | cache.reuse_cache | true | Indicates if the local cache should be reused in next test execution|
 | cache.users.pool.size | 40 | Indicates how many DHIS2 users should be stored in the cache. Note that users should exist in DHIS2 DB.  |
+| cache.users.ou_levels | 5 | Used to restrict users to the organisation unit levels (comma separated list). Set lowest level ou to model data entry users. Set to 0 if ou level doesn't matter. |
 | cache.users.use_admin_user | false | Indicates if the admin user should be used when running the tests. If there are no users matching identifier configured in `cache.users.identifier`, only admin user will be used |
 | cache.users.identifier | uio | Identifier used to look up users. Users will be filtered by `displayName` property |
 | cache.users.password | Test1212? | Password of users loaded in the cache | 
