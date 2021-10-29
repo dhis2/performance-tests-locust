@@ -1,6 +1,5 @@
 package org.hisp.dhis.tasksets.tracker;
 
-import jdk.nashorn.internal.parser.JSONParser;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
