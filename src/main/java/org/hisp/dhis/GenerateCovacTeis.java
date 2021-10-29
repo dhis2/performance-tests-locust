@@ -80,7 +80,7 @@ public class GenerateCovacTeis extends DhisAbstractTask
         {
             TrackedEntityInstance instance =  new TrackedEntityInstanceRandomizer().createWithoutEnrollment( entitiesCache,ctx );
 
-            Attribute att = instance.getAttributes().stream().filter( p -> p.getAttribute().equalsIgnoreCase( "CklPZdOd6H1" ))
+            Attribute att = instance.getAttributes().stream().filter( p -> p.getAttribute().equalsIgnoreCase( "oindugucx72" ))
                 .findFirst().orElse( null );
 
             String sex = att.getValue();
