@@ -1,6 +1,5 @@
 package org.hisp.dhis.random;
 
-import com.github.javafaker.Faker;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.DataSet;
 import org.hisp.dhis.cache.EntitiesCache;
@@ -87,13 +86,13 @@ public class DataValueRandomizer
         case TEXT:
             return DataRandomizer.randomString( 8 );
         case LONG_TEXT:
-            return Faker.instance().lorem().sentence( 50 );
+            return DataRandomizer.faker().lorem().sentence( 50 );
         case LETTER:
             return DataRandomizer.randomString( 1 );
         case PHONE_NUMBER:
-            return Faker.instance().phoneNumber().cellPhone();
+            return DataRandomizer.faker().phoneNumber().cellPhone();
         case EMAIL:
-            return Faker.instance().name().username() + "@dhis2.org";
+            return DataRandomizer.faker().name().username() + "@dhis2.org";
         case BOOLEAN:
             return String.valueOf( DataRandomizer.randomBoolean() );
         case TRUE_ONLY:

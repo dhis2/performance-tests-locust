@@ -61,7 +61,7 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask
         {
             List<String> values = apiResponse.extractList( "value" );
 
-            if ( values == null || values.isEmpty()) {
+            if ( apiResponse.statusCode() != 200 || values == null || values.isEmpty()) {
                 throw new Exception("Failed to generate attributes. Attributes weren't added to TEI.");
             }
 
@@ -89,7 +89,7 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask
         return performTaskAndRecord( () -> {
             return apiActions.get( endpoint.replace( "id", teiAttributeId ), new QueryParamsBuilder().add( "numberToReserve",
                 String.valueOf( numberToReserve ) ) );
-        }, response -> ( response.statusCode() == 200 && !CollectionUtils.isEmpty( response.extractList( "value" ))));
+        }, response -> ( response.statusCode() == 200) );
     }
 }
 

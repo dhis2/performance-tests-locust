@@ -1,10 +1,7 @@
 package org.hisp.dhis.tasks.tracker;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.Program;
-import org.hisp.dhis.cache.TrackedEntityAttribute;
-import org.hisp.dhis.cache.User;
-import org.hisp.dhis.cache.UserCredentials;
+import org.hisp.dhis.cache.*;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
@@ -80,8 +77,8 @@ public class PostRelationshipTask
             entitiesCache, context, 2
         );
 
-        trackedEntityInstances.getTrackedEntityInstances()
-            .forEach( p -> generateAttributes( context.getProgram(), p, user.getUserCredentials() ) );
+        generateAttributes( context.getProgram(), trackedEntityInstances, user.getUserCredentials());
+
 
         ApiResponse body = new AddTeiTask( 1, trackedEntityInstances, user.getUserCredentials() )
             .executeAndGetResponse();
@@ -89,23 +86,18 @@ public class PostRelationshipTask
         return body.extractUids();
     }
 
-    private void generateAttributes( Program program, TrackedEntityInstance tei, UserCredentials userCredentials )
+    private void generateAttributes( Program program, TrackedEntityInstances teis, UserCredentials userCredentials )
+        throws Exception
     {
-
-        program.getAttributes().stream().filter( TrackedEntityAttribute::isGenerated )
-            .forEach( att -> {
-                    ApiResponse response = new GenerateTrackedEntityAttributeValueTask( 1, att.getTrackedEntityAttribute(),
-                        userCredentials ).executeAndGetResponse();
-
-                    String value = response.extractString( "value" );
-
-                    Attribute attribute = tei.getAttributes().stream()
-                        .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
-                        .findFirst().orElse( new Attribute() );
-
-                    attribute.setValue( value );
-                }
-            );
+        for ( TrackedEntityAttribute att : program.getAttributes() )
+        {
+            if ( att.isGenerated() )
+            {
+                new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
+                    userCredentials, teis.getTrackedEntityInstances().size() )
+                    .executeAndAddAttributes( teis.getTrackedEntityInstances() );
+            }
+        }
 
     }
 

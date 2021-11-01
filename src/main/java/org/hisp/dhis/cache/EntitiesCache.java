@@ -127,18 +127,7 @@ public class EntitiesCache
 
     public List<Program> getProgramsWithAtLeastOneRepeatableStage()
     {
-        List<Program> progr = new ArrayList<>();
-        for ( Program program : this.programs )
-        {
-            for ( ProgramStage ps : program.getProgramStages() )
-            {
-                if ( ps.isRepeatable() )
-                {
-                    progr.add( program );
-                }
-            }
-        }
-        return progr;
+        return getTrackerPrograms().stream().filter( Program::hasRepeatableStage ).collect( Collectors.toList());
     }
 
     private TeiType getTetById( String uid )

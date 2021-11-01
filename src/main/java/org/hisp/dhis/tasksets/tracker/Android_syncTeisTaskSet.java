@@ -5,7 +5,6 @@ import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
-import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.random.RandomizerContext;
@@ -16,7 +15,6 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
 import org.hisp.dhis.utils.DataRandomizer;
-import org.hisp.dhis.utils.JsonParserUtils;
 
 import java.util.List;
 

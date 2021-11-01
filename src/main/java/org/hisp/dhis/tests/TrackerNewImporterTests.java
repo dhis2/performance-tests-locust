@@ -21,6 +21,7 @@ public class TrackerNewImporterTests
     {
         return Arrays.asList(
             new Android_importer_syncTeisTaskSet( 1 ),
+            new Android_importer_syncTeisTaskSet( 1 , true),
             new Capture_importer_addEventTaskSet( 1 ),
             new TrackerCapture_importer_searchForTeiTaskSet( 1 ),
             new TrackerCapture_importer_addTeiTaskSet( 1 )

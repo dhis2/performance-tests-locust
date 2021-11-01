@@ -1,6 +1,7 @@
 package org.hisp.dhis.random;
 
-import com.github.javafaker.Faker;
+import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
@@ -8,6 +9,8 @@ import org.hisp.dhis.textpattern.*;
 import org.hisp.dhis.utils.DataRandomizer;
 import org.springframework.util.StringUtils;
 
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,32 +49,32 @@ public class TrackedEntityAttributeRandomizer
                         .anyMatch( att.getDisplayName().toLowerCase( )::contains ) )
                     {
                         return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            Faker.instance().name().firstName() );
+                            DataRandomizer.faker().name().firstName() );
                     }
 
                     if ( att.getDisplayName().toLowerCase().contains( "surname" ) ||
                         att.getDisplayName().toLowerCase().contains( "given name" ) )
                     {
                         return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            Faker.instance().name().lastName() );
+                            DataRandomizer.faker().name().lastName() );
                     }
 
-                    if ( att.getValueType().isDate() && att.getDisplayName().equalsIgnoreCase( "of birth" ) )
+                    if ( att.getValueType().isDate() && att.getDisplayName().toLowerCase().contains( "of birth" ) )
                     {
                         return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            Faker.instance().date().birthday( 16, 80 ).toInstant().toString() );
+                            new SimpleDateFormat("yyyy-MM-dd").format( DataRandomizer.faker().date().birthday( 16, 80 ) ));
                     }
 
                     if ( att.getDisplayName().toLowerCase().contains( "address" ) )
                     {
                         return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            Faker.instance().address().fullAddress() );
+                            DataRandomizer.faker().address().fullAddress() );
                     }
 
                     if ( att.getDisplayName().toLowerCase().contains( "national id" ) )
                     {
                         return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            Faker.instance().idNumber().valid() );
+                            DataRandomizer.faker().idNumber().valid() );
                     }
 
                     return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),

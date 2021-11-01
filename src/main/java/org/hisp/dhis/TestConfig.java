@@ -3,7 +3,10 @@ package org.hisp.dhis;
 import java.util.List;
 
 @org.aeonbits.owner.Config.LoadPolicy( org.aeonbits.owner.Config.LoadType.MERGE )
-@org.aeonbits.owner.Config.Sources( { "system:properties", "system:env", "classpath:locust.properties" } )
+@org.aeonbits.owner.Config.Sources( { "system:properties",
+    "system:env",
+    "file:/conf/locust.properties",
+    "classpath:locust.properties" } )
 public interface TestConfig
     extends
     org.aeonbits.owner.Config
@@ -47,6 +50,6 @@ public interface TestConfig
     @Key( "cache.users.ou_levels" )
     List<Integer> cacheUsersOuLevels();
 
-    @Key( "tracker.importer.async")
+    @Key( "tracker.importer.async" )
     boolean useAsyncTrackerImporter();
 }
