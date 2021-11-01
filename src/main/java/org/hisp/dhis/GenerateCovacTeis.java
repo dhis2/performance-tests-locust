@@ -1,32 +1,24 @@
 package org.hisp.dhis;
 
-import com.github.javafaker.Faker;
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.actions.IdGenerator;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
-import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
 import org.hisp.dhis.dxf2.events.event.DataValue;
 import org.hisp.dhis.dxf2.events.event.Event;
-import org.hisp.dhis.dxf2.events.event.Events;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.random.*;
-import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
 import org.hisp.dhis.utils.DataRandomizer;
-import org.jfree.data.time.Day;
-import org.joda.time.Days;
 
-import javax.xml.crypto.Data;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -72,11 +64,11 @@ public class GenerateCovacTeis extends DhisAbstractTask
         UserCredentials userCredentials = new UserCredentials("admin_clone", "Test1212?");
         ctx.setProgram( program );
         ctx.setOrgUnitUid( ou );
-        Instant enrollmentDate = Faker.instance().date().past( 210, TimeUnit.DAYS ).toInstant();
+        Instant enrollmentDate = DataRandomizer.faker().date().past( 210, TimeUnit.DAYS ).toInstant();
 
         TrackedEntityInstances instances = new TrackedEntityInstances();
 
-        for ( int i = 0; i < 40 ; i++ )
+        for ( int i = 0; i < 20 ; i++ )
         {
             TrackedEntityInstance instance =  new TrackedEntityInstanceRandomizer().createWithoutEnrollment( entitiesCache,ctx );
 
@@ -247,7 +239,7 @@ public class GenerateCovacTeis extends DhisAbstractTask
             for ( int i = 0; i < numberOfConds ; i++ )
             {
                 if (DataRandomizer.randomBoolean()) {
-                    conditions.add( buildDv( "dpyQUtizp7s",Faker.instance().medical().diseaseName()  ) );
+                    conditions.add( buildDv( "dpyQUtizp7s", DataRandomizer.faker().medical().diseaseName()  ) );
                     break;
                 }
 
