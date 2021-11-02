@@ -1,6 +1,7 @@
 .idea
 target/
 locust/
+reports/
 venv/
 .settings
 .project

@@ -2,8 +2,8 @@ version: '3'
 
 services:
   locust:
-    restart: always
-    image: "dhis2/locustio:latest"
+#    restart: always
+    image: "dhis2/locustio-test:latest"
     environment:
       LOCUST_MASTER_NODE_HOST: "127.0.0.1"
       LOCUST_MASTER_NODE_PORT: "5557"
@@ -12,6 +12,8 @@ services:
       USERS: ${USERS:-10}
       HATCH_RATE: ${HATCH_RATE:-1}
       TIME: ${TIME:-10s}
+    volumes:
+      - ./reports:/home/locust/reports
    
 
     ports:
