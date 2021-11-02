@@ -5,7 +5,7 @@ pipeline {
     }
 
     environment {
-        GIT_URL = "https://github.com/dhis2/performance-tests-locust"
+//         GIT_URL = "https://github.com/dhis2/performance-tests-locust"
 //         AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
 //         GITHUB_CREDS = credentials('github_bot')
 //         GITHUB_USERNAME = "${GITHUB_CREDS_USR}"
@@ -25,11 +25,11 @@ pipeline {
 //     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'DEVOPS-30', url: "${GIT_URL}"
-            }
-        }
+//         stage('Checkout') {
+//             steps {
+//                 git branch: 'DEVOPS-30', url: "${GIT_URL}"
+//             }
+//         }
 
 //         stage('Update performance test instance') {
 //             steps {
