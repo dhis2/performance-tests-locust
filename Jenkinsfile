@@ -26,22 +26,30 @@ pipeline {
             }
         }
 
-        stage('Start locust') {
+        stage('Start Locust master') {
             steps {
-                script {
-                    sh "mkdir -p ${LOCUST_REPORT_DIR}"
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ./docker"
-                    sh "${COMPOSE_ARGS} docker-compose up -d"
-                    sh "ls -la"
-                }
+                sh "mkdir -p ${LOCUST_REPORT_DIR}"
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ./docker"
+                sh "${COMPOSE_ARGS} docker-compose up -d"
             }
         }
 
         stage('Run tests') {
             steps {
-                script {
-                    sh "mvn clean compile exec:java -Dtarget.base_uri=https://$INSTANCE_HOST/$INSTANCE_NAME"
-                }
+                sh "mvn clean compile exec:java -Dtarget.base_uri=https://$INSTANCE_HOST/$INSTANCE_NAME"
+            }
+        }
+
+        stage('Copy previous reports') {
+            steps {
+                copyArtifacts(
+                    projectName: currentBuild.projectName,
+                    selector: specific("${currentBuild.previousSuccessfulBuild.number}}"),
+                    filter: "*.csv",
+                    target: "previous_${LOCUST_REPORT_DIR}"
+                )
+
+                sh 'ls -la'
             }
         }
     }

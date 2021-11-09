@@ -14,9 +14,7 @@ services:
       TIME: ${TIME:-10s}
     volumes:
       - ./reports:/home/locust/reports
-   
 
     ports:
       - 5557:5557
       - 8089:8089
-

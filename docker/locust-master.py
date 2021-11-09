@@ -105,4 +105,3 @@ class MyUser(locust.User):
 #             er['occurences'],
 #         ))
 #     return "\n".join(rows)
-
