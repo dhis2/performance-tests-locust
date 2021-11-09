@@ -44,12 +44,13 @@ pipeline {
             steps {
                 copyArtifacts(
                     projectName: currentBuild.projectName,
-                    selector: specific("${currentBuild.previousSuccessfulBuild.number}}"),
+                    selector: specific("${currentBuild.previousSuccessfulBuild.number}"),
                     filter: "*.csv",
                     target: "previous_${LOCUST_REPORT_DIR}"
                 )
 
                 sh 'ls -la'
+                sh "ls -la previous_${LOCUST_REPORT_DIR}"
             }
         }
     }
