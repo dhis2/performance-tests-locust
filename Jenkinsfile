@@ -14,6 +14,7 @@ pipeline {
         HTML_REPORT_FILE = "test_report.html"
         CSV_REPORT_FILE = "dhis_stats.csv"
         COMPARISON_FILE = "comparison_results.txt"
+        COMPARISON_COLUMN = "90%"
         INSTANCE_HOST = "test.performance.dhis2.org"
         INSTANCE_NAME = "2.37.0"
     }
@@ -57,15 +58,15 @@ pipeline {
         stage('Compare Locust reports') {
             steps {
                 dir('locust-compare') {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                        git branch: 'update-for-latest-locust', url: 'https://github.com/radnov/Locust-Compare'
-                        sh 'pip3 install -r requirements.txt'
+                    git branch: 'update-for-latest-locust', url: 'https://github.com/radnov/Locust-Compare'
+                    sh 'pip3 install -r requirements.txt'
 
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                         sh """
                             python3 locust_compare.py \
                             $WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
                             $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-                            --column-name 90% > $WORKSPACE/$COMPARISON_FILE
+                            --column-name $COMPARISON_COLUMN > $WORKSPACE/$COMPARISON_FILE
                         """
                     }
                 }
