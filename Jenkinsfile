@@ -12,6 +12,7 @@ pipeline {
         COMPOSE_ARGS = "NO_WEB=true TIME=30s HATCH_RATE=1 USERS=5"
         LOCUST_REPORT_DIR = "reports"
         HTML_REPORT_FILE = "test_report.html"
+        CSV_REPORT_FILE = "dhis_stats.csv"
         INSTANCE_HOST = "test.performance.dhis2.org"
         INSTANCE_NAME = "2.37.0"
     }
@@ -28,9 +29,9 @@ pipeline {
 
         stage('Start Locust master') {
             steps {
-                sh "mkdir -p ${LOCUST_REPORT_DIR}"
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ./docker"
-                sh "${COMPOSE_ARGS} docker-compose up -d"
+                sh "mkdir -p $LOCUST_REPORT_DIR"
+                sh "docker build -t $IMAGE_NAME:$IMAGE_TAG ./docker"
+                sh "$COMPOSE_ARGS docker-compose up -d"
             }
         }
 
@@ -45,22 +46,29 @@ pipeline {
                 copyArtifacts(
                     projectName: currentBuild.projectName,
                     selector: specific("${currentBuild.previousSuccessfulBuild.number}"),
-                    filter: "${LOCUST_REPORT_DIR}/*.csv",
+                    filter: "$LOCUST_REPORT_DIR/*.csv",
                     flatten: true,
-                    target: "previous_${LOCUST_REPORT_DIR}"
+                    target: "previous_$LOCUST_REPORT_DIR"
                 )
 
                 sh 'ls -la'
-                sh "ls -la previous_${LOCUST_REPORT_DIR}"
+                sh "ls -la previous_$LOCUST_REPORT_DIR"
             }
         }
 
         stage('Compare Locust reports') {
             steps {
                 dir('locust-compare') {
-                    git branch: 'update-for-latest-locust', url: 'https://github.com/radnov/Locust-Compare'
-                    sh "pip3 install -r requirements.txt"
-                    sh "python3 locust_compare.py ${WORKSPACE}/previous_${LOCUST_REPORT_DIR}/dhis_stats.csv ${WORKSPACE}/${LOCUST_REPORT_DIR}/dhis_stats.csv --column-name 90%"
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        git branch: 'update-for-latest-locust', url: 'https://github.com/radnov/Locust-Compare'
+                        sh 'pip3 install -r requirements.txt'
+                        sh """
+                            python3 locust_compare.py \
+                            $WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
+                            $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
+                            --column-name 90%
+                        """
+                    }
                 }
             }
         }
@@ -68,14 +76,14 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: "${LOCUST_REPORT_DIR}/*.csv"
+            archiveArtifacts artifacts: "$LOCUST_REPORT_DIR/*.csv"
 
             publishHTML target: [
                 allowMissing: false,
                 alwaysLinkToLastBuild: false,
                 keepAll: true,
-                reportDir: "${LOCUST_REPORT_DIR}",
-                reportFiles: "${HTML_REPORT_FILE}",
+                reportDir: "$LOCUST_REPORT_DIR",
+                reportFiles: "$HTML_REPORT_FILE",
                 reportName: 'Load test report'
             ]
         }
