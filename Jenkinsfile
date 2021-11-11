@@ -13,6 +13,7 @@ pipeline {
         LOCUST_REPORT_DIR = "reports"
         HTML_REPORT_FILE = "test_report.html"
         CSV_REPORT_FILE = "dhis_stats.csv"
+        COMPARISON_FILE = "comparison_results.txt"
         INSTANCE_HOST = "test.performance.dhis2.org"
         INSTANCE_NAME = "2.37.0"
     }
@@ -46,13 +47,10 @@ pipeline {
                 copyArtifacts(
                     projectName: currentBuild.projectName,
                     selector: specific("${currentBuild.previousSuccessfulBuild.number}"),
-                    filter: "$LOCUST_REPORT_DIR/*.csv",
+                    filter: "$LOCUST_REPORT_DIR/$CSV_REPORT_FILE",
                     flatten: true,
                     target: "previous_$LOCUST_REPORT_DIR"
                 )
-
-                sh 'ls -la'
-                sh "ls -la previous_$LOCUST_REPORT_DIR"
             }
         }
 
@@ -63,29 +61,26 @@ pipeline {
                         git branch: 'update-for-latest-locust', url: 'https://github.com/radnov/Locust-Compare'
                         sh 'pip3 install -r requirements.txt'
 
-                        script {
-                            COMPARISON_RESULTS = sh (
-                                script: """
-                                    python3 locust_compare.py \
-                                    $WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-                                    $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-                                    --column-name 90%
-                                """,
-                                returnStdout: true
-                            ).trim()
-
-                            echo "$COMPARISON_RESULTS"
-                        }
+                        sh """
+                            python3 locust_compare.py \
+                            $WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
+                            $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
+                            --column-name 90% > $WORKSPACE/$COMPARISON_FILE
+                        """
                     }
                 }
             }
 
             post {
+                always {
+                    archiveArtifacts artifacts: "$COMPARISON_FILE"
+                }
+
                 failure {
                     script {
                         slackSend(
                             color: '#ff0000',
-                            message: "$COMPARISON_RESULTS",
+                            message: "<${BUILD_URL}|${JOB_NAME} (#${BUILD_NUMBER})>: performance is getting worse!\nCheck <${BUILD_URL}artifact/${COMPARISON_FILE}/*view*/|comparison results>.",
                             channel: '@U01RSD1LPB3'
                         )
                     }
