@@ -54,6 +54,16 @@ pipeline {
                 sh "ls -la previous_${LOCUST_REPORT_DIR}"
             }
         }
+
+        stage('Compare Locust reports') {
+            steps {
+                dir('locust-compare') {
+                    git branch: 'update-for-latest-locust', url: 'https://github.com/radnov/Locust-Compare'
+                    sh "pip3 install -r requirements.txt"
+                    sh "python3 locust_compare.py ${WORKSPACE}/previous_${LOCUST_REPORT_DIR}/dhis_stats.csv ${WORKSPACE}/${LOCUST_REPORT_DIR}/dhis_stats.csv --column-name 90%"
+                }
+            }
+        }
     }
 
     post {
