@@ -62,12 +62,32 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                         git branch: 'update-for-latest-locust', url: 'https://github.com/radnov/Locust-Compare'
                         sh 'pip3 install -r requirements.txt'
-                        sh """
-                            python3 locust_compare.py \
-                            $WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-                            $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-                            --column-name 90%
-                        """
+
+                        script {
+                            COMPARISON_RESULTS = sh (
+                                script: """
+                                    python3 locust_compare.py \
+                                    $WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
+                                    $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
+                                    --column-name 90%
+                                """,
+                                returnStdout: true
+                            ).trim()
+
+                            echo "$COMPARISON_RESULTS"
+                        }
+                    }
+                }
+            }
+
+            post {
+                failure {
+                    script {
+                        slackSend(
+                            color: '#ff0000',
+                            message: "$COMPARISON_RESULTS",
+                            channel: '@U01RSD1LPB3'
+                        )
                     }
                 }
             }
