@@ -5,6 +5,10 @@ pipeline {
         label 'ec2-jdk11'
     }
 
+    options {
+        copyArtifactPermission("$JOB_NAME");
+    }
+
     environment {
 //         AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
         IMAGE_NAME = "dhis2/locustio-test"
@@ -46,7 +50,7 @@ pipeline {
         stage('Copy previous reports') {
             steps {
                 copyArtifacts(
-                    projectName: currentBuild.projectName,
+                    projectName: "$JOB_NAME",
                     selector: specific("${currentBuild.previousSuccessfulBuild.number}"),
                     filter: "$LOCUST_REPORT_DIR/$CSV_REPORT_FILE",
                     flatten: true,
