@@ -6,7 +6,7 @@ pipeline {
     }
 
     options {
-        copyArtifactPermission("$JOB_NAME");
+        copyArtifactPermission("$JOB_BASE_NAME");
     }
 
     environment {
