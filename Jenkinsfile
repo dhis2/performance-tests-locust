@@ -48,6 +48,10 @@ pipeline {
         }
 
         stage('Copy previous reports') {
+            when {
+                expression { currentBuild.previousSuccessfulBuild != null }
+            }
+
             steps {
                 copyArtifacts(
                     projectName: "$JOB_NAME",
@@ -60,6 +64,10 @@ pipeline {
         }
 
         stage('Compare Locust reports') {
+            when {
+                expression { currentBuild.previousSuccessfulBuild != null }
+            }
+
             steps {
                 dir('locust-compare') {
                     git branch: 'update-for-latest-locust', url: 'https://github.com/radnov/Locust-Compare'
