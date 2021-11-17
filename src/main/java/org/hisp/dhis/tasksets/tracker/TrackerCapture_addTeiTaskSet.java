@@ -122,8 +122,6 @@ public class TrackerCapture_addTeiTaskSet
         } );
 
         taskSet.execute();
-        recordSuccess( System.currentTimeMillis() - time, 0 );
-
         waitBetweenTasks();
 
     }

@@ -19,9 +19,9 @@ public class CacheUtils
 {
     private static Logger logger = Logger.getLogger( CacheUtils.class.getName() );
 
-    private static String tmp = System.getProperty( "java.io.tmpdir" );
+    private static String tmp = "/tmp/cache";
 
-    private static String cacheFile = tmp + System.getProperty( "file.separator" ) + "locust-cache.dat";
+    private static String cacheFile = tmp  + "/locust-cache.dat";
 
     private static Kryo kryo;
 
@@ -63,14 +63,14 @@ public class CacheUtils
     private static void serializeCache( EntitiesCache cache )
         throws IOException
     {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Output output = new Output( baos );
-        kryo.writeObject( output, cache );
-        output.flush();
-        try (OutputStream outputStream = new FileOutputStream( cacheFile ))
-        {
-            baos.writeTo( outputStream );
+        File file = new File( cacheFile );
+        if ( !file.exists()) {
+            file.getParentFile().mkdirs();
         }
+
+        Output output = new Output( new FileOutputStream(file, false) );
+        kryo.writeObject(output, cache);
+        output.close();
     }
 
     private static EntitiesCache deserializeCache()

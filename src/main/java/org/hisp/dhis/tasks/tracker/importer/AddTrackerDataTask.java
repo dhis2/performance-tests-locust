@@ -1,10 +1,7 @@
 package org.hisp.dhis.tasks.tracker.importer;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.Program;
-import org.hisp.dhis.cache.TrackedEntityAttribute;
-import org.hisp.dhis.cache.User;
-import org.hisp.dhis.cache.UserCredentials;
+import org.hisp.dhis.cache.*;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
@@ -129,18 +126,8 @@ public class AddTrackerDataTask
         {
             if ( att.isGenerated() )
             {
-                ApiResponse response = new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
-                    userCredentials, teis.size() ).executeAndGetResponse();
-                List<String> values = response.extractList( "value" );
-
-                for ( int i = 0; i < teis.size(); i++ )
-                {
-                    Attribute attribute = teis.get( i ).getAttributes().stream()
-                        .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
-                        .findFirst().orElse( null );
-
-                    attribute.setValue( values.get( i ) );
-                }
+                new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
+                    userCredentials, teis.size() ).executeAndAddAttributes( teis );
             }
         }
     }

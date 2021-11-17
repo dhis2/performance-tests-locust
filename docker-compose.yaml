@@ -12,7 +12,6 @@ services:
       USERS: ${USERS:-10}
       HATCH_RATE: ${HATCH_RATE:-1}
       TIME: ${TIME:-10s}
-   
 
     ports:
       - 5557:5557

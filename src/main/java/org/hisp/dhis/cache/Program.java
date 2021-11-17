@@ -42,4 +42,8 @@ public class Program
     {
         return attributes.stream().filter( p -> !p.isGeneratedByProgramRule() ).collect( Collectors.toList() );
     }
+
+    public boolean hasRepeatableStage() {
+        return programStages.stream().anyMatch( ProgramStage::isRepeatable );
+    }
 }
