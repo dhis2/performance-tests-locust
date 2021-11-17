@@ -10,7 +10,7 @@ pipeline {
     }
 
     parameters {
-        choice(name: 'comparison', choices: ['Baseline', 'Previous'], description: 'Which results to compare?')
+        choice(name: 'comparison', choices: ['Previous', 'Baseline'], description: 'Which results to compare?')
     }
 
     environment {
@@ -47,7 +47,7 @@ pipeline {
 
         stage('Run tests') {
             steps {
-                sh "mvn clean compile exec:java -Dtarget.base_uri=https://$INSTANCE_HOST/$INSTANCE_NAME"
+                sh "mvn --batch-mode --no-transfer-progress clean compile exec:java -Dtarget.base_uri=https://$INSTANCE_HOST/$INSTANCE_NAME"
             }
         }
 
