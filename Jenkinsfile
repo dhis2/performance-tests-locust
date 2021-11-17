@@ -9,6 +9,10 @@ pipeline {
         copyArtifactPermission("$JOB_BASE_NAME");
     }
 
+    parameters {
+        choice(name: 'comparison', choices: ['Baseline', 'Previous'], description: 'Which results to compare?')
+    }
+
     environment {
 //         AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
         IMAGE_NAME = "dhis2/locustio-test"
@@ -50,6 +54,7 @@ pipeline {
         stage('Copy previous reports') {
             when {
                 expression { currentBuild.previousSuccessfulBuild != null }
+                expression { params.comparison == "Previous" }
             }
 
             steps {
@@ -60,6 +65,17 @@ pipeline {
                     flatten: true,
                     target: "previous_$LOCUST_REPORT_DIR"
                 )
+            }
+        }
+
+        stage('Copy baseline reports') {
+            when {
+                expression { params.comparison == "Baseline" }
+            }
+
+            steps {
+                sh "mkdir -p previous_$LOCUST_REPORT_DIR"
+                sh "curl https://example.org --output previous_$LOCUST_REPORT_DIR"
             }
         }
 
