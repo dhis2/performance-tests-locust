@@ -1,5 +1,6 @@
 package org.hisp.dhis.utils;
 
+import groovy.lang.GroovyObject;
 import io.restassured.authentication.BasicAuthScheme;
 import io.restassured.authentication.PreemptiveBasicAuthScheme;
 import io.restassured.filter.Filter;
@@ -21,7 +22,7 @@ import java.util.List;
 public class AuthFilter
     implements Filter
 {
-    List<Pair<String, Cookie>> auth = new ArrayList<>();
+    List<Cookie> auth = new ArrayList<>();
 
     @Override
     public Response filter( FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec,
@@ -45,15 +46,14 @@ public class AuthFilter
                 password = ((PreemptiveBasicAuthScheme) requestSpec.getAuthenticationScheme()).getPassword();
             }
 
-            if ( getPair( username ) != null )
+            if ( getCookie( username ) != null )
             {
                 String finalUsername = username;
 
-                Cookie cookie = auth.stream().filter( p -> p.getKey().equalsIgnoreCase( finalUsername ) )
-                    .findFirst().orElse( null ).getValue();
+                Cookie cookie = auth.stream().filter( p -> p.getUser().equalsIgnoreCase( finalUsername ) )
+                    .findFirst().orElse( null );
 
                 requestSpec.cookie( cookie.getType(), cookie.getValue() );
-
             }
 
             else
@@ -64,31 +64,31 @@ public class AuthFilter
 
         final Response response = ctx.next( requestSpec, responseSpec );
 
-        if ( getPair( username ) == null && getSessionCookie( response ) != null )
+        if ( getCookie( username ) == null && getSessionCookie( response, username ) != null )
         {
-            auth.add( new Pair<>( username,
-                getSessionCookie( response ) ) );
+            auth.add(
+                getSessionCookie( response, username ) ) ;
         }
         return response;
     }
 
-    private Cookie getSessionCookie( Response response )
+    private Cookie getSessionCookie( Response response, String user )
     {
         if ( response.getCookie( "JSESSIONID" ) != null )
         {
-            return new Cookie( "JSESSIONID", response.getCookie( "JSESSIONID" ) );
+            return new Cookie( "JSESSIONID", response.getCookie( "JSESSIONID" ), user );
         }
         else if ( response.getCookie( "SESSION" ) != null )
         {
-            return new Cookie( "SESSION", response.getCookie( "SESSION" ) );
+            return new Cookie( "SESSION", response.getCookie( "SESSION" ), user );
         }
 
         return null;
     }
 
-    private Pair<String, Cookie> getPair( String username )
+    private Cookie getCookie( String username )
     {
-        return auth.stream().filter( p -> p.getKey().equalsIgnoreCase( username ) ).findFirst().orElse(
+        return auth.stream().filter( p -> p.getUser().equalsIgnoreCase( username ) ).findFirst().orElse(
             null
         );
     }
@@ -101,5 +101,7 @@ public class AuthFilter
         private String type;
 
         private String value;
+
+        private String user;
     }
 }

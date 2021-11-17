@@ -95,7 +95,7 @@ public class TrackerCapture_importer_searchForTeiTaskSet
         )
         {
             List<TrackedEntityAttribute> searchableAttributes = program
-                .getAttributes().stream().filter( a -> a.isSearchable() && a.getValueType().equals( ValueType.TEXT ) )
+                .getAttributes().stream().parallel().filter( a -> a.isSearchable() && a.getValueType().equals( ValueType.TEXT ) )
                 .collect( Collectors.toList() );
 
             if ( CollectionUtils.isEmpty( searchableAttributes ) )

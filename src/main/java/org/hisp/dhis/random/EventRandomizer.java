@@ -48,21 +48,19 @@ public class EventRandomizer
 {
     public Event createWithoutDataValues( EntitiesCache cache, RandomizerContext ctx )
     {
-        Program program = ctx.getProgram();
-        if ( program == null )
+        if ( ctx.getProgram() == null )
         {
-            program = DataRandomizer.randomElementFromList( cache.getProgramsWithAtLeastOneRepeatableStage() );
-            ctx.setProgram( program );
+            ctx.setProgram( DataRandomizer.randomElementFromList( cache.getProgramsWithAtLeastOneRepeatableStage() ) );
         }
 
         ProgramStage programStage = ctx.getProgramStage();
         if ( programStage == null )
         {
-            programStage = getRepeatableRandomProgramStageFromProgram( program );
+            programStage = getRepeatableRandomProgramStageFromProgram( ctx.getProgram() );
             ctx.setProgramStage( programStage );
         }
 
-        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, program );
+        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, ctx.getProgram() );
 
         Event event = new Event();
         if ( ctx.isGenerateIds() ) {
@@ -71,7 +69,7 @@ public class EventRandomizer
         event.setStoredBy( "performance-test" );
         event.setEnrollment( ctx.getEnrollmentId() );
         event.setDueDate( simpleDateFormat.format( new Date() ) );
-        event.setProgram( program.getId() );
+        event.setProgram( ctx.getProgram().getId() );
         event.setProgramStage( programStage.getId() );
         event.setOrgUnit( orgUnitUid );
         event.setStatus( EventStatus.ACTIVE );
@@ -80,7 +78,7 @@ public class EventRandomizer
         event.setDeleted( false );
         event.setAttributeOptionCombo( "" ); // TODO
 
-        if ( !ctx.isSkipTeiInEvent() && program.isHasRegistration() )
+        if ( !ctx.isSkipTeiInEvent() && ctx.getProgram().isHasRegistration() )
         {
             if ( ctx.getTeiId() != null )
             {
@@ -88,9 +86,9 @@ public class EventRandomizer
                 return event;
             }
 
-            if ( cache.getTeis().get( program.getId() ) != null )
+            if ( cache.getTeis().get( ctx.getProgram().getId() ) != null )
             {
-                String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( program.getId() ) )
+                String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( ctx.getProgram().getId() ) )
                     .getUid();
                 event.setTrackedEntityInstance( teiUid );
             }
