@@ -88,7 +88,7 @@ pipeline {
 
             steps {
                 dir('locust-compare') {
-                    git branch: 'update-for-latest-locust', url: 'https://github.com/radnov/Locust-Compare'
+                    git url: 'https://github.com/radnov/Locust-Compare'
                     sh 'pip3 install -r requirements.txt'
 
                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
