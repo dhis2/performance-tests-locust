@@ -74,7 +74,7 @@ pipeline {
 
             steps {
                 sh "mkdir -p previous_$LOCUST_REPORT_DIR"
-                sh "aws s3 cp $S3_BUCKET/baseline_$CSV_REPORT_FILE previous_$LOCUST_REPORT_DIR/"
+                sh "aws s3 cp $S3_BUCKET/baseline_$CSV_REPORT_FILE previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
             }
         }
 
