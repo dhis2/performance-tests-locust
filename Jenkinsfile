@@ -15,16 +15,14 @@ pipeline {
 
     environment {
 //         AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
-        IMAGE_NAME = "dhis2/locustio-test"
-        IMAGE_TAG = "latest"
-        COMPOSE_ARGS = "NO_WEB=true TIME=30s HATCH_RATE=1 USERS=5"
         LOCUST_REPORT_DIR = "reports"
         HTML_REPORT_FILE = "test_report.html"
         CSV_REPORT_FILE = "dhis_stats.csv"
         COMPARISON_FILE = "comparison_results.txt"
         COMPARISON_COLUMN = "90%"
-        INSTANCE_HOST = "test.performance.dhis2.org"
+        INSTANCE_HOST = "https://test.performance.dhis2.org"
         INSTANCE_NAME = "2.37.0"
+        COMPOSE_ARGS = "NO_WEB=true TIME=30s HATCH_RATE=1 USERS=5 TARGET=$INSTANCE_HOST/$INSTANCE_NAME"
     }
 
     stages {
@@ -37,19 +35,19 @@ pipeline {
             }
         }
 
-        stage('Start Locust master') {
+        stage('Start Locust') {
             steps {
                 sh "mkdir -p $LOCUST_REPORT_DIR"
-                sh "docker build -t $IMAGE_NAME:$IMAGE_TAG ./docker"
-                sh "$COMPOSE_ARGS docker-compose up -d"
+                sh "docker-compose build"
+                sh "$COMPOSE_ARGS docker-compose up"
             }
         }
 
-        stage('Run tests') {
-            steps {
-                sh "mvn --batch-mode --no-transfer-progress clean compile exec:java -Dtarget.base_uri=https://$INSTANCE_HOST/$INSTANCE_NAME"
-            }
-        }
+//         stage('Run tests') {
+//             steps {
+//                 sh "mvn --batch-mode --no-transfer-progress clean compile exec:java -Dtarget.base_uri=https://$INSTANCE_HOST/$INSTANCE_NAME"
+//             }
+//         }
 
         stage('Copy previous reports') {
             when {
