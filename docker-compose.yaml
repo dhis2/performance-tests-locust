@@ -1,9 +1,9 @@
 version: '3'
 
 services:
-  locust:
-#    restart: always
-    image: "dhis2/locustio-test:latest"
+  master:
+    build: ./docker
+    image: "locustio-master:latest"
     environment:
       LOCUST_MASTER_NODE_HOST: "127.0.0.1"
       LOCUST_MASTER_NODE_PORT: "5557"
@@ -14,7 +14,11 @@ services:
       TIME: ${TIME:-10s}
     volumes:
       - ./reports:/home/locust/reports
-
     ports:
-      - 5557:5557
-      - 8089:8089
+      - "5557:5557"
+      - "8089:8089"
+  worker:
+    build: .
+    image: "locustio-worker:latest"
+    environment:
+      JAVA_OPTS: "-Dtarget.base_uri=${TARGET} -Dlocust.master.host=master"
