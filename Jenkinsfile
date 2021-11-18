@@ -44,12 +44,6 @@ pipeline {
             }
         }
 
-//         stage('Run tests') {
-//             steps {
-//                 sh "mvn --batch-mode --no-transfer-progress clean compile exec:java -Dtarget.base_uri=https://$INSTANCE_HOST/$INSTANCE_NAME"
-//             }
-//         }
-
         stage('Copy previous reports') {
             when {
                 expression { currentBuild.previousSuccessfulBuild != null }
