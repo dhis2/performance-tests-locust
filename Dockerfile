@@ -1,7 +1,7 @@
 FROM maven:3.5.3-jdk-8-slim as builder
 
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
+RUN mvn --batch-mode --no-transfer-progress dependency:go-offline
 
 COPY ./src ./src
 RUN mvn package

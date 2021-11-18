@@ -23,6 +23,7 @@ pipeline {
         INSTANCE_HOST = "https://test.performance.dhis2.org"
         INSTANCE_NAME = "2.37.0"
         COMPOSE_ARGS = "NO_WEB=true TIME=30s HATCH_RATE=1 USERS=5 TARGET=$INSTANCE_HOST/$INSTANCE_NAME"
+        S3_BUCKET = "s3://dhis2-performance-tests-results"
     }
 
     stages {
@@ -73,13 +74,16 @@ pipeline {
 
             steps {
                 sh "mkdir -p previous_$LOCUST_REPORT_DIR"
-                sh "curl https://example.org --output previous_$LOCUST_REPORT_DIR"
+                sh "aws s3 cp $S3_BUCKET/baseline_$CSV_REPORT_FILE previous_$LOCUST_REPORT_DIR/"
             }
         }
 
         stage('Compare Locust reports') {
             when {
-                expression { currentBuild.previousSuccessfulBuild != null }
+                anyOf {
+                    expression { params.comparison == "Baseline" }
+                    expression { currentBuild.previousSuccessfulBuild != null }
+                }
             }
 
             steps {
