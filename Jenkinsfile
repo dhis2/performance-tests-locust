@@ -10,7 +10,7 @@ pipeline {
     }
 
     parameters {
-        choice(name: 'comparison', choices: ['Previous', 'Baseline'], description: 'Which results to compare?')
+        choice(name: 'comparison', choices: ['Previous', 'Baseline', 'Both'], description: 'Which results to compare?')
     }
 
     environment {
@@ -47,7 +47,10 @@ pipeline {
         stage('Copy previous reports') {
             when {
                 expression { currentBuild.previousSuccessfulBuild != null }
-                expression { params.comparison == "Previous" }
+                anyOf {
+                    expression { params.comparison == "Previous" }
+                    expression { params.comparison == "Both" }
+                }
             }
 
             steps {
@@ -63,34 +66,44 @@ pipeline {
 
         stage('Copy baseline reports') {
             when {
-                expression { params.comparison == "Baseline" }
+                anyOf {
+                    expression { params.comparison == "Baseline" }
+                    expression { params.comparison == "Both" }
+                }
             }
 
             steps {
-                sh "mkdir -p previous_$LOCUST_REPORT_DIR"
-                sh "aws s3 cp $S3_BUCKET/baseline_$CSV_REPORT_FILE previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
+                sh "mkdir -p baseline_$LOCUST_REPORT_DIR"
+                sh "aws s3 cp $S3_BUCKET/baseline_$CSV_REPORT_FILE baseline_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
             }
         }
 
-        stage('Compare Locust reports') {
+        stage('Checkout comparer') {
+            steps {
+                dir('locust-compare') {
+                    git url: 'https://github.com/radnov/Locust-Compare'
+                    sh 'pip3 install -r requirements.txt'
+            }
+        }
+
+        // TODO: Create shared library function
+        stage('Compare to previous Locust report') {
             when {
+                expression { currentBuild.previousSuccessfulBuild != null }
                 anyOf {
-                    expression { params.comparison == "Baseline" }
-                    expression { currentBuild.previousSuccessfulBuild != null }
+                    expression { params.comparison == "Previous" }
+                    expression { params.comparison == "Both" }
                 }
             }
 
             steps {
                 dir('locust-compare') {
-                    git url: 'https://github.com/radnov/Locust-Compare'
-                    sh 'pip3 install -r requirements.txt'
-
                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                         sh """
                             python3 locust_compare.py \
                             $WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
                             $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-                            --column-name $COMPARISON_COLUMN > $WORKSPACE/$COMPARISON_FILE
+                            --column-name $COMPARISON_COLUMN > $WORKSPACE/previous_$COMPARISON_FILE
                         """
                     }
                 }
@@ -98,14 +111,53 @@ pipeline {
 
             post {
                 always {
-                    archiveArtifacts artifacts: "$COMPARISON_FILE"
+                    archiveArtifacts artifacts: "previous_$COMPARISON_FILE"
                 }
 
                 failure {
                     script {
                         slackSend(
                             color: '#ff0000',
-                            message: "<${BUILD_URL}|${JOB_NAME} (#${BUILD_NUMBER})>: performance is getting worse!\nCheck <${BUILD_URL}artifact/${COMPARISON_FILE}/*view*/|comparison results>.",
+                            message: "<${BUILD_URL}|${JOB_NAME} (#${BUILD_NUMBER})>: performance is getting worse!\nCheck <${BUILD_URL}artifact/${COMPARISON_FILE}/*view*/|comparison to previous results>.",
+                            channel: '@U01RSD1LPB3'
+                        )
+                    }
+                }
+            }
+        }
+
+        // TODO: Create shared library function
+        stage('Compare to baseline Locust report') {
+            when {
+                anyOf {
+                    expression { params.comparison == "Baseline" }
+                    expression { params.comparison == "Both" }
+                }
+            }
+
+            steps {
+                dir('locust-compare') {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        sh """
+                            python3 locust_compare.py \
+                            $WORKSPACE/baseline_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
+                            $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
+                            --column-name $COMPARISON_COLUMN > $WORKSPACE/baseline_$COMPARISON_FILE
+                        """
+                    }
+                }
+            }
+
+            post {
+                always {
+                    archiveArtifacts artifacts: "baseline_$COMPARISON_FILE"
+                }
+
+                failure {
+                    script {
+                        slackSend(
+                            color: '#ff0000',
+                            message: "<${BUILD_URL}|${JOB_NAME} (#${BUILD_NUMBER})>: performance is getting worse!\nCheck <${BUILD_URL}artifact/${COMPARISON_FILE}/*view*/|comparison to baseline results>.",
                             channel: '@U01RSD1LPB3'
                         )
                     }
