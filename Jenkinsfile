@@ -83,6 +83,7 @@ pipeline {
                 dir('locust-compare') {
                     git url: 'https://github.com/radnov/Locust-Compare'
                     sh 'pip3 install -r requirements.txt'
+                }
             }
         }
 
