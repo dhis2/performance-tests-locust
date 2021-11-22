@@ -18,7 +18,7 @@ pipeline {
         LOCUST_REPORT_DIR = "reports"
         HTML_REPORT_FILE = "test_report.html"
         CSV_REPORT_FILE = "dhis_stats.csv"
-        COMPARISON_FILE = "comparison_results.txt"
+        COMPARISON_FILE = "comparison_results.html"
         COMPARISON_COLUMN = "90%"
         INSTANCE_HOST = "https://test.performance.dhis2.org"
         INSTANCE_NAME = "2.37.0"
@@ -104,7 +104,8 @@ pipeline {
                             python3 locust_compare.py \
                             $WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
                             $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-                            --column-name $COMPARISON_COLUMN > $WORKSPACE/previous_$COMPARISON_FILE
+                            --column-name $COMPARISON_COLUMN \
+                            --output $WORKSPACE/previous_$COMPARISON_FILE
                         """
                     }
                 }
@@ -143,7 +144,8 @@ pipeline {
                             python3 locust_compare.py \
                             $WORKSPACE/baseline_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
                             $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-                            --column-name $COMPARISON_COLUMN > $WORKSPACE/baseline_$COMPARISON_FILE
+                            --column-name $COMPARISON_COLUMN \
+                            --output $WORKSPACE/baseline_$COMPARISON_FILE
                         """
                     }
                 }
