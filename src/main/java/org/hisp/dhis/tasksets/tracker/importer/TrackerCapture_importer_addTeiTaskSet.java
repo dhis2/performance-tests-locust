@@ -128,20 +128,18 @@ public class TrackerCapture_importer_addTeiTaskSet
 
     private void generateAttributes( Program program, TrackedEntity tei, UserCredentials userCredentials )
     {
+        program.getGeneratedAttributes().forEach( att -> {
+            ApiResponse response = new GenerateTrackedEntityAttributeValueTask( 1, att.getTrackedEntityAttribute(),
+                userCredentials ).executeAndGetResponse();
 
-        program.getAttributes().stream().filter( TrackedEntityAttribute::isGenerated )
-            .forEach( att -> {
-                ApiResponse response = new GenerateTrackedEntityAttributeValueTask( 1, att.getTrackedEntityAttribute(),
-                    userCredentials ).executeAndGetResponse();
+            String value = response.extractString( "value" );
 
-                String value = response.extractString( "value" );
+            Attribute attribute = tei.getAttributes().stream()
+                .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
+                .findFirst().orElse( null );
 
-                Attribute attribute = tei.getAttributes().stream()
-                    .filter( teiAtr -> teiAtr.getAttribute().equals( att.getTrackedEntityAttribute() ) )
-                    .findFirst().orElse( null );
-
-                attribute.setValue( value );
-            } );
+            attribute.setValue( value );
+        } );
     }
 }
 
