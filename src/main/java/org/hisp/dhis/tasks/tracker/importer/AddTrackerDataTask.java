@@ -1,8 +1,10 @@
 package org.hisp.dhis.tasks.tracker.importer;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.*;
-import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
+import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.TrackedEntityAttribute;
+import org.hisp.dhis.cache.User;
+import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.models.TrackedEntities;
@@ -122,13 +124,11 @@ public class AddTrackerDataTask
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
         throws Exception
     {
-        for ( TrackedEntityAttribute att : program.getAttributes() )
+        for ( TrackedEntityAttribute att : program.getGeneratedAttributes() )
         {
-            if ( att.isGenerated() )
-            {
-                new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
-                    userCredentials, teis.size() ).executeAndAddAttributes( teis );
-            }
+            new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
+                userCredentials, teis.size() ).executeAndAddAttributes( teis );
+
         }
     }
 
