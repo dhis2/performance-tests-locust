@@ -112,7 +112,7 @@ public abstract class DhisAbstractTask
     {
         final long time = System.currentTimeMillis();
         ApiResponse response = function.call();
-      
+
         if ( expectation != null )
         {
             boolean passed = expectation.apply( response );
@@ -123,7 +123,7 @@ public abstract class DhisAbstractTask
                 return response;
             }
 
-            recordFailure( System.currentTimeMillis() - time, response.getRaw().getBody().asString() );
+            recordFailure( System.currentTimeMillis() - time, response.getRaw() );
         }
 
         return response;
@@ -168,7 +168,7 @@ public abstract class DhisAbstractTask
 
         else
         {
-            recordFailure( time, response.getBody().asString() );
+            recordFailure( time, response );
         }
     }
 
@@ -195,8 +195,22 @@ public abstract class DhisAbstractTask
         Locust.getInstance().recordFailure( getType(), getName(), time, message );
     }
 
+    public void recordFailure( long time, Response response )
+    {
+        Locust.getInstance().recordFailure( getType(), getName(), time, mask( response ) );
+    }
+
     public void recordFailure( Response response )
     {
-        Locust.getInstance().recordFailure( getType(), getName(), response.getTime(), response.getBody().asString() );
+        Locust.getInstance().recordFailure( getType(), getName(), response.getTime(), mask( response ) );
+    }
+
+    // locust4j stores errors in a hashmap and most of our responses contains uid or another unique attribute,
+    // so logging full response ends up being memory issue when there are many errors.
+    // Eventually, we should strip away the unique elements of response, but for now logging errors to stdout.
+    private String mask( Response response )
+    {
+        response.print();
+        return "Status code: " + response.statusCode();
     }
 }
