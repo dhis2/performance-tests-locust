@@ -6,6 +6,7 @@ pipeline {
     }
 
     options {
+        ansiColor('xterm')
         copyArtifactPermission("$JOB_BASE_NAME");
     }
 
@@ -120,7 +121,7 @@ pipeline {
                     script {
                         slackSend(
                             color: '#ff0000',
-                            message: "<${BUILD_URL}|${JOB_NAME} (#${BUILD_NUMBER})>: performance is getting worse!\nCheck <${BUILD_URL}artifact/previous_${COMPARISON_FILE}/*view*/|comparison to previous results>.",
+                            message: "<${BUILD_URL}|${JOB_NAME} (#${BUILD_NUMBER})>: performance is getting worse!\nCheck <${BUILD_URL}artifact/previous_${COMPARISON_FILE}|comparison to previous results>.",
                             channel: '@U01RSD1LPB3'
                         )
                     }
@@ -160,7 +161,7 @@ pipeline {
                     script {
                         slackSend(
                             color: '#ff0000',
-                            message: "<${BUILD_URL}|${JOB_NAME} (#${BUILD_NUMBER})>: performance is getting worse!\nCheck <${BUILD_URL}artifact/baseline_${COMPARISON_FILE}/*view*/|comparison to baseline results>.",
+                            message: "<${BUILD_URL}|${JOB_NAME} (#${BUILD_NUMBER})>: performance is getting worse!\nCheck <${BUILD_URL}artifact/baseline_${COMPARISON_FILE}|comparison to baseline results>.",
                             channel: '@U01RSD1LPB3'
                         )
                     }
