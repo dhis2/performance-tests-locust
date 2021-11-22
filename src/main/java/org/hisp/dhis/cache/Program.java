@@ -43,7 +43,13 @@ public class Program
         return attributes.stream().filter( p -> !p.isGeneratedByProgramRule() ).collect( Collectors.toList() );
     }
 
-    public boolean hasRepeatableStage() {
+    public List<TrackedEntityAttribute> getGeneratedAttributes()
+    {
+        return attributes.stream().filter( p -> p.isGenerated() ).collect( Collectors.toList() );
+    }
+
+    public boolean hasRepeatableStage()
+    {
         return programStages.stream().anyMatch( ProgramStage::isRepeatable );
     }
 }

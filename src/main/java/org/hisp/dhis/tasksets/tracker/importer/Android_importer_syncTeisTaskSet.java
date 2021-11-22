@@ -104,13 +104,10 @@ public class Android_importer_syncTeisTaskSet
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
         throws Exception
     {
-        for ( TrackedEntityAttribute att : program.getAttributes() )
+        for ( TrackedEntityAttribute att : program.getGeneratedAttributes() )
         {
-            if ( att.isGenerated() )
-            {
-                new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
-                    userCredentials, teis.size() ).executeAndAddAttributes( teis );
-            }
+            new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
+                userCredentials, teis.size() ).executeAndAddAttributes( teis );
         }
     }
 
