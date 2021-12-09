@@ -129,7 +129,7 @@ public class TrackerCapture_addTeiTaskSet
     private void generateAttributes( Program program, TrackedEntityInstance tei, UserCredentials userCredentials )
     {
 
-        program.getAttributes().stream().filter( TrackedEntityAttribute::isGenerated )
+        program.getGeneratedAttributes()
             .forEach( att -> {
                 ApiResponse response = new GenerateTrackedEntityAttributeValueTask( 1, att.getTrackedEntityAttribute(),
                     userCredentials ).executeAndGetResponse();
