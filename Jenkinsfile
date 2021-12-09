@@ -79,11 +79,11 @@ pipeline {
             }
         }
 
-        stage('Checkout comparer') {
+        stage('Checkout csvcomparer') {
             steps {
-                dir('locust-compare') {
-                    git url: 'https://github.com/radnov/Locust-Compare'
-                    sh 'pip3 install -r requirements.txt'
+                dir('csvcomparer') {
+                    git url: 'https://github.com/dhis2-sre/csvcomparer'
+                    sh 'pip3 install .'
                 }
             }
         }
@@ -99,10 +99,10 @@ pipeline {
             }
 
             steps {
-                dir('locust-compare') {
+                dir('csvcomparer') {
                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                         sh """
-                            python3 locust_compare.py \
+                            csvcomparer \
                             $WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
                             $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
                             --column-name $COMPARISON_COLUMN \
@@ -139,10 +139,10 @@ pipeline {
             }
 
             steps {
-                dir('locust-compare') {
+                dir('csvcomparer') {
                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                         sh """
-                            python3 locust_compare.py \
+                            csvcomparer \
                             $WORKSPACE/baseline_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
                             $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
                             --column-name $COMPARISON_COLUMN \
