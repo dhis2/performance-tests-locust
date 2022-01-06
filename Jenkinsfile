@@ -24,8 +24,8 @@ pipeline {
         CURRENT_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
         PREVIOUS_REPORT = "$WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
         BASELINE_REPORT = "$WORKSPACE/baseline_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
-        INSTANCE_HOST = "https://test.performance.dhis2.org"
-        INSTANCE_NAME = "2.37.0"
+        INSTANCE_HOST = "https://test.performancebot.dhis2.org/"
+        INSTANCE_NAME = "dev/"
         COMPOSE_ARGS = "NO_WEB=true TIME=30s HATCH_RATE=1 USERS=5 TARGET=$INSTANCE_HOST/$INSTANCE_NAME"
         S3_BUCKET = "s3://dhis2-performance-tests-results"
     }
