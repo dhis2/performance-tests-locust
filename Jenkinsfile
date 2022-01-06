@@ -24,23 +24,25 @@ pipeline {
         CURRENT_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
         PREVIOUS_REPORT = "$WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
         BASELINE_REPORT = "$WORKSPACE/baseline_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
-        INSTANCE_HOST = "https://test.performancebot.dhis2.org/"
-        INSTANCE_NAME = "dev/"
-        COMPOSE_ARGS = "NO_WEB=true TIME=30s HATCH_RATE=1 USERS=5 TARGET=$INSTANCE_HOST/$INSTANCE_NAME"
+        INSTANCE_HOST = "https://test.performancebot.dhis2.org"
+        INSTANCE_NAME = "2.37.2"
+        COMPOSE_ARGS = "NO_WEB=true TIME=30s HATCH_RATE=1 USERS=10 TARGET=$INSTANCE_HOST/$INSTANCE_NAME"
         S3_BUCKET = "s3://dhis2-performance-tests-results"
+        PATH="/home/ubuntu/.local/bin:$PATH"
     }
 
     stages {
         stage('Update performance test instance') {
             steps {
                 echo 'Updating performance test instance ...'
+                echo "$PATH"
 //                 script {
 //                     awx.resetWar("$AWX_BOT_CREDENTIALS", "${INSTANCE_HOST}", "${INSTANCE_NAME}")
 //                 }
             }
         }
 
-        stage('Start Locust') {
+        stage('Run Locust tests') {
             steps {
                 sh "mkdir -p $LOCUST_REPORT_DIR"
                 sh "docker-compose build"
@@ -85,7 +87,7 @@ pipeline {
         stage('Checkout csvcomparer') {
             steps {
                 dir('csvcomparer') {
-                    sh 'pip3 install git+https://github.com/dhis2-sre/csvcomparer.git'
+                    sh 'pip3 install git+https://github.com/dhis2-sre/csvcomparer.git@DEVOPS-30'
                 }
             }
         }
@@ -137,6 +139,7 @@ pipeline {
 
             post {
                 always {
+                    sh 'ls -la'
                     archiveArtifacts artifacts: "$COMPARISON_FILE"
                 }
 
