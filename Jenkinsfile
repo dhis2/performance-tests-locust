@@ -11,22 +11,22 @@ pipeline {
     }
 
     parameters {
-        choice(name: 'comparison', choices: ['Previous', 'Baseline', 'Both'], description: 'Which results to compare?')
+        choice(name: 'comparison', choices: ['Baseline', 'Previous', 'Both'], description: 'Which results to compare?')
     }
 
     environment {
-//         AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
+        //AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
         LOCUST_REPORT_DIR = "reports"
         HTML_REPORT_FILE = "test_report.html"
         CSV_REPORT_FILE = "dhis_stats.csv"
         COMPARISON_FILE = "comparison_results.html"
         COMPARISON_COLUMN = "90%"
         CURRENT_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
-        PREVIOUS_REPORT = "$WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
-        BASELINE_REPORT = "$WORKSPACE/baseline_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
+        PREVIOUS_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/previous_$CSV_REPORT_FILE"
+        BASELINE_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/baseline_$CSV_REPORT_FILE"
         INSTANCE_HOST = "https://test.performancebot.dhis2.org"
         INSTANCE_NAME = "2.37.2"
-        COMPOSE_ARGS = "NO_WEB=true TIME=30s HATCH_RATE=1 USERS=10 TARGET=$INSTANCE_HOST/$INSTANCE_NAME"
+        COMPOSE_ARGS = "NO_WEB=true TIME=30m HATCH_RATE=1 USERS=10 TARGET=$INSTANCE_HOST/$INSTANCE_NAME"
         S3_BUCKET = "s3://dhis2-performance-tests-results"
         PATH="/home/ubuntu/.local/bin:$PATH"
     }
@@ -35,10 +35,9 @@ pipeline {
         stage('Update performance test instance') {
             steps {
                 echo 'Updating performance test instance ...'
-                echo "$PATH"
-//                 script {
-//                     awx.resetWar("$AWX_BOT_CREDENTIALS", "${INSTANCE_HOST}", "${INSTANCE_NAME}")
-//                 }
+                 //script {
+                 //    awx.resetWar("$AWX_BOT_CREDENTIALS", "${INSTANCE_HOST}", "${INSTANCE_NAME}")
+                 //}
             }
         }
 
@@ -67,6 +66,7 @@ pipeline {
                     flatten: true,
                     target: "previous_$LOCUST_REPORT_DIR"
                 )
+                sh "mv previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE $PREVIOUS_REPORT"
             }
         }
 
@@ -79,15 +79,15 @@ pipeline {
             }
 
             steps {
-                sh "mkdir -p baseline_$LOCUST_REPORT_DIR"
-                sh "aws s3 cp $S3_BUCKET/baseline_$CSV_REPORT_FILE baseline_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
+                sh "aws s3 cp $S3_BUCKET/baseline_$CSV_REPORT_FILE $BASELINE_REPORT"
             }
         }
 
         stage('Checkout csvcomparer') {
             steps {
                 dir('csvcomparer') {
-                    sh 'pip3 install git+https://github.com/dhis2-sre/csvcomparer.git@DEVOPS-30'
+                    git url: 'https://github.com/dhis2-sre/csvcomparer'
+                    sh 'pip3 install .'
                 }
             }
         }
@@ -139,7 +139,6 @@ pipeline {
 
             post {
                 always {
-                    sh 'ls -la'
                     archiveArtifacts artifacts: "$COMPARISON_FILE"
                 }
 
@@ -154,87 +153,6 @@ pipeline {
                 }
             }
         }
-
-        //// TODO: Create shared library function
-        //stage('Compare to previous Locust report') {
-        //    when {
-        //        expression { currentBuild.previousSuccessfulBuild != null }
-        //        anyOf {
-        //            expression { params.comparison == "Previous" }
-        //            expression { params.comparison == "Both" }
-        //        }
-        //    }
-        //
-        //    steps {
-        //        dir('csvcomparer') {
-        //            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-        //                sh """
-        //                    csvcomparer \
-        //                    $WORKSPACE/previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-        //                    $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-        //                    --column-name $COMPARISON_COLUMN \
-        //                    --output $WORKSPACE/previous_$COMPARISON_FILE
-        //                """
-        //            }
-        //        }
-        //    }
-        //
-        //    post {
-        //        always {
-        //            archiveArtifacts artifacts: "previous_$COMPARISON_FILE"
-        //        }
-        //
-        //        failure {
-        //            script {
-        //                slackSend(
-        //                    color: '#ff0000',
-        //                    message: "<${BUILD_URL}|${JOB_NAME} (#${BUILD_NUMBER})>: performance is getting worse!\nCheck <${BUILD_URL}artifact/previous_${COMPARISON_FILE}|comparison to previous results>.",
-        //                    channel: '@U01RSD1LPB3'
-        //                )
-        //            }
-        //        }
-        //    }
-        //}
-        //
-        //// TODO: Create shared library function
-        //stage('Compare to baseline Locust report') {
-        //    when {
-        //        anyOf {
-        //            expression { params.comparison == "Baseline" }
-        //            expression { params.comparison == "Both" }
-        //        }
-        //    }
-        //
-        //    steps {
-        //        dir('csvcomparer') {
-        //            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-        //                sh """
-        //                    csvcomparer \
-        //                    $WORKSPACE/baseline_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-        //                    $WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE \
-        //                    --column-name $COMPARISON_COLUMN \
-        //                    --output $WORKSPACE/baseline_$COMPARISON_FILE
-        //                """
-        //            }
-        //        }
-        //    }
-        //
-        //    post {
-        //        always {
-        //            archiveArtifacts artifacts: "baseline_$COMPARISON_FILE"
-        //        }
-        //
-        //        failure {
-        //            script {
-        //                slackSend(
-        //                    color: '#ff0000',
-        //                    message: "<${BUILD_URL}|${JOB_NAME} (#${BUILD_NUMBER})>: performance is getting worse!\nCheck <${BUILD_URL}artifact/baseline_${COMPARISON_FILE}|comparison to baseline results>.",
-        //                    channel: '@U01RSD1LPB3'
-        //                )
-        //            }
-        //        }
-        //    }
-        //}
     }
 
     post {
