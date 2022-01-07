@@ -7,11 +7,12 @@ pipeline {
 
     options {
         ansiColor('xterm')
-        copyArtifactPermission("$JOB_BASE_NAME");
+        copyArtifactPermission("$JOB_BASE_NAME")
     }
 
     parameters {
-        choice(name: 'comparison', choices: ['Baseline', 'Previous', 'Both'], description: 'Which results to compare?')
+        choice(name: 'REPORT', choices: ['Baseline', 'Previous', 'Both'], description: 'Which report/s to compare with?')
+        string(name: 'COLUMN', defaultValue: 'Average Response Time,90%', description: 'Which column to compare?\n(comma-separated list of strings)')
     }
 
     environment {
@@ -20,13 +21,12 @@ pipeline {
         HTML_REPORT_FILE = "test_report.html"
         CSV_REPORT_FILE = "dhis_stats.csv"
         COMPARISON_FILE = "comparison_results.html"
-        COMPARISON_COLUMN = "90%"
         CURRENT_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
         PREVIOUS_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/previous_$CSV_REPORT_FILE"
         BASELINE_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/baseline_$CSV_REPORT_FILE"
         INSTANCE_HOST = "https://test.performancebot.dhis2.org"
         INSTANCE_NAME = "2.37.2"
-        COMPOSE_ARGS = "NO_WEB=true TIME=30m HATCH_RATE=1 USERS=10 TARGET=$INSTANCE_HOST/$INSTANCE_NAME"
+        COMPOSE_ARGS = "NO_WEB=true TIME=60m HATCH_RATE=10 USERS=100 TARGET=$INSTANCE_HOST/$INSTANCE_NAME"
         S3_BUCKET = "s3://dhis2-performance-tests-results"
         PATH="/home/ubuntu/.local/bin:$PATH"
     }
@@ -53,8 +53,8 @@ pipeline {
             when {
                 expression { currentBuild.previousSuccessfulBuild != null }
                 anyOf {
-                    expression { params.comparison == "Previous" }
-                    expression { params.comparison == "Both" }
+                    expression { params.REPORT == "Previous" }
+                    expression { params.REPORT == "Both" }
                 }
             }
 
@@ -73,8 +73,8 @@ pipeline {
         stage('Copy baseline reports') {
             when {
                 anyOf {
-                    expression { params.comparison == "Baseline" }
-                    expression { params.comparison == "Both" }
+                    expression { params.REPORT == "Baseline" }
+                    expression { params.REPORT == "Both" }
                 }
             }
 
@@ -86,7 +86,7 @@ pipeline {
         stage('Checkout csvcomparer') {
             steps {
                 dir('csvcomparer') {
-                    git url: 'https://github.com/dhis2-sre/csvcomparer'
+                    git branch: 'DEVOPS-30', url: 'https://github.com/dhis2-sre/csvcomparer'
                     sh 'pip3 install .'
                 }
             }
@@ -97,38 +97,20 @@ pipeline {
                 dir('csvcomparer') {
                     script {
                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            switch(params.comparison) {
+                            switch(params.REPORT) {
                                 case 'Previous':
                                     if (currentBuild.previousSuccessfulBuild != null) {
                                         COMPARISON_FILE = "previous_$COMPARISON_FILE"
-                                        sh """
-                                            csvcomparer --loglevel info \
-                                            --current $CURRENT_REPORT \
-                                            --previous $PREVIOUS_REPORT \
-                                            --column-name $COMPARISON_COLUMN \
-                                            --output $WORKSPACE/$COMPARISON_FILE
-                                        """
+                                        sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $PREVIOUS_REPORT --column-name \"${params.COLUMN}\" --output $WORKSPACE/$COMPARISON_FILE"
                                     }
                                     break
                                 case 'Baseline':
                                     COMPARISON_FILE = "baseline_$COMPARISON_FILE"
-                                    sh """
-                                        csvcomparer --loglevel info \
-                                        --current $CURRENT_REPORT \
-                                        --previous $BASELINE_REPORT \
-                                        --column-name $COMPARISON_COLUMN \
-                                        --output $WORKSPACE/$COMPARISON_FILE
-                                    """
+                                    sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $BASELINE_REPORT --column-name \"${params.COLUMN}\" --output $WORKSPACE/$COMPARISON_FILE"
                                     break
                                 case 'Both':
                                     if (currentBuild.previousSuccessfulBuild != null) {
-                                        sh """
-                                            csvcomparer --loglevel info \
-                                            --current $CURRENT_REPORT \
-                                            --previous $BASELINE_REPORT $PREVIOUS_REPORT \
-                                            --column-name $COMPARISON_COLUMN \
-                                            --output $WORKSPACE/$COMPARISON_FILE
-                                        """
+                                        sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $BASELINE_REPORT $PREVIOUS_REPORT --column-name \"${params.COLUMN}\" --output $WORKSPACE/$COMPARISON_FILE"
                                     }
                                     break
                             }
