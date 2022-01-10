@@ -11,8 +11,12 @@ pipeline {
     }
 
     parameters {
-        choice(name: 'REPORT', choices: ['Baseline', 'Previous', 'Both'], description: 'Which report/s to compare with?')
+        string(name: 'INSTANCE', defaultValue: '2.37.2', description: 'Which instance to target?')
+        string(name: 'TIME', defaultValue: '60m', description: 'How much time to run the tests for?')
+        string(name: 'USERS', defaultValue: '100', description: 'How much users?')
+        string(name: 'RATE', defaultValue: '10', description: 'At what rate to add users?')
         string(name: 'COLUMN', defaultValue: 'Average Response Time,90%', description: 'Which column to compare?\n(comma-separated list of strings)')
+        choice(name: 'REPORT', choices: ['Baseline', 'Previous', 'Both'], description: 'Which report/s to compare with?')
     }
 
     environment {
@@ -25,10 +29,8 @@ pipeline {
         PREVIOUS_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/previous_$CSV_REPORT_FILE"
         BASELINE_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/baseline_$CSV_REPORT_FILE"
         INSTANCE_HOST = "https://test.performancebot.dhis2.org"
-        INSTANCE_NAME = "2.37.2"
-        COMPOSE_ARGS = "NO_WEB=true TIME=60m HATCH_RATE=10 USERS=100 TARGET=$INSTANCE_HOST/$INSTANCE_NAME"
+        COMPOSE_ARGS = "NO_WEB=true TIME=${params.TIME} HATCH_RATE=${params.RATE} USERS=${params.USERS} TARGET=$INSTANCE_HOST/${params.INSTANCE}"
         S3_BUCKET = "s3://dhis2-performance-tests-results"
-        PATH="/home/ubuntu/.local/bin:$PATH"
     }
 
     stages {
@@ -36,7 +38,7 @@ pipeline {
             steps {
                 echo 'Updating performance test instance ...'
                  //script {
-                 //    awx.resetWar("$AWX_BOT_CREDENTIALS", "${INSTANCE_HOST}", "${INSTANCE_NAME}")
+                 //    awx.resetWar("$AWX_BOT_CREDENTIALS", "${INSTANCE_HOST}", "${params.INSTANCE}")
                  //}
             }
         }
@@ -86,7 +88,7 @@ pipeline {
         stage('Checkout csvcomparer') {
             steps {
                 dir('csvcomparer') {
-                    git branch: 'DEVOPS-30', url: 'https://github.com/dhis2-sre/csvcomparer'
+                    git url: 'https://github.com/dhis2-sre/csvcomparer'
                     sh 'pip3 install .'
                 }
             }
