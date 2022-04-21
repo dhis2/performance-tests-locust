@@ -52,4 +52,7 @@ public interface TestConfig
 
     @Key( "tracker.importer.async" )
     boolean useAsyncTrackerImporter();
+
+    @Key( "logging.debug" )
+    boolean debug();
 }

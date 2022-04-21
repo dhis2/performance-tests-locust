@@ -17,6 +17,8 @@ public class Program
 {
     private String id;
 
+    private String name;
+
     private List<String> organisationUnits;
 
     @Setter

@@ -28,6 +28,7 @@ public class AllTests
             new TrackerCapture_searchForTeiTaskSet( 1 ),
             new PostRelationshipTask( 1 ),
             new TrackerCapture_searchForTeiByUniqueAttributeTaskSet( 1 ),
+            new Android_downloadTeisTaskSet( 1 ),
             new Android_downloadLatestEventsTaskSet( 1 ),
             new Android_downloadLatestTeisTaskSet( 1 )
         );

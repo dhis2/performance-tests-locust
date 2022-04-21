@@ -14,6 +14,7 @@ import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import static org.aeonbits.owner.ConfigFactory.create;
 
@@ -28,6 +29,8 @@ public abstract class DhisAbstractTask
     protected UserCredentials userCredentials;
 
     protected User user;
+
+    private Logger logger = Logger.getLogger( this.getClass().getName() );
 
     protected EntitiesCache entitiesCache;
 
@@ -212,5 +215,12 @@ public abstract class DhisAbstractTask
     {
         response.print();
         return "Status code: " + response.statusCode();
+    }
+
+    protected void logWarningIfDebugEnabled( String message )
+    {
+        if ( cfg.debug() ) {
+            logger.warning( message );
+        }
     }
 }

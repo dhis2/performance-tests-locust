@@ -21,7 +21,9 @@ public class TrackedEntityAttributeRandomizer
 {
     private List<Attribute> create( List<TrackedEntityAttribute> trackedEntityAttributes )
     {
-        return trackedEntityAttributes.stream().map( att -> {
+        return trackedEntityAttributes.stream()
+            .filter( p -> p.getValueType() != ValueType.FILE_RESOURCE )
+            .map( att -> {
             if ( !StringUtils.isEmpty( att.getPattern() ) )
             {
                 try
@@ -119,6 +121,7 @@ public class TrackedEntityAttributeRandomizer
             value = getValueSegment( textPattern ).getParameter() + value;
         }
 
+        value = "";
         return value;
     }
 

@@ -24,9 +24,6 @@ class MyTaskSet(locust.TaskSet):
 class MyUser(locust.User):
     tasks = [MyTaskSet]
 
-@events.quitting.add_listener
-def handle_quit(**kw):
-    generate_report()
 
 def generate_report():
     print('Generating html report')

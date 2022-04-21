@@ -1,0 +1,9 @@
+version: '3'
+services:
+  test:
+    image: 'tests:latest'
+    environment:
+      - locust.master.host=test.performance.dhis2.org
+      - JAVA_OPTS=-Xmx1g -Xms500m -XX:+UseContainerSupport -XX:MaxRAMPercentage=90.0
+    volumes:
+      - /tmp/cache/locust-cache.dat:/tmp/cache/locust-cache.dat

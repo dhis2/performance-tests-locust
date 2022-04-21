@@ -53,7 +53,7 @@ public class ProgramCacheBuilder
     private Program buildProgram( String uid )
     {
         ApiResponse response = programCache.get( uid );
-
+        response.validate().statusCode( 200 );
         Program program = response.extractObject( "", Program.class );
 
         program.setAttributes( getTrackerAttributesFromProgram( uid ) );
