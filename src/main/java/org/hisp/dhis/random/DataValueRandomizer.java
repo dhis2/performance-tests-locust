@@ -113,7 +113,7 @@ public class DataValueRandomizer
         case AGE:
             return String.valueOf( DataRandomizer.randomIntInRange( 1, 80 ) );
         default:
-            return "";
+            return null;
         }
     }
 }

@@ -23,7 +23,8 @@ public class AndroidTests
             new Android_syncTeisTaskSet( 1, 10 ),
             new Android_syncDataValuesTaskSet( 1 ),
             new Android_downloadLatestTeisTaskSet( 1 ),
-            new Android_downloadLatestEventsTaskSet( 1 )
+            new Android_downloadLatestEventsTaskSet( 1 ),
+            new Android_syncTeisTaskSet( 1 )
         );
     }
 }
