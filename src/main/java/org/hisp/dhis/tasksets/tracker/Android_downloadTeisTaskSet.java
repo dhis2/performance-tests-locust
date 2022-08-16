@@ -25,7 +25,7 @@ public class Android_downloadTeisTaskSet
     @Override
     public String getName()
     {
-        return "Android: download latest teis";
+        return "Android: download teis";
     }
 
     @Override

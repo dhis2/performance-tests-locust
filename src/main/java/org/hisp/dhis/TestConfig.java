@@ -17,6 +17,9 @@ public interface TestConfig
     @Key( "locust.master.host" )
     String locustMasterHost();
 
+    @Key( "locust.log_full_errors" )
+    Boolean locustLogFullErrors();
+
     @Key( "locust.min_wait" )
     int locustMinWaitBetweenTasks();
 

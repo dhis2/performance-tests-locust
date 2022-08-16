@@ -4,6 +4,7 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasksets.aggregate.Android_syncDataValuesTaskSet;
 import org.hisp.dhis.tasksets.tracker.Android_downloadLatestEventsTaskSet;
 import org.hisp.dhis.tasksets.tracker.Android_downloadLatestTeisTaskSet;
+import org.hisp.dhis.tasksets.tracker.Android_downloadTeisTaskSet;
 import org.hisp.dhis.tasksets.tracker.Android_syncTeisTaskSet;
 
 import java.util.Arrays;
@@ -24,7 +25,7 @@ public class AndroidTests
             new Android_syncDataValuesTaskSet( 1 ),
             new Android_downloadLatestTeisTaskSet( 1 ),
             new Android_downloadLatestEventsTaskSet( 1 ),
-            new Android_syncTeisTaskSet( 1 )
+            new Android_downloadTeisTaskSet( 1 )
         );
     }
 }
