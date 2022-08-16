@@ -121,7 +121,6 @@ public class TrackedEntityAttributeRandomizer
             value = getValueSegment( textPattern ).getParameter() + value;
         }
 
-        value = "";
         return value;
     }
 
