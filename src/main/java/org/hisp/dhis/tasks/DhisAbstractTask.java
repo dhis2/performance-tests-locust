@@ -224,8 +224,7 @@ public abstract class DhisAbstractTask
 
     protected void logWarningIfDebugEnabled( String message )
     {
-        if ( cfg.debug() )
-        {
+        if ( cfg.debug() ) {
             logger.warning( message );
         }
     }

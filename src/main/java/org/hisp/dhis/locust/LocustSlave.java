@@ -45,6 +45,17 @@ public class LocustSlave
 
         locust.run( tasks );
     }
+    
+    /* 
+     Starts tests in dryRun mode. Used for debugging.
+     Tests end after one iteration and won't run in a loop.
+    */
+    public void dryRun( AbstractTask... tasks )
+    {
+        com.github.myzhan.locust4j.Locust locust = init();
+
+        locust.dryRun( tasks );
+    }
 
     public void runTasks( CategoryType... categories )
         throws InstantiationException, IllegalAccessException
