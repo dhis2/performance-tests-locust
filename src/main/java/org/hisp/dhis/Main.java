@@ -31,6 +31,6 @@ public class Main
 
         // locust.runTasks(  new TrackerCapture_addTeiTaskSet( 1 ) ) ;
         // categories are under /src/main/tests
-        locust.runTasks( CategoryType.ALL );
+        locust.runTasks( CategoryType.ALL, CategoryType.NTI);
     }
 }
