@@ -56,7 +56,7 @@ public class EventRandomizer
         ProgramStage programStage = ctx.getProgramStage();
         if ( programStage == null )
         {
-            programStage = getRepeatableRandomProgramStageFromProgram( ctx.getProgram() );
+            programStage = getRandomProgramStageFromProgram( ctx.getProgram() );
             ctx.setProgramStage( programStage );
         }
 
@@ -112,9 +112,9 @@ public class EventRandomizer
         return event;
     }
 
-    private ProgramStage getRepeatableRandomProgramStageFromProgram( Program program )
+    private ProgramStage getRandomProgramStageFromProgram( Program program )
     {
         return DataRandomizer.randomElementFromList(
-            program.getProgramStages().stream().filter( ProgramStage::isRepeatable ).collect( Collectors.toList() ) );
+            program.getProgramStages() );
     }
 }
