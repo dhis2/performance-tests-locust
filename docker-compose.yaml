@@ -2,7 +2,9 @@ version: '3'
 
 services:
   master:
-    build: ./docker
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.master
     image: "locustio-master:latest"
     environment:
       LOCUST_MASTER_NODE_HOST: "127.0.0.1"
@@ -18,7 +20,9 @@ services:
       - "5557:5557"
       - "8089:8089"
   worker:
-    build: .
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.worker
     image: "locustio-worker:latest"
     environment:
       JAVA_OPTS: "-Dtarget.base_uri=${TARGET} -Dlocust.master.host=master"
