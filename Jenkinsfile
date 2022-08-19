@@ -49,7 +49,7 @@ pipeline {
             steps {
                 sh "mkdir -p $LOCUST_REPORT_DIR"
                 sh "docker-compose build worker"
-                sh "$COMPOSE_ARGS docker-compose up worker --abort-on-container-exit"
+                sh "$COMPOSE_ARGS docker-compose up --abort-on-container-exit worker"
             }
         }
 
