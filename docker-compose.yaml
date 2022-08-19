@@ -25,4 +25,4 @@ services:
       dockerfile: Dockerfile.worker
     image: "locustio-worker:latest"
     environment:
-      JAVA_OPTS: "-Dtarget.base_uri=${TARGET} -Dlocust.master.host=master"
+      JAVA_OPTS: "-Dtarget.base_uri=${TARGET} -Dlocust.master.host=https://test.tools.dhis2.org/locustio"
