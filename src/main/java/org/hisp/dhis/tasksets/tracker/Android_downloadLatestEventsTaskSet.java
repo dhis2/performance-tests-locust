@@ -40,7 +40,7 @@ public class Android_downloadLatestEventsTaskSet
         throws Exception
     {
         User user = new UserRandomizer().getRandomUser( entitiesCache );
-        Program program = DataRandomizer.randomElementFromList( entitiesCache.getEventPrograms() );
+        Program program = DataRandomizer.randomElementFromList( entitiesCache.getTrackerPrograms() );
         QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder()
             .add( "ouMode=DESCENDANTS" )
             .add( "includeDeleted", "true" )
@@ -55,5 +55,6 @@ public class Android_downloadLatestEventsTaskSet
         performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, user.getUserCredentials() )
             .get( "", queryParamsBuilder ), response -> response.extractList( "events" ) != null );
 
+        waitBetweenTasks();
     }
 }

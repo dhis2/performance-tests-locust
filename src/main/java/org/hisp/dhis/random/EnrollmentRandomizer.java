@@ -90,7 +90,7 @@ public class EnrollmentRandomizer
 
         if ( ctx.isProgramAttributesInEnrollment() )
         {
-            enrollment.setAttributes( new TrackedEntityAttributeRandomizer().create(  ctx, true, false ) );
+            enrollment.setAttributes( new TrackedEntityAttributeRandomizer().create(  ctx, false, false ) );
         }
 
         if ( !ctx.isSkipTeiInEnrollment() )

@@ -62,6 +62,8 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask
             List<String> values = apiResponse.extractList( "value" );
 
             if ( apiResponse.statusCode() != 200 || values == null || values.isEmpty()) {
+
+                logWarningIfDebugEnabled( apiResponse.prettyPrint());
                 throw new Exception("Failed to generate attributes. Attributes weren't added to TEI.");
             }
 

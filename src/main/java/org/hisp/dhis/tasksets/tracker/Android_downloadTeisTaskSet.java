@@ -12,11 +12,12 @@ import java.time.Instant;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class Android_downloadLatestTeisTaskSet extends DhisAbstractTask
+public class Android_downloadTeisTaskSet
+    extends DhisAbstractTask
 {
     private String endpoint = "/api/trackedEntityInstances";
 
-    public Android_downloadLatestTeisTaskSet( int weight )
+    public Android_downloadTeisTaskSet( int weight )
     {
         super( weight );
     }
@@ -24,7 +25,7 @@ public class Android_downloadLatestTeisTaskSet extends DhisAbstractTask
     @Override
     public String getName()
     {
-        return "Android: download latest teis";
+        return "Android: download teis";
     }
 
     @Override
@@ -44,10 +45,10 @@ public class Android_downloadLatestTeisTaskSet extends DhisAbstractTask
             .add( "includeDeleted", "true" )
             .add( "includeAllAttributes", "true" )
             .add( "pageSize", "50" )
+            .add( "page", String.valueOf( DataRandomizer.randomIntInRange( 1, 10 ) ))
             .add( "trackedEntityType", DataRandomizer.randomElementFromList( entitiesCache.getTeiTypes() ).getId() )
             .add( "paging", "true" )
-            .add( "ou", new UserRandomizer().getRandomUserOrgUnit( user ) )
-            .add( "lastUpdatedStartDate", Instant.now().toString() );
+            .add( "ou", new UserRandomizer().getRandomUserOrgUnit( user ) );
 
         performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, user.getUserCredentials() )
             .get( "", queryParamsBuilder ), response -> response.extractList( "trackedEntityInstances" ) != null );

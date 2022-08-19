@@ -14,6 +14,7 @@ import org.hisp.dhis.utils.DataRandomizer;
 
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import static org.aeonbits.owner.ConfigFactory.create;
 
@@ -28,6 +29,8 @@ public abstract class DhisAbstractTask
     protected UserCredentials userCredentials;
 
     protected User user;
+
+    private Logger logger = Logger.getLogger( this.getClass().getName() );
 
     protected EntitiesCache entitiesCache;
 
@@ -197,20 +200,32 @@ public abstract class DhisAbstractTask
 
     public void recordFailure( long time, Response response )
     {
-        Locust.getInstance().recordFailure( getType(), getName(), time, mask( response ) );
+        Locust.getInstance().recordFailure( getType(), getName(), time, getError( response ) );
     }
 
     public void recordFailure( Response response )
     {
-        Locust.getInstance().recordFailure( getType(), getName(), response.getTime(), mask( response ) );
+        Locust.getInstance().recordFailure( getType(), getName(), response.getTime(), getError( response ) );
     }
 
-    // locust4j stores errors in a hashmap and most of our responses contains uid or another unique attribute,
-    // so logging full response ends up being memory issue when there are many errors.
-    // Eventually, we should strip away the unique elements of response, but for now logging errors to stdout.
-    private String mask( Response response )
+    /*
+    Log full responses to stdout and only status codes in locust master if full error logging is disabled.
+     */
+    //
+    private String getError( Response response )
     {
+        if ( cfg.locustLogFullErrors() )
+        {
+            return response.body().asString();
+        }
         response.print();
         return "Status code: " + response.statusCode();
+    }
+
+    protected void logWarningIfDebugEnabled( String message )
+    {
+        if ( cfg.debug() ) {
+            logger.warning( message );
+        }
     }
 }

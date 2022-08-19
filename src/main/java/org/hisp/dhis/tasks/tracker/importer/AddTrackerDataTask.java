@@ -1,5 +1,6 @@
 package org.hisp.dhis.tasks.tracker.importer;
 
+import com.google.gson.GsonBuilder;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
@@ -108,6 +109,11 @@ public class AddTrackerDataTask
                 this.waitUntilJobIsCompleted( jobId, user.getUserCredentials() );
 
                 response = trackerActions.get( String.format( "/jobs/%s/report?reportMode=%s", jobId, "FULL" ) );
+            }
+
+            if ( !response.extractString( "status" ).equalsIgnoreCase( "OK" ) && cfg.debug() )
+            {
+                logWarningIfDebugEnabled( new GsonBuilder().setPrettyPrinting().create().toJson( response.getBody() ) );
             }
 
             return new TrackerApiResponse( response );

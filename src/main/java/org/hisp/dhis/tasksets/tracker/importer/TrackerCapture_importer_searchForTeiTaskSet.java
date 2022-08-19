@@ -7,6 +7,7 @@ import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.tasks.tracker.events.QueryEventsTask;
 import org.hisp.dhis.tasks.tracker.importer.GetTrackerTeiTask;
 import org.hisp.dhis.tasks.tracker.importer.QueryTrackerTeisTask;
 import org.hisp.dhis.utils.DataRandomizer;
@@ -46,7 +47,8 @@ public class TrackerCapture_importer_searchForTeiTaskSet
     public void execute()
         throws Exception
     {
-        Program program = DataRandomizer.randomElementFromList( this.entitiesCache.getTrackerPrograms() );
+        Program program = DataRandomizer.randomElementFromList( this.entitiesCache.getTrackerPrograms());
+
         User user = new UserRandomizer().getRandomUser( this.entitiesCache );
         String ou = DataRandomizer.randomElementFromList( user.getOrganisationUnits() );
 
@@ -61,8 +63,17 @@ public class TrackerCapture_importer_searchForTeiTaskSet
             HashMap row = DataRandomizer.randomElementFromList( rows );
 
             String teiId = row.get( "trackedEntity" ).toString();
+
+            rows.stream().filter( p ->  !p.get(
+                "trackedEntity" ).toString().isEmpty()
+            ).forEach(  p-> {
+                String tei = p.get( "trackedEntity" ).toString();
+                new QueryEventsTask( String.format( "?program=%s&programStage=%s&orgUnit=%s&ouMode=DESCENDANTS&trackedEntityInstance=%s&fields=created,eventDate,dataValues[dataElement,value]", program.getId(), program.getProgramStages().get( 0 ).getId(), entitiesCache.getRootOu().getId(), tei) , entitiesCache.getDefaultUser().getUserCredentials() ).execute();
+            } );
             new GetTrackerTeiTask( teiId, user.getUserCredentials() ).execute();
         }
+
+        waitBetweenTasks();
 
     }
 
@@ -73,7 +84,7 @@ public class TrackerCapture_importer_searchForTeiTaskSet
         getRandomAttributes( program.getId(), program.getMinAttributesRequiredToSearch() )
             .forEach( p -> {
                 query.set( query +
-                    String.format( "&attribute=%s:EQ:%s", p.getTrackedEntityAttribute(), DataRandomizer.randomString( 2 ) ) );
+                    String.format( "&attribute=%s:LIKE:%s", p.getTrackedEntityAttribute(), DataRandomizer.randomString( 2 ) ) );
             } );
 
         return query.get();
