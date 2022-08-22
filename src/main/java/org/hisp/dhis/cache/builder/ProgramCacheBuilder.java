@@ -43,7 +43,7 @@ public class ProgramCacheBuilder
     @Override
     public List<Program> get()
     {
-        List<String> programUids = getPayload( "/api/programs?fields=id" ).extractList( "programs.id" );
+        List<String> programUids = getPayload( "/api/programs?filter=categoryCombo.code:eq:default&fields=id" ).extractList( "programs.id" );
 
         return programUids.stream()
             .map( this::buildProgram )
