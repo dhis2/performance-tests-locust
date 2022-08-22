@@ -5,6 +5,7 @@ import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.dxf2.events.event.DataValue;
 import org.hisp.dhis.utils.DataRandomizer;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class EventDataValueRandomizer
         dataValue.setDataElement( dataElement.getUid() );
         dataValue.setProvidedElsewhere( false );
         String val;
-        if ( dataElement.getOptionSet() != null && !dataElement.getOptionSet().isEmpty() )
+        if ( !CollectionUtils.isEmpty( dataElement.getOptionSet() ) )
         {
             val = DataRandomizer.randomElementFromList( dataElement.getOptionSet() );
         }

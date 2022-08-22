@@ -19,4 +19,6 @@ public class DataSet
     private List<DataElement> dataElements;
 
     private String periodType;
+
+    private int openFuturePeriods;
 }

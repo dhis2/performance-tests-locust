@@ -48,6 +48,7 @@ public class PostRelationshipTask
     public void execute()
         throws Exception
     {
+        // todo this test won't work on SL because the TEIs passed there might not have a TET that matches relationship types.
         User user = getUser();
 
         RandomizerContext context = new RandomizerContext();
