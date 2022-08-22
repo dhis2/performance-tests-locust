@@ -11,8 +11,8 @@ pipeline {
     }
 
     parameters {
-//        string(name: 'INSTANCE', defaultValue: '2.37.2', description: 'Which instance to target?')
-        string(name: 'INSTANCE', defaultValue: 'rado-test-20399', description: 'Which instance to target?')
+        string(name: 'INSTANCE', defaultValue: 'dev', description: 'Which instance to target?')
+//        string(name: 'INSTANCE', defaultValue: 'rado-test-20399', description: 'Which instance to target?')
         string(name: 'TIME', defaultValue: '60m', description: 'How much time to run the tests for?')
         string(name: 'USERS', defaultValue: '100', description: 'How much users?')
         string(name: 'RATE', defaultValue: '10', description: 'At what rate to add users?')
@@ -29,8 +29,8 @@ pipeline {
         CURRENT_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
         PREVIOUS_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/previous_$CSV_REPORT_FILE"
         BASELINE_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/baseline_$CSV_REPORT_FILE"
-//        INSTANCE_HOST = "https://test.performancebot.dhis2.org"
-        INSTANCE_HOST = "https://whoami.im.radnov.test.c.dhis2.org"
+        INSTANCE_HOST = "https://test.performance.dhis2.org"
+//        INSTANCE_HOST = "https://whoami.im.radnov.test.c.dhis2.org"
         COMPOSE_ARGS = "NO_WEB=true TIME=${params.TIME} HATCH_RATE=${params.RATE} USERS=${params.USERS} TARGET=$INSTANCE_HOST/${params.INSTANCE}"
         S3_BUCKET = "s3://dhis2-performance-tests-results"
     }
