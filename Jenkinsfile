@@ -48,8 +48,8 @@ pipeline {
         stage('Run Locust tests') {
             steps {
                 sh "mkdir -p $LOCUST_REPORT_DIR"
-                sh "docker-compose build worker"
-                sh "$COMPOSE_ARGS docker-compose up --abort-on-container-exit worker"
+                sh "docker-compose build"
+                sh "$COMPOSE_ARGS docker-compose up --abort-on-container-exit"
             }
         }
 
