@@ -11,6 +11,7 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 /**
@@ -33,7 +34,7 @@ public class DataSetsCacheBuilder
     public List<DataSet> get()
     {
         List<DataSet> dataSets = new ArrayList<>();
-        List<JsonObject> sets = getPayload( "/api/dataSets?fields=periodType,dataSetElements[dataElement[*]],id" )
+        List<JsonObject> sets = getPayload( "/api/dataSets?fields=periodType,openFuturePeriods,dataSetElements[dataElement[*]],id" )
             .extractList( "dataSets", JsonObject.class );
 
         // filter out data sets without monthly period, since generation is not yet supported
@@ -50,7 +51,10 @@ public class DataSetsCacheBuilder
 
                     if ( de.get( "optionSet" ) != null )
                     {
-                        optionSets.add( de.get( "optionSet" ).getAsJsonObject().get( "id" ).getAsString() );
+                        ApiResponse options = getPayload( String.format( "/api/optionSets/%s?fields=options[code,id]",
+                            de.get( "optionSet" ).getAsJsonObject().get( "id" ).getAsString() ) );
+
+                        optionSets.addAll( options.extractList( "options.code" ) );
                     }
 
                     dataElements.add( new DataElement( de.get( "id" ).getAsString(),
@@ -58,9 +62,11 @@ public class DataSetsCacheBuilder
                         optionSets, false ) );
                 } );
 
-                dataSets.add( new DataSet( obj.get( "id" ).getAsString(), dataElements, obj.get( "periodType" ).getAsString() ) );
+                dataSets.add( new DataSet( obj.get( "id" ).getAsString(), dataElements, obj.get( "periodType" ).getAsString(),
+                    obj.get( "openFuturePeriods" ).getAsInt() ) );
             } );
 
+        dataSets.removeIf( Objects::isNull );
         return dataSets;
     }
 

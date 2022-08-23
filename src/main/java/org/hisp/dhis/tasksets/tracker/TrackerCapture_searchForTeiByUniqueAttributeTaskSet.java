@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hisp.dhis.utils.DataRandomizer.faker;
+
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
@@ -121,15 +123,23 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
         TextPattern pattern = TextPatternParser.parse( entityAttribute.getPattern() );
         TextPatternSegment staticSegment = pattern.getSegments().stream().filter( tp -> !tp.getMethod().isGenerated() )
             .findFirst()
-            .orElse( null );
+            .orElse( new TextPatternSegment() );
 
-        int valueSegmentLength = pattern.getSegments().stream().filter( tp -> tp.getMethod().isGenerated() )
-            .findFirst().get().getParameter().length();
+        TextPatternSegment dynamicSegment =  pattern.getSegments().stream().filter( tp -> tp.getMethod().isGenerated() )
+            .findFirst().orElse( null );
 
-        int topValue = Integer.parseInt( entityAttribute.getLastValue().replace( staticSegment.getParameter(), "" ) );
+
+        // some patterns don't have fixed strings, but generate random letters
+        int numberOfLetters = StringUtils.countMatches( dynamicSegment.getParameter(), "X" );
+
+        int valueSegmentLength = dynamicSegment.getParameter().replace( "X", "" ).length();
+
+        int topValue = Integer.parseInt( entityAttribute.getLastValue()
+            .replace( staticSegment.getParameter(), "" )
+            .replaceAll( "[a-zA-Z]", "" ));
 
         String value = new DecimalFormat( StringUtils.repeat( "0", valueSegmentLength ) )
             .format( DataRandomizer.randomIntInRange( 0, topValue ) );
-        return staticSegment.getParameter() + value;
+        return staticSegment.getParameter() + faker().lorem().characters(numberOfLetters, true, false) + value;
     }
 }

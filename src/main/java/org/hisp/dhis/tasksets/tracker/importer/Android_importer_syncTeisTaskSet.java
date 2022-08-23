@@ -76,6 +76,7 @@ public class Android_importer_syncTeisTaskSet
         context.setOrgUnitUid( new UserRandomizer().getRandomUserOrProgramOrgUnit( user, program ) );
         context.setProgram( program );
         context.setGenerateIds( true );
+        context.setProgramAttributesInEnrollment( true );
         TrackedEntityInstances instances = new TrackedEntityInstanceRandomizer().create( entitiesCache, context, 20, 20 );
 
         generateAttributes( context.getProgram(), instances.getTrackedEntityInstances(), user.getUserCredentials() );
