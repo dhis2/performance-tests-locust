@@ -11,6 +11,7 @@ pipeline {
     }
 
     parameters {
+        string(name: 'MASTER_HOST', defaultValue: 'master', description: 'Which master to connect to?')
         string(name: 'INSTANCE', defaultValue: 'dev', description: 'Which instance to target?')
 //        string(name: 'INSTANCE', defaultValue: 'rado-test-20399', description: 'Which instance to target?')
         string(name: 'TIME', defaultValue: '60m', description: 'How much time to run the tests for?')
@@ -31,7 +32,7 @@ pipeline {
         BASELINE_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/baseline_$CSV_REPORT_FILE"
         INSTANCE_HOST = "https://test.performance.dhis2.org"
 //        INSTANCE_HOST = "https://whoami.im.radnov.test.c.dhis2.org"
-        COMPOSE_ARGS = "NO_WEB=true TIME=${params.TIME} HATCH_RATE=${params.RATE} USERS=${params.USERS} TARGET=$INSTANCE_HOST/${params.INSTANCE}"
+        COMPOSE_ARGS = "NO_WEB=true TIME=${params.TIME} HATCH_RATE=${params.RATE} USERS=${params.USERS} TARGET=$INSTANCE_HOST/${params.INSTANCE} MASTER_HOST=${params.MASTER_HOST}"
         S3_BUCKET = "s3://dhis2-performance-tests-results"
     }
 
@@ -47,9 +48,16 @@ pipeline {
 
         stage('Run Locust tests') {
             steps {
-                sh "mkdir -p $LOCUST_REPORT_DIR"
-                sh "docker-compose build"
-                sh "$COMPOSE_ARGS docker-compose up --abort-on-container-exit"
+                script {
+                    containers = "worker"
+                    if (params.MASTER_HOST == "master") {
+                        containers = containers + " " + params.MASTER_HOST
+                    }
+                    sh "mkdir -p $LOCUST_REPORT_DIR"
+                    //sh "docker-compose build $containers"
+                    sh "docker-compose pull $containers"
+                    sh "$COMPOSE_ARGS docker-compose up --abort-on-container-exit $containers"
+                }
             }
         }
 

@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.master
-    image: "locustio-master:latest"
+    image: "radnov/locustio-master:latest"
     environment:
       LOCUST_MASTER_NODE_HOST: "127.0.0.1"
       LOCUST_MASTER_NODE_PORT: "5557"
@@ -24,6 +24,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
-    image: "locustio-worker:latest"
+    image: "radnov/locustio-worker:latest"
     environment:
-      JAVA_OPTS: "-Dtarget.base_uri=${TARGET} -Dlocust.master.host=master"
+      JAVA_OPTS: "-Dtarget.base_uri=${TARGET} -Dlocust.master.host=${MASTER_HOST}"
