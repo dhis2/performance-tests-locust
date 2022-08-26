@@ -2,7 +2,7 @@ version: '3'
 
 services:
   locust:
-    restart: always
+    restart: unless-stopped
     image: "dhis2/locustio:latest"
     environment:
       LOCUST_MASTER_NODE_HOST: "127.0.0.1"
