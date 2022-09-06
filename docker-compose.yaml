@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.master
+    restart: unless-stopped
     image: "radnov/locustio-master:latest"
     environment:
       LOCUST_MASTER_NODE_HOST: "127.0.0.1"
