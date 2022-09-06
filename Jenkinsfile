@@ -12,7 +12,7 @@ pipeline {
 
     parameters {
         string(name: 'MASTER_HOST', defaultValue: 'master', description: 'Which master to connect to?')
-        string(name: 'INSTANCE', defaultValue: 'dev', description: 'Which instance to target?')
+        string(name: 'INSTANCE', defaultValue: '2.38.1.1', description: 'Which instance to target?')
 //        string(name: 'INSTANCE', defaultValue: 'rado-test-20399', description: 'Which instance to target?')
         string(name: 'TIME', defaultValue: '60m', description: 'How much time to run the tests for?')
         string(name: 'USERS', defaultValue: '100', description: 'How much users?')
