@@ -32,15 +32,10 @@ public class AddEventsTask
 
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
-    public AddEventsTask( int weight )
-    {
-        super( weight );
-        eventRandomizer = new EventRandomizer();
-    }
-
     public AddEventsTask( int weight, List<Event> events, UserCredentials userCredentials )
     {
         super( weight );
+        eventRandomizer = new EventRandomizer();
         this.events = events;
         this.userCredentials = userCredentials;
     }

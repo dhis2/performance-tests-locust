@@ -24,14 +24,9 @@ public class AddTrackerEnrollmentTask
 
     private TrackerApiResponse response;
 
-    public AddTrackerEnrollmentTask( int weight )
-    {
-        super( weight );
-    }
-
     public AddTrackerEnrollmentTask( int weight, RandomizerContext context, UserCredentials userCredentials )
     {
-        this( weight );
+        super( weight );
         this.ctx = context;
         this.userCredentials = userCredentials;
     }

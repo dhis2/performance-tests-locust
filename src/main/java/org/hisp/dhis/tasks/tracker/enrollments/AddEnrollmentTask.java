@@ -20,14 +20,9 @@ public class AddEnrollmentTask
 
     private ApiResponse response;
 
-    public AddEnrollmentTask( int weight )
-    {
-        super( weight );
-    }
-
     public AddEnrollmentTask( int weight, RandomizerContext context, UserCredentials userCredentials )
     {
-        this( weight );
+        super( weight );
         this.ctx = context;
         this.userCredentials = userCredentials;
     }

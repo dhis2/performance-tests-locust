@@ -18,15 +18,10 @@ public class AddTeiTask
 
     private ApiResponse response;
 
-    public AddTeiTask( int weight )
-    {
-        super( weight );
-    }
-
     public AddTeiTask( int weight, TrackedEntityInstances trackedEntityInstance,
         UserCredentials userCredentials )
     {
-        this( weight );
+        super( weight );
         trackedEntityInstanceBody = trackedEntityInstance;
         this.userCredentials = userCredentials;
 
@@ -46,11 +41,9 @@ public class AddTeiTask
     public void execute()
         throws Exception
     {
-        if ( trackedEntityInstanceBody == null )
-        {
-            trackedEntityInstanceBody = new TrackedEntityInstanceRandomizer()
-                .create( this.entitiesCache, RandomizerContext.EMPTY_CONTEXT(), 5 );
-        }
+
+        trackedEntityInstanceBody = new TrackedEntityInstanceRandomizer()
+            .create( this.entitiesCache, RandomizerContext.EMPTY_CONTEXT(), 5 );
 
         this.response = performTaskAndRecord(
             () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( trackedEntityInstanceBody ) );

@@ -23,18 +23,13 @@ public class AddDataValueTask
 
     private String tei;
 
-    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program, String tei )
+    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program, String tei, UserCredentials userCredentials )
     {
         super( weight );
         this.eventId = eventId;
         this.dataValue = dataValue;
         this.eventProgram = program;
         this.tei = tei;
-    }
-
-    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program, String tei, UserCredentials userCredentials )
-    {
-        this( weight, eventId, dataValue, program, tei );
         this.userCredentials = userCredentials;
     }
 

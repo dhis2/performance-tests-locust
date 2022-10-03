@@ -27,15 +27,10 @@ public class AddTrackerTeiTask
 
     private TrackerApiResponse response;
 
-    public AddTrackerTeiTask( int weight )
-    {
-        super( weight );
-    }
-
     public AddTrackerTeiTask( int weight, TrackedEntities trackedEntityInstance,
         UserCredentials userCredentials )
     {
-        this( weight );
+        super( weight );
         trackedEntityInstanceBody = trackedEntityInstance;
         this.userCredentials = userCredentials;
 
@@ -59,15 +54,13 @@ public class AddTrackerTeiTask
         RandomizerContext context = new RandomizerContext();
         context.setOrgUnitUid( new UserRandomizer().getRandomUserOrgUnit( user ) );
 
-        if ( trackedEntityInstanceBody == null )
-        {
-            TrackedEntityInstances ins = new TrackedEntityInstanceRandomizer()
-                .create( this.entitiesCache, context, 5 );
 
-            trackedEntityInstanceBody = TrackedEntities.builder().trackedEntities(
-                ins.getTrackedEntityInstances().stream().map( p -> new TrackedEntityMapperImpl().from( p ) ).collect( Collectors
-                    .toList() ) ).build();
-        }
+        TrackedEntityInstances ins = new TrackedEntityInstanceRandomizer()
+            .create( this.entitiesCache, context, 5 );
+
+        trackedEntityInstanceBody = TrackedEntities.builder().trackedEntities(
+            ins.getTrackedEntityInstances().stream().map( p -> new TrackedEntityMapperImpl().from( p ) ).collect( Collectors
+                .toList() ) ).build();
 
         response = new AddTrackerDataTask( 1, user.getUserCredentials(), trackedEntityInstanceBody, "teis" ).executeAndGetBody();
     }

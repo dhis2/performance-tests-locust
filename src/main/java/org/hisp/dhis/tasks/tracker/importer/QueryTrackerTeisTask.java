@@ -19,14 +19,9 @@ public class QueryTrackerTeisTask
 
     private boolean savePayload = false;
 
-    public QueryTrackerTeisTask( int weight )
-    {
-        super( weight );
-    }
-
     public QueryTrackerTeisTask( int weight, String query, UserCredentials userCredentials )
     {
-        this( weight );
+        super( weight );
         this.query = query;
         this.userCredentials = userCredentials;
     }

@@ -43,15 +43,10 @@ public class AddTrackerDataTask
 
     private String identifier = "";
 
-    public AddTrackerDataTask( int weight )
-    {
-        super( weight );
-    }
-
     public AddTrackerDataTask( int weight, UserCredentials userCredentials, Object payload,
         String identifier )
     {
-        this( weight );
+        super( weight );
         this.userCredentials = userCredentials;
         this.payload = payload;
         this.identifier = identifier;

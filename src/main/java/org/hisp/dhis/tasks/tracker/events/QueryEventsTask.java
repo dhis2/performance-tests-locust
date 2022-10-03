@@ -21,15 +21,10 @@ public class QueryEventsTask
 
     private boolean saveResponse = false;
 
-    public QueryEventsTask( String query )
+    public QueryEventsTask( String query, UserCredentials userCredentials )
     {
         super( 1 );
         this.query = query;
-    }
-
-    public QueryEventsTask( String query, UserCredentials userCredentials )
-    {
-        this( query );
         this.userCredentials = userCredentials;
     }
 

@@ -17,15 +17,10 @@ public class GetTrackerTeiTask
 
     private String tei;
 
-    public GetTrackerTeiTask( String teiId )
+    public GetTrackerTeiTask( String teiId, UserCredentials userCredentials )
     {
         super( 1 );
         this.tei = teiId;
-    }
-
-    public GetTrackerTeiTask( String teiId, UserCredentials userCredentials )
-    {
-        this( teiId );
         this.userCredentials = userCredentials;
     }
 

@@ -24,16 +24,11 @@ public class AddTrackerDataValueTask
 
     private DataValue dataValue;
 
-    public AddTrackerDataValueTask( int weight, Event event, DataValue dataValue )
+    public AddTrackerDataValueTask( int weight, Event event, DataValue dataValue, UserCredentials userCredentials )
     {
         super( weight );
         this.event = new Gson().fromJson( new Gson().toJson( event ), Event.class );
         this.dataValue = dataValue;
-    }
-
-    public AddTrackerDataValueTask( int weight, Event event, DataValue dataValue, UserCredentials userCredentials )
-    {
-        this( weight, event, dataValue );
         this.userCredentials = userCredentials;
     }
 
