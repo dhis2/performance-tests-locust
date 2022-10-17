@@ -54,28 +54,26 @@ public class EnrollmentRandomizer
 
     private final EventRandomizer eventRandomizer;
 
-    private final Randomizer rnd;
-
-    public EnrollmentRandomizer( int minEVent, int maxEvent, Randomizer rnd )
+    public EnrollmentRandomizer( Randomizer rnd, int minEVent, int maxEvent )
     {
+        super( rnd );
         this.minEVent = minEVent;
         this.maxEvent = maxEvent;
-        this.rnd = rnd;
-        this.eventRandomizer = new EventRandomizer(this.rnd);
+        this.eventRandomizer = new EventRandomizer( this.rnd );
     }
 
     public EnrollmentRandomizer(Randomizer rnd)
     {
-        this(1,5, rnd);
+        this(rnd, 1,5 );
     }
 
     public Enrollment createWithoutEvents( EntitiesCache cache, RandomizerContext ctx )
     {
-        Program program = getProgramFromContextOrRnd( ctx, cache, rnd);
-        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, program, rnd);
+        Program program = getProgramFromContextOrRnd( ctx, cache );
+        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, program );
 
         // Pick a random program stage to pass to the events
-        ProgramStage programStage = getProgramStageFromProgram( program, rnd);
+        ProgramStage programStage = getProgramStageFromProgram( program );
         ctx.setProgramStage( programStage );
 
         Enrollment enrollment = new Enrollment();

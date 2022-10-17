@@ -15,10 +15,13 @@ import java.util.List;
 public class EventDataValueRandomizer
     implements DhisEntityRandomizer<ListOrderedSet>
 {
-    private Randomizer rnd;
+    private final Randomizer rnd;
+
+    private final DataValueRandomizer dataValueRandomizer;
 
     public EventDataValueRandomizer(Randomizer rnd) {
         this.rnd = rnd;
+        this.dataValueRandomizer = new DataValueRandomizer(this.rnd);
     }
 
     private DataValue withRandomValue(DataElement dataElement )
@@ -33,7 +36,7 @@ public class EventDataValueRandomizer
         }
         else
         {
-            val = new DataValueRandomizer(rnd).rndValueFrom( dataElement.getValueType() );
+            val = dataValueRandomizer.rndValueFrom( dataElement.getValueType() );
         }
 
         dataValue.setValue( val );

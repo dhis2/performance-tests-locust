@@ -45,10 +45,8 @@ public class EventRandomizer
     extends
     AbstractTrackerEntityRandomizer<Event>
 {
-    private Randomizer rnd;
-
     public EventRandomizer(Randomizer rnd) {
-        this.rnd = rnd;
+        super( rnd );
     }
 
     public Event createWithoutDataValues(EntitiesCache cache, RandomizerContext ctx )
@@ -65,7 +63,7 @@ public class EventRandomizer
             ctx.setProgramStage( programStage );
         }
 
-        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, ctx.getProgram(), rnd);
+        String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, ctx.getProgram() );
 
         Event event = new Event();
         if ( ctx.isGenerateIds() ) {

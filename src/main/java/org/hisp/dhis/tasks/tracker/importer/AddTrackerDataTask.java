@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static org.hisp.dhis.Main.cfg;
+import static org.hisp.dhis.conf.ConfigFactory.cfg;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>

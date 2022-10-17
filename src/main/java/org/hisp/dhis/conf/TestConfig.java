@@ -1,4 +1,4 @@
-package org.hisp.dhis;
+package org.hisp.dhis.conf;
 
 import java.util.List;
 

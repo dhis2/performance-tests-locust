@@ -3,8 +3,8 @@ package org.hisp.dhis.tasks;
 import com.github.myzhan.locust4j.AbstractTask;
 import com.github.myzhan.locust4j.Locust;
 import io.restassured.response.Response;
-import org.aeonbits.owner.ConfigFactory;
-import org.hisp.dhis.TestConfig;
+import org.hisp.dhis.conf.ConfigFactory;
+import org.hisp.dhis.conf.TestConfig;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-import static org.hisp.dhis.Main.cfg;
+import static org.hisp.dhis.conf.ConfigFactory.cfg;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -93,7 +93,7 @@ public abstract class DhisAbstractTask
                 return user;
             }
 
-            TestConfig conf = ConfigFactory.create( TestConfig.class );
+            TestConfig conf = org.aeonbits.owner.ConfigFactory.create( TestConfig.class );
             return new User( new UserCredentials( conf.adminUsername(), conf.adminPassword() ) );
         }
 

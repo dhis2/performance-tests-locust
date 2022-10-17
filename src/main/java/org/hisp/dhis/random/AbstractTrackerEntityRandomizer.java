@@ -45,12 +45,18 @@ public abstract class AbstractTrackerEntityRandomizer<T>
 {
     protected DateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
 
-    protected Program getProgramFromContextOrRnd(RandomizerContext ctx, EntitiesCache cache, Randomizer rnd)
+    protected Randomizer rnd;
+
+    protected AbstractTrackerEntityRandomizer( Randomizer rnd ){
+        this.rnd = rnd;
+    }
+
+    protected Program getProgramFromContextOrRnd(RandomizerContext ctx, EntitiesCache cache )
     {
         Program program;
         if ( ctx.getProgram() == null )
         {
-            program = getRandomProgram( cache, rnd );
+            program = getRandomProgram( cache );
             ctx.setProgram( program );
         }
         else
@@ -60,27 +66,27 @@ public abstract class AbstractTrackerEntityRandomizer<T>
         return program;
     }
 
-    protected String getOrgUnitFromContextOrRndFromProgram(RandomizerContext ctx, Program program, Randomizer rnd)
+    protected String getOrgUnitFromContextOrRndFromProgram(RandomizerContext ctx, Program program )
     {
         if ( ctx.getOrgUnitUid() == null )
         {
-            return getRandomOrgUnitFromProgram( program, rnd );
+            return getRandomOrgUnitFromProgram( program );
         }
 
         return ctx.getOrgUnitUid();
     }
 
-    private Program getRandomProgram(EntitiesCache cache, Randomizer rnd)
+    private Program getRandomProgram(EntitiesCache cache )
     {
         return rnd.randomElementFromList( cache.getTrackerPrograms() );
     }
 
-    protected String getRandomOrgUnitFromProgram(Program program, Randomizer rnd)
+    protected String getRandomOrgUnitFromProgram(Program program )
     {
         return rnd.randomElementFromList( program.getOrganisationUnits() );
     }
 
-    protected ProgramStage getProgramStageFromProgram(Program program, Randomizer rnd)
+    protected ProgramStage getProgramStageFromProgram(Program program )
     {
         return rnd.randomElementFromList( program.getProgramStages() );
     }

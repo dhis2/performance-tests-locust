@@ -37,20 +37,18 @@ public class TrackedEntityInstanceRandomizer
 
     private final EnrollmentRandomizer enrollmentRandomizer;
 
-    private final Randomizer rnd;
-
-    public TrackedEntityInstanceRandomizer( int maxEvent, int minEVent, Randomizer rnd )
+    public TrackedEntityInstanceRandomizer( Randomizer rnd, int maxEvent, int minEVent )
     {
+        super( rnd );
         this.maxEvent = maxEvent;
         this.minEVent = minEVent;
-        this.rnd = rnd;
 
-        enrollmentRandomizer = new EnrollmentRandomizer( minEVent, maxEvent, rnd );
+        enrollmentRandomizer = new EnrollmentRandomizer( rnd, minEVent, maxEvent );
     }
 
     public TrackedEntityInstanceRandomizer( Randomizer rnd )
     {
-        this(1, 5, rnd );
+        this(rnd, 1, 5 );
     }
 
     @Override
@@ -67,7 +65,7 @@ public class TrackedEntityInstanceRandomizer
 
     public TrackedEntityInstance createWithoutEnrollment( EntitiesCache cache, RandomizerContext ctx )
     {
-        Program program = getProgramFromContextOrRnd( ctx, cache, rnd);
+        Program program = getProgramFromContextOrRnd( ctx, cache );
         ctx.setSkipTeiInEvent( true );
         ctx.setProgram( program );
 
@@ -80,7 +78,7 @@ public class TrackedEntityInstanceRandomizer
         tei.setInactive( false );
         tei.setDeleted( false );
         tei.setFeatureType( FeatureType.NONE );
-        tei.setOrgUnit( getOrgUnitFromContextOrRndFromProgram( ctx, program, rnd) );
+        tei.setOrgUnit( getOrgUnitFromContextOrRndFromProgram( ctx, program ) );
         tei.setAttributes( new TrackedEntityAttributeRandomizer(rnd).create( ctx, false, ctx.isProgramAttributesInEnrollment() ) );
 
         return tei;

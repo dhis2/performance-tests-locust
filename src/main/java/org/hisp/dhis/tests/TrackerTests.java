@@ -1,13 +1,15 @@
 package org.hisp.dhis.tests;
 
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.tasksets.tracker.*;
-import org.hisp.dhis.utils.PredictableRandomizer;
+import org.hisp.dhis.tasksets.tracker.Android_syncTeisTaskSet;
+import org.hisp.dhis.tasksets.tracker.Capture_addEventTaskSet;
+import org.hisp.dhis.tasksets.tracker.TrackerCapture_addTeiTaskSet;
+import org.hisp.dhis.tasksets.tracker.TrackerCapture_postRelationshipTask;
+import org.hisp.dhis.tasksets.tracker.TrackerCapture_searchForTeiByUniqueAttributeTaskSet;
+import org.hisp.dhis.tasksets.tracker.TrackerCapture_searchForTeiTaskSet;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static org.hisp.dhis.Main.cfg;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>

@@ -43,12 +43,11 @@ public class LoadDashboardTask
         Dashboard dashboard = rnd.randomElementFromList( entitiesCache.getDashboards() );
 
         // app loads items as user scrolls, so load 10 at once
-        List<Integer> randomSequence = IntStream.range(0, dashboard.getDashboardItems().size())
-                .map(number -> rnd.randomInt(10))
-                .boxed()
-                .collect( Collectors.toList() );
-
-        randomSequence.parallelStream()
+        IntStream
+            .generate(() -> rnd.randomInt(10))
+            .boxed()
+            .limit(dashboard.getDashboardItems().size())
+            .parallel()
             .forEach( o -> {
                 Visualization vi = dashboard.getDashboardItems().get( o ).getVisualization();
                 if ( vi != null )

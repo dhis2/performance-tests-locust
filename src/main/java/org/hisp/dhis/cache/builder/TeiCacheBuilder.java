@@ -9,11 +9,16 @@ import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.utils.PredictableRandomizer;
 import org.hisp.dhis.utils.Randomizer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.toList;
-import static org.hisp.dhis.Main.cfg;
+import static org.hisp.dhis.conf.ConfigFactory.cfg;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>

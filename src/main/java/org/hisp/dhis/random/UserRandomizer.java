@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  */
 public class UserRandomizer
 {
-    private Randomizer rnd;
+    private final Randomizer rnd;
 
     public UserRandomizer( Randomizer rnd )
     {

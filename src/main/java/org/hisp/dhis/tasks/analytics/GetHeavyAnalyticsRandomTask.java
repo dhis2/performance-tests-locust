@@ -10,7 +10,9 @@ import org.hisp.dhis.utils.Randomizer;
 import java.util.List;
 
 import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
-import static java.lang.String.*;
+import static java.lang.String.format;
+import static java.lang.String.join;
+import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 
 /**

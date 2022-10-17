@@ -1,6 +1,10 @@
 package org.hisp.dhis.random;
 
-import org.hisp.dhis.cache.*;
+import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.RelationshipConstraint;
+import org.hisp.dhis.cache.RelationshipType;
+import org.hisp.dhis.cache.Tei;
 import org.hisp.dhis.dxf2.events.trackedentity.Relationship;
 import org.hisp.dhis.dxf2.events.trackedentity.RelationshipItem;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
@@ -14,10 +18,8 @@ import java.util.stream.Collectors;
 public class RelationshipRandomizer
     extends AbstractTrackerEntityRandomizer<Relationship>
 {
-    private Randomizer rnd;
-
     public RelationshipRandomizer(Randomizer rnd) {
-        this.rnd = rnd;
+        super( rnd );
     }
 
     @Override

@@ -3,7 +3,11 @@ package org.hisp.dhis.random;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
-import org.hisp.dhis.textpattern.*;
+import org.hisp.dhis.textpattern.TextPattern;
+import org.hisp.dhis.textpattern.TextPatternMethod;
+import org.hisp.dhis.textpattern.TextPatternMethodUtils;
+import org.hisp.dhis.textpattern.TextPatternParser;
+import org.hisp.dhis.textpattern.TextPatternSegment;
 import org.hisp.dhis.utils.Randomizer;
 import org.springframework.util.StringUtils;
 
@@ -19,7 +23,7 @@ import java.util.stream.Collectors;
  */
 public class TrackedEntityAttributeRandomizer
 {
-    private Randomizer rnd;
+    private final Randomizer rnd;
 
     public TrackedEntityAttributeRandomizer(Randomizer rnd) {
         this.rnd = rnd;

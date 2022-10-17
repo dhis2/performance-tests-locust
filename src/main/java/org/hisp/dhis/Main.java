@@ -3,13 +3,12 @@ package org.hisp.dhis;
 import io.restassured.RestAssured;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.locust.LocustSlave;
-import org.hisp.dhis.tasksets.tracker.importer.TrackerCapture_importer_addTeiTaskSet;
 import org.hisp.dhis.tests.CategoryType;
 
 import java.io.IOException;
 
 import static io.restassured.RestAssured.preemptive;
-import static org.aeonbits.owner.ConfigFactory.create;
+import static org.hisp.dhis.conf.ConfigFactory.cfg;
 import static org.hisp.dhis.utils.CacheUtils.initCache;
 
 /**
@@ -17,8 +16,6 @@ import static org.hisp.dhis.utils.CacheUtils.initCache;
  */
 public class Main
 {
-    public static final TestConfig cfg = create( TestConfig.class );
-
     public static void main( String[] args )
         throws IOException, InstantiationException, IllegalAccessException
     {

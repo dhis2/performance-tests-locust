@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class DataValueRandomizer
 {
 
-    private Randomizer rnd;
+    private final Randomizer rnd;
 
     public DataValueRandomizer( Randomizer rnd ) {
         this.rnd = rnd;
