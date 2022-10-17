@@ -58,4 +58,7 @@ public interface TestConfig
 
     @Key( "logging.debug" )
     boolean debug();
+
+    @Key( "locust.random.seed" )
+    long locustRandomSeed();
 }

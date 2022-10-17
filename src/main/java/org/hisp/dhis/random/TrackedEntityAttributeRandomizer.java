@@ -1,17 +1,17 @@
 package org.hisp.dhis.random;
 
-import org.hisp.dhis.cache.EntitiesCache;
-import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.textpattern.*;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -19,7 +19,13 @@ import java.util.stream.Collectors;
  */
 public class TrackedEntityAttributeRandomizer
 {
-    private List<Attribute> create( List<TrackedEntityAttribute> trackedEntityAttributes )
+    private Randomizer rnd;
+
+    public TrackedEntityAttributeRandomizer(Randomizer rnd) {
+        this.rnd = rnd;
+    }
+
+    private List<Attribute> create(List<TrackedEntityAttribute> trackedEntityAttributes )
     {
         return trackedEntityAttributes.stream()
             .filter( p -> p.getValueType() != ValueType.FILE_RESOURCE )
@@ -33,7 +39,7 @@ public class TrackedEntityAttributeRandomizer
                     {
                         // Numeric type should not start with a 0
                         patternValue = patternValue.replace( "0",
-                            String.valueOf( DataRandomizer.randomIntInRange( 1, 9 ) ) );
+                            String.valueOf( rnd.randomIntInRange( 1, 9 ) ) );
                     }
                     return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(), patternValue );
                 }
@@ -51,32 +57,32 @@ public class TrackedEntityAttributeRandomizer
                         .anyMatch( att.getDisplayName().toLowerCase( )::contains ) )
                     {
                         return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            DataRandomizer.faker().name().firstName() );
+                            this.rnd.randomFirstName() );
                     }
 
                     if ( att.getDisplayName().toLowerCase().contains( "surname" ) ||
                         att.getDisplayName().toLowerCase().contains( "given name" ) )
                     {
                         return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            DataRandomizer.faker().name().lastName() );
+                            this.rnd.randomLastName() );
                     }
 
                     if ( att.getValueType().isDate() && att.getDisplayName().toLowerCase().contains( "of birth" ) )
                     {
                         return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            new SimpleDateFormat("yyyy-MM-dd").format( DataRandomizer.faker().date().birthday( 16, 80 ) ));
+                            new SimpleDateFormat("yyyy-MM-dd").format( this.rnd.randomAdultBirthday() ) );
                     }
 
                     if ( att.getDisplayName().toLowerCase().contains( "address" ) )
                     {
                         return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            DataRandomizer.faker().address().fullAddress() );
+                            this.rnd.randomAddress() );
                     }
 
                     if ( att.getDisplayName().toLowerCase().contains( "national id" ) )
                     {
                         return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                            DataRandomizer.faker().idNumber().valid() );
+                            this.rnd.randomNationalId() );
                     }
 
                     return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
@@ -86,7 +92,7 @@ public class TrackedEntityAttributeRandomizer
                 else
                 {
                     return new Attribute( att.getTrackedEntityAttribute(), att.getValueType(),
-                        DataRandomizer.randomElementFromList( att.getOptions() ) );
+                        rnd.randomElementFromList( att.getOptions() ) );
                 }
 
             }
@@ -105,11 +111,11 @@ public class TrackedEntityAttributeRandomizer
         String value = "";
         if ( segment.getMethod().equals( TextPatternMethod.SEQUENTIAL ) )
         {
-            value = String.format( "%0" + segment.getParameter().length() + "d", DataRandomizer.randomInt() );
+            value = String.format( "%0" + segment.getParameter().length() + "d", this.rnd.randomInt( Integer.MAX_VALUE ) );
         }
         else if ( segment.getMethod().equals( TextPatternMethod.RANDOM ) )
         {
-            value = TextPatternMethodUtils.generateRandom( new Random(), segment.getParameter() );
+            value = TextPatternMethodUtils.generateRandom( this.rnd.getRandom(), segment.getParameter() );
         }
         else
         {
@@ -164,7 +170,7 @@ public class TrackedEntityAttributeRandomizer
 
     private String rndValueFrom( ValueType valueType )
     {
-        return new DataValueRandomizer().rndValueFrom( valueType );
+        return new DataValueRandomizer(rnd).rndValueFrom( valueType );
     }
 
 }

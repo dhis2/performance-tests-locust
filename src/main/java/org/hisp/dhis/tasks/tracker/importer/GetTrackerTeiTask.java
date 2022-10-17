@@ -4,6 +4,7 @@ import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -17,9 +18,9 @@ public class GetTrackerTeiTask
 
     private String tei;
 
-    public GetTrackerTeiTask( String teiId, UserCredentials userCredentials )
+    public GetTrackerTeiTask(String teiId, UserCredentials userCredentials, Randomizer randomizer)
     {
-        super( 1 );
+        super( 1, randomizer );
         this.tei = teiId;
         this.userCredentials = userCredentials;
     }
@@ -40,7 +41,8 @@ public class GetTrackerTeiTask
     public void execute()
         throws Exception
     {
-        this.response = performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, getUserCredentials() ).get( tei ) );
+        Randomizer rnd = getNextRandomizer( getName() );
+        this.response = performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, getUserCredentials(rnd) ).get( tei ) );
     }
 
     public ApiResponse executeAndGetResponse()

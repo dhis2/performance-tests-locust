@@ -7,6 +7,7 @@ import org.hisp.dhis.random.EnrollmentRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -20,9 +21,9 @@ public class AddEnrollmentTask
 
     private ApiResponse response;
 
-    public AddEnrollmentTask( int weight, RandomizerContext context, UserCredentials userCredentials )
+    public AddEnrollmentTask( int weight, RandomizerContext context, UserCredentials userCredentials, Randomizer randomizer )
     {
-        super( weight );
+        super( weight,randomizer );
         this.ctx = context;
         this.userCredentials = userCredentials;
     }
@@ -43,11 +44,12 @@ public class AddEnrollmentTask
     public void execute()
         throws Exception
     {
-        EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer();
+        Randomizer rnd = getNextRandomizer( getName() );
+        EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer( rnd );
 
         Enrollment enrollment = enrollmentRandomizer.createWithoutEvents( entitiesCache, ctx );
 
-        AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, getUserCredentials() );
+        AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, getUserCredentials( rnd ) );
 
         response = performTaskAndRecord( () -> authenticatedApiActions.post( enrollment ), 201 );
     }

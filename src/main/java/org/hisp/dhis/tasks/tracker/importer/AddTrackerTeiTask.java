@@ -1,19 +1,12 @@
 package org.hisp.dhis.tasks.tracker.importer;
 
-import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
-import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.models.TrackedEntities;
 import org.hisp.dhis.random.RandomizerContext;
-import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
-import org.hisp.dhis.random.UserRandomizer;
-import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
-
-import java.util.stream.Collectors;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -28,12 +21,11 @@ public class AddTrackerTeiTask
     private TrackerApiResponse response;
 
     public AddTrackerTeiTask( int weight, TrackedEntities trackedEntityInstance,
-        UserCredentials userCredentials )
+        UserCredentials userCredentials, Randomizer randomizer )
     {
-        super( weight );
+        super( weight, randomizer );
         trackedEntityInstanceBody = trackedEntityInstance;
         this.userCredentials = userCredentials;
-
     }
 
     public String getName()
@@ -50,19 +42,12 @@ public class AddTrackerTeiTask
     public void execute()
         throws Exception
     {
-        User user = getUser();
+        Randomizer rnd = getNextRandomizer( getName() );
+        User user = getUser( rnd );
         RandomizerContext context = new RandomizerContext();
-        context.setOrgUnitUid( new UserRandomizer().getRandomUserOrgUnit( user ) );
+        context.setOrgUnitUid( getRandomUserOrgUnit( user, rnd ) );
 
-
-        TrackedEntityInstances ins = new TrackedEntityInstanceRandomizer()
-            .create( this.entitiesCache, context, 5 );
-
-        trackedEntityInstanceBody = TrackedEntities.builder().trackedEntities(
-            ins.getTrackedEntityInstances().stream().map( p -> new TrackedEntityMapperImpl().from( p ) ).collect( Collectors
-                .toList() ) ).build();
-
-        response = new AddTrackerDataTask( 1, user.getUserCredentials(), trackedEntityInstanceBody, "teis" ).executeAndGetBody();
+        response = new AddTrackerDataTask( 1, user.getUserCredentials(), trackedEntityInstanceBody, "teis", rnd ).executeAndGetBody();
     }
 
     public TrackerApiResponse executeAndGetResponse()

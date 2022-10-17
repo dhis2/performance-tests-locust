@@ -4,7 +4,7 @@ import org.apache.commons.collections.set.ListOrderedSet;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.dxf2.events.event.DataValue;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -15,8 +15,13 @@ import java.util.List;
 public class EventDataValueRandomizer
     implements DhisEntityRandomizer<ListOrderedSet>
 {
+    private Randomizer rnd;
 
-    private DataValue withRandomValue( DataElement dataElement )
+    public EventDataValueRandomizer(Randomizer rnd) {
+        this.rnd = rnd;
+    }
+
+    private DataValue withRandomValue(DataElement dataElement )
     {
         DataValue dataValue = new DataValue();
         dataValue.setDataElement( dataElement.getUid() );
@@ -24,11 +29,11 @@ public class EventDataValueRandomizer
         String val;
         if ( !CollectionUtils.isEmpty( dataElement.getOptionSet() ) )
         {
-            val = DataRandomizer.randomElementFromList( dataElement.getOptionSet() );
+            val = rnd.randomElementFromList( dataElement.getOptionSet() );
         }
         else
         {
-            val = new DataValueRandomizer().rndValueFrom( dataElement.getValueType() );
+            val = new DataValueRandomizer(rnd).rndValueFrom( dataElement.getValueType() );
         }
 
         dataValue.setValue( val );

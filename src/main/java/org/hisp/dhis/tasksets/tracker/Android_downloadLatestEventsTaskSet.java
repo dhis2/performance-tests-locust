@@ -3,10 +3,9 @@ package org.hisp.dhis.tasksets.tracker;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
-import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.request.QueryParamsBuilder;
-import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.time.Instant;
 
@@ -14,19 +13,21 @@ import java.time.Instant;
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
 public class Android_downloadLatestEventsTaskSet
-    extends DhisAbstractTask
+    extends DhisAbstractTaskSet
 {
     private String endpoint = "/api/events";
 
+    private static final String NAME = "Android: download latest events";
+
     public Android_downloadLatestEventsTaskSet( int weight )
     {
-        super( weight );
+        super( NAME, weight );
     }
 
     @Override
     public String getName()
     {
-        return "Android: download latest events";
+        return NAME;
     }
 
     @Override
@@ -39,8 +40,9 @@ public class Android_downloadLatestEventsTaskSet
     public void execute()
         throws Exception
     {
-        User user = new UserRandomizer().getRandomUser( entitiesCache );
-        Program program = DataRandomizer.randomElementFromList( entitiesCache.getTrackerPrograms() );
+        Randomizer rnd = getNextRandomizer( getName() );
+        User user = getRandomUser(rnd);
+        Program program = rnd.randomElementFromList( entitiesCache.getTrackerPrograms() );
         QueryParamsBuilder queryParamsBuilder = new QueryParamsBuilder()
             .add( "ouMode=DESCENDANTS" )
             .add( "includeDeleted", "true" )
@@ -49,7 +51,7 @@ public class Android_downloadLatestEventsTaskSet
             .add( "pageSize", "50" )
             .add( "program", program.getId() )
             .add( "paging", "true" )
-            .add( "orgUnit", new UserRandomizer().getRandomUserOrProgramOrgUnit( user, program ) )
+            .add( "orgUnit", getRandomUserOrProgramOrgUnit( user, program, rnd ) )
             .add( "lastUpdatedStartDate", Instant.now().toString() );
 
         performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, user.getUserCredentials() )

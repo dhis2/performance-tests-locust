@@ -31,8 +31,7 @@ package org.hisp.dhis.random;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.ProgramStage;
-import org.hisp.dhis.common.ValueType;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -46,12 +45,12 @@ public abstract class AbstractTrackerEntityRandomizer<T>
 {
     protected DateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
 
-    protected Program getProgramFromContextOrRnd( RandomizerContext ctx, EntitiesCache cache )
+    protected Program getProgramFromContextOrRnd(RandomizerContext ctx, EntitiesCache cache, Randomizer rnd)
     {
         Program program;
         if ( ctx.getProgram() == null )
         {
-            program = getRandomProgram( cache );
+            program = getRandomProgram( cache, rnd );
             ctx.setProgram( program );
         }
         else
@@ -61,37 +60,28 @@ public abstract class AbstractTrackerEntityRandomizer<T>
         return program;
     }
 
-    protected String getOrgUnitFromContextOrRndFromProgram( RandomizerContext ctx, Program program )
+    protected String getOrgUnitFromContextOrRndFromProgram(RandomizerContext ctx, Program program, Randomizer rnd)
     {
         if ( ctx.getOrgUnitUid() == null )
         {
-            return getRandomOrgUnitFromProgram( program );
+            return getRandomOrgUnitFromProgram( program, rnd );
         }
 
-        String uid = ctx.getOrgUnitUid();
-        ctx.setOrgUnitUid( uid );
-
-        return uid;
+        return ctx.getOrgUnitUid();
     }
 
-    private Program getRandomProgram( EntitiesCache cache )
+    private Program getRandomProgram(EntitiesCache cache, Randomizer rnd)
     {
-        return DataRandomizer.randomElementFromList( cache.getTrackerPrograms() );
+        return rnd.randomElementFromList( cache.getTrackerPrograms() );
     }
 
-    protected String getRandomOrgUnitFromProgram( Program program )
+    protected String getRandomOrgUnitFromProgram(Program program, Randomizer rnd)
     {
-        return DataRandomizer.randomElementFromList( program.getOrganisationUnits() );
+        return rnd.randomElementFromList( program.getOrganisationUnits() );
     }
 
-    protected ProgramStage getProgramStageFromProgram( Program program )
+    protected ProgramStage getProgramStageFromProgram(Program program, Randomizer rnd)
     {
-        return DataRandomizer.randomElementFromList( program.getProgramStages() );
+        return rnd.randomElementFromList( program.getProgramStages() );
     }
-
-    protected String rndValueFrom( ValueType valueType )
-    {
-        return new DataValueRandomizer().rndValueFrom( valueType );
-    }
-
 }

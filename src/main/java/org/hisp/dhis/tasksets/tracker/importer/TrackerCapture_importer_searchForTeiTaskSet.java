@@ -4,13 +4,12 @@ import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.common.ValueType;
-import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.events.QueryEventsTask;
 import org.hisp.dhis.tasks.tracker.importer.GetTrackerTeiTask;
 import org.hisp.dhis.tasks.tracker.importer.QueryTrackerTeisTask;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
+import org.hisp.dhis.utils.Randomizer;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
@@ -22,19 +21,21 @@ import java.util.stream.Collectors;
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
 public class TrackerCapture_importer_searchForTeiTaskSet
-    extends DhisAbstractTask
+    extends DhisAbstractTaskSet
 {
+    private static final String NAME = "TrackerCapture: search for tei (importer)";
+
     HashMap<String, List<TrackedEntityAttribute>> attributes = new HashMap<>();
 
     public TrackerCapture_importer_searchForTeiTaskSet( int weight )
     {
-        super( weight );
+        super( NAME, weight );
     }
 
     @Override
     public String getName()
     {
-        return "TrackerCapture: search for tei (importer)";
+        return NAME;
     }
 
     @Override
@@ -47,20 +48,21 @@ public class TrackerCapture_importer_searchForTeiTaskSet
     public void execute()
         throws Exception
     {
-        Program program = DataRandomizer.randomElementFromList( this.entitiesCache.getTrackerPrograms());
+        Randomizer rnd = getNextRandomizer( getName() );
+        Program program = rnd.randomElementFromList( this.entitiesCache.getTrackerPrograms() );
 
-        User user = new UserRandomizer().getRandomUser( this.entitiesCache );
-        String ou = DataRandomizer.randomElementFromList( user.getOrganisationUnits() );
+        User user = getRandomUser(rnd);
+        String ou = getRandomUserOrgUnit( user, rnd );
 
         ApiResponse response = new QueryTrackerTeisTask( 1,
-            String.format( "?orgUnit=%s&ouMode=ACCESSIBLE&program=%s%s", ou, program.getId(), getAttributesQuery( program ) ),
-            user.getUserCredentials() ).executeAndGetResponse();
+            String.format( "?orgUnit=%s&ouMode=ACCESSIBLE&program=%s%s", ou, program.getId(), getAttributesQuery( program, rnd) ),
+            user.getUserCredentials(), rnd ).executeAndGetResponse();
 
         List<HashMap> rows = response.extractList( "instances" );
 
         if ( !CollectionUtils.isEmpty( rows ) )
         {
-            HashMap row = DataRandomizer.randomElementFromList( rows );
+            HashMap row = rnd.randomElementFromList( rows );
 
             String teiId = row.get( "trackedEntity" ).toString();
 
@@ -68,36 +70,38 @@ public class TrackerCapture_importer_searchForTeiTaskSet
                 "trackedEntity" ).toString().isEmpty()
             ).forEach(  p-> {
                 String tei = p.get( "trackedEntity" ).toString();
-                new QueryEventsTask( String.format( "?program=%s&programStage=%s&orgUnit=%s&ouMode=DESCENDANTS&trackedEntityInstance=%s&fields=created,eventDate,dataValues[dataElement,value]", program.getId(), program.getProgramStages().get( 0 ).getId(), entitiesCache.getRootOu().getId(), tei) , entitiesCache.getDefaultUser().getUserCredentials() ).execute();
+                new QueryEventsTask( String.format( "?program=%s&programStage=%s&orgUnit=%s&ouMode=DESCENDANTS&trackedEntityInstance=%s&fields=created,eventDate,dataValues[dataElement,value]",
+                        program.getId(), program.getProgramStages().get( 0 ).getId(), entitiesCache.getRootOu().getId(), tei),
+                        entitiesCache.getDefaultUser().getUserCredentials(), rnd ).execute();
             } );
-            new GetTrackerTeiTask( teiId, user.getUserCredentials() ).execute();
+            new GetTrackerTeiTask( teiId, user.getUserCredentials(), rnd ).execute();
         }
 
         waitBetweenTasks();
 
     }
 
-    private String getAttributesQuery( Program program )
+    private String getAttributesQuery(Program program, Randomizer rnd)
     {
         AtomicReference<String> query = new AtomicReference<>( "" );
 
-        getRandomAttributes( program.getId(), program.getMinAttributesRequiredToSearch() )
+        getRandomAttributes( program.getId(), program.getMinAttributesRequiredToSearch(), rnd)
             .forEach( p -> {
                 query.set( query +
-                    String.format( "&attribute=%s:LIKE:%s", p.getTrackedEntityAttribute(), DataRandomizer.randomString( 2 ) ) );
+                    String.format( "&attribute=%s:LIKE:%s", p.getTrackedEntityAttribute(), rnd.randomString( 2 ) ) );
             } );
 
         return query.get();
     }
 
-    private List<TrackedEntityAttribute> getRandomAttributes( String programId, int size )
+    private List<TrackedEntityAttribute> getRandomAttributes(String programId, int size, Randomizer rnd )
     {
         if ( attributes.isEmpty() )
         {
             preloadAttributes();
         }
 
-        return DataRandomizer.randomElementsFromList( attributes.get( programId ), size );
+        return rnd.randomElementsFromList( attributes.get( programId ), size );
     }
 
     private void preloadAttributes()
