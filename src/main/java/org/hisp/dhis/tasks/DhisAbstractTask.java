@@ -3,8 +3,6 @@ package org.hisp.dhis.tasks;
 import com.github.myzhan.locust4j.AbstractTask;
 import com.github.myzhan.locust4j.Locust;
 import io.restassured.response.Response;
-import org.hisp.dhis.conf.ConfigFactory;
-import org.hisp.dhis.conf.TestConfig;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
@@ -93,8 +91,7 @@ public abstract class DhisAbstractTask
                 return user;
             }
 
-            TestConfig conf = org.aeonbits.owner.ConfigFactory.create( TestConfig.class );
-            return new User( new UserCredentials( conf.adminUsername(), conf.adminPassword() ) );
+            return new User( new UserCredentials( cfg.adminUsername(), cfg.adminPassword() ) );
         }
 
         return this.entitiesCache.getUsers().stream().filter( p -> p.getUserCredentials().equals( this.userCredentials ) )
