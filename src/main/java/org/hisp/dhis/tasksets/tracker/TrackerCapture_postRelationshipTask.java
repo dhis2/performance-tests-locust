@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks.tracker;
+package org.hisp.dhis.tasksets.tracker;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.Program;
@@ -10,32 +10,33 @@ import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.RelationshipRandomizer;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
 import org.hisp.dhis.tasks.tracker.tei.AddTeiTask;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.List;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class PostRelationshipTask
-    extends DhisAbstractTask
+public class TrackerCapture_postRelationshipTask
+    extends DhisAbstractTaskSet
 {
-    private String endpoint = "/api/relationships";
+
+    private static final String NAME = "/api/relationships";
 
     private RelationshipRandomizer relationshipRandomizer;
 
-    public PostRelationshipTask( int weight )
+    public TrackerCapture_postRelationshipTask( int weight )
     {
-        super( weight );
-        this.relationshipRandomizer = new RelationshipRandomizer();
+        super( NAME, weight );
     }
 
     @Override
     public String getName()
     {
-        return endpoint;
+        return NAME;
     }
 
     @Override
@@ -48,15 +49,16 @@ public class PostRelationshipTask
     public void execute()
         throws Exception
     {
+        Randomizer rnd = getNextRandomizer( getName() );
         // todo this test won't work on SL because the TEIs passed there might not have a TET that matches relationship types.
-        User user = getUser();
+        User user = getUser(rnd);
 
         RandomizerContext context = new RandomizerContext();
-        context.setOrgUnitUid( DataRandomizer.randomElementFromList( user.getOrganisationUnits() ) );
-        context.setProgram( DataRandomizer.randomElementFromList( entitiesCache.getTrackerPrograms() ) );
+        context.setOrgUnitUid( rnd.randomElementFromList( user.getOrganisationUnits() ) );
+        context.setProgram( rnd.randomElementFromList( entitiesCache.getTrackerPrograms() ) );
 
-        AuthenticatedApiActions actions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
-        List<String> uids = createTeis( context );
+        AuthenticatedApiActions actions = new AuthenticatedApiActions( NAME, user.getUserCredentials() );
+        List<String> uids = createTeis( context, rnd);
 
         if ( uids == null )
         {
@@ -71,29 +73,29 @@ public class PostRelationshipTask
         waitBetweenTasks();
     }
 
-    private List<String> createTeis( RandomizerContext context )
+    private List<String> createTeis(RandomizerContext context, Randomizer rnd)
         throws Exception
     {
 
-        TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstanceRandomizer().create(
+        TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstanceRandomizer(rnd).create(
             entitiesCache, context, 2
         );
 
-        generateAttributes( context.getProgram(), trackedEntityInstances, user.getUserCredentials() );
+        generateAttributes( context.getProgram(), trackedEntityInstances, user.getUserCredentials(), rnd);
 
-        ApiResponse body = new AddTeiTask( 1, trackedEntityInstances, user.getUserCredentials() )
+        ApiResponse body = new AddTeiTask( 1, trackedEntityInstances, user.getUserCredentials(), rnd )
             .executeAndGetResponse();
 
         return body.extractUids();
     }
 
-    private void generateAttributes( Program program, TrackedEntityInstances teis, UserCredentials userCredentials )
+    private void generateAttributes(Program program, TrackedEntityInstances teis, UserCredentials userCredentials, Randomizer rnd)
         throws Exception
     {
         for ( TrackedEntityAttribute att : program.getGeneratedAttributes() )
         {
             new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
-                userCredentials, teis.getTrackedEntityInstances().size() )
+                userCredentials, teis.getTrackedEntityInstances().size(), rnd )
                 .executeAndAddAttributes( teis.getTrackedEntityInstances() );
 
         }

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -11,9 +12,9 @@ import org.hisp.dhis.response.dto.ApiResponse;
 public class MetadataExportImportTask
     extends DhisAbstractTask
 {
-    public MetadataExportImportTask( int weight )
+    public MetadataExportImportTask(int weight, Randomizer randomizer)
     {
-        super( weight );
+        super( weight, randomizer );
     }
 
     public String getName()
@@ -30,7 +31,8 @@ public class MetadataExportImportTask
     public void execute()
         throws Exception
     {
-        JsonObject metadata = new MetadataExportTask().executeAndGetBody();
+        Randomizer rnd = getNextRandomizer( getName() );
+        JsonObject metadata = new MetadataExportTask( rnd ).executeAndGetBody();
 
         long time = System.currentTimeMillis();
 

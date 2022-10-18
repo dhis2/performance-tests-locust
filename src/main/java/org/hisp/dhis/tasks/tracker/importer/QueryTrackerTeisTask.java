@@ -4,6 +4,7 @@ import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -19,14 +20,10 @@ public class QueryTrackerTeisTask
 
     private boolean savePayload = false;
 
-    public QueryTrackerTeisTask( int weight )
+    public QueryTrackerTeisTask(int weight, String query, UserCredentials userCredentials,
+                                Randomizer randomizer )
     {
-        super( weight );
-    }
-
-    public QueryTrackerTeisTask( int weight, String query, UserCredentials userCredentials )
-    {
-        this( weight );
+        super( weight, randomizer );
         this.query = query;
         this.userCredentials = userCredentials;
     }
@@ -46,7 +43,8 @@ public class QueryTrackerTeisTask
     @Override
     public void execute()
     {
-        ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query );
+        Randomizer rnd = getNextRandomizer( getName() );
+        ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials( rnd ) ).get( this.query );
 
         if ( savePayload )
         {

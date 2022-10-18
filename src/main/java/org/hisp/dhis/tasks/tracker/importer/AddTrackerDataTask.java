@@ -17,11 +17,13 @@ import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
 import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import static org.hisp.dhis.conf.ConfigFactory.cfg;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -35,7 +37,7 @@ public class AddTrackerDataTask
 
     private Object payload;
 
-    private boolean async = super.cfg.useAsyncTrackerImporter();
+    private boolean async = cfg.useAsyncTrackerImporter();
 
     private TrackerApiResponse response;
 
@@ -43,24 +45,19 @@ public class AddTrackerDataTask
 
     private String identifier = "";
 
-    public AddTrackerDataTask( int weight )
-    {
-        super( weight );
-    }
-
     public AddTrackerDataTask( int weight, UserCredentials userCredentials, Object payload,
-        String identifier )
+        String identifier, Randomizer randomizer )
     {
-        this( weight );
+        super( weight, randomizer );
         this.userCredentials = userCredentials;
         this.payload = payload;
         this.identifier = identifier;
     }
 
-    public AddTrackerDataTask( int weight, UserCredentials userCredentials, Object payload,
-        String identifier, String... params )
+    public AddTrackerDataTask(int weight, UserCredentials userCredentials, Object payload,
+                              String identifier, Randomizer randomizer, String... params )
     {
-        this( weight, userCredentials, payload, identifier );
+        this( weight, userCredentials, payload, identifier, randomizer );
         this.builder.addAll( params );
     }
 
@@ -80,16 +77,17 @@ public class AddTrackerDataTask
     public void execute()
         throws Exception
     {
-        User user = getUser();
-        AuthenticatedApiActions trackerActions = new AuthenticatedApiActions( endpoint, getUserCredentials() );
+        Randomizer rnd = getNextRandomizer( getName() );
+        User user = getUser( rnd );
+        AuthenticatedApiActions trackerActions = new AuthenticatedApiActions( endpoint, getUserCredentials( rnd ) );
 
         if ( payload == null )
         {
             RandomizerContext context = new RandomizerContext();
-            context.setOrgUnitUid( DataRandomizer.randomElementFromList( user.getOrganisationUnits() ) );
-            TrackedEntityInstances instances = new TrackedEntityInstanceRandomizer().create( entitiesCache, context, 2, 3 );
+            context.setOrgUnitUid( rnd.randomElementFromList( user.getOrganisationUnits() ) );
+            TrackedEntityInstances instances = new TrackedEntityInstanceRandomizer(rnd).create( entitiesCache, context, 2, 3 );
 
-            generateAttributes( context.getProgram(), instances.getTrackedEntityInstances(), user.getUserCredentials() );
+            generateAttributes( context.getProgram(), instances.getTrackedEntityInstances(), user.getUserCredentials(), rnd);
 
             payload = TrackedEntities.builder()
                 .trackedEntities( instances.getTrackedEntityInstances().stream().
@@ -106,7 +104,7 @@ public class AddTrackerDataTask
             {
                 String jobId = response.extractString( "response.id" );
 
-                this.waitUntilJobIsCompleted( jobId, user.getUserCredentials() );
+                this.waitUntilJobIsCompleted( jobId, user.getUserCredentials(), rnd);
 
                 response = trackerActions.get( String.format( "/jobs/%s/report?reportMode=%s", jobId, "FULL" ) );
             }
@@ -127,18 +125,18 @@ public class AddTrackerDataTask
         return response;
     }
 
-    private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
+    private void generateAttributes(Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials, Randomizer rnd)
         throws Exception
     {
         for ( TrackedEntityAttribute att : program.getGeneratedAttributes() )
         {
             new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
-                userCredentials, teis.size() ).executeAndAddAttributes( teis );
+                userCredentials, teis.size(), rnd ).executeAndAddAttributes( teis );
 
         }
     }
 
-    public ApiResponse waitUntilJobIsCompleted( String jobId, UserCredentials credentials )
+    public ApiResponse waitUntilJobIsCompleted(String jobId, UserCredentials credentials, Randomizer rnd)
         throws Exception
     {
         ApiResponse response = null;
@@ -149,7 +147,7 @@ public class AddTrackerDataTask
         {
             Thread.currentThread().sleep( 100 );
 
-            response = new GetImportJobTask( 1, credentials, jobId ).executeAndGetResponse();
+            response = new GetImportJobTask( 1, credentials, jobId, rnd ).executeAndGetResponse();
             completed = response.extractList( "completed" ).contains( true );
             attempts--;
         }

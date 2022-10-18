@@ -9,6 +9,7 @@ import io.restassured.config.EncoderConfig;
 import io.restassured.config.ObjectMapperConfig;
 import io.restassured.mapper.ObjectMapperType;
 import io.restassured.specification.RequestSpecification;
+import org.hisp.dhis.conf.TestConfig;
 import org.hisp.dhis.utils.AuthFilter;
 
 import java.time.Instant;

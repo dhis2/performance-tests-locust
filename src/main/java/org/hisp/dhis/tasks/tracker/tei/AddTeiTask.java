@@ -3,10 +3,9 @@ package org.hisp.dhis.tasks.tracker.tei;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
-import org.hisp.dhis.random.RandomizerContext;
-import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.utils.Randomizer;
 
 public class AddTeiTask
     extends
@@ -18,15 +17,10 @@ public class AddTeiTask
 
     private ApiResponse response;
 
-    public AddTeiTask( int weight )
-    {
-        super( weight );
-    }
-
     public AddTeiTask( int weight, TrackedEntityInstances trackedEntityInstance,
-        UserCredentials userCredentials )
+        UserCredentials userCredentials, Randomizer randomizer )
     {
-        this( weight );
+        super( weight,randomizer );
         trackedEntityInstanceBody = trackedEntityInstance;
         this.userCredentials = userCredentials;
 
@@ -46,14 +40,10 @@ public class AddTeiTask
     public void execute()
         throws Exception
     {
-        if ( trackedEntityInstanceBody == null )
-        {
-            trackedEntityInstanceBody = new TrackedEntityInstanceRandomizer()
-                .create( this.entitiesCache, RandomizerContext.EMPTY_CONTEXT(), 5 );
-        }
+        Randomizer rnd = getNextRandomizer( getName() );
 
         this.response = performTaskAndRecord(
-            () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( trackedEntityInstanceBody ) );
+            () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials( rnd ) ).post( trackedEntityInstanceBody ) );
     }
 
     public ApiResponse executeAndGetResponse()

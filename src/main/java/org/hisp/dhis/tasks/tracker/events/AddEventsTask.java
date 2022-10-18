@@ -8,7 +8,7 @@ import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,15 +32,11 @@ public class AddEventsTask
 
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
-    public AddEventsTask( int weight )
+    public AddEventsTask( int weight, List<Event> events, UserCredentials userCredentials,
+                          Randomizer randomizer )
     {
-        super( weight );
-        eventRandomizer = new EventRandomizer();
-    }
-
-    public AddEventsTask( int weight, List<Event> events, UserCredentials userCredentials )
-    {
-        super( weight );
+        super( weight,randomizer );
+        eventRandomizer = new EventRandomizer(randomizer);
         this.events = events;
         this.userCredentials = userCredentials;
     }
@@ -57,11 +53,11 @@ public class AddEventsTask
         return "POST";
     }
 
-    private List<Event> createRandomEvents()
+    private List<Event> createRandomEvents(Randomizer rnd)
     {
 
         List<Event> rndEvents = new ArrayList<>();
-        for ( int i = 0; i < DataRandomizer.randomIntInRange( 5, 10 ); i++ )
+        for ( int i = 0; i < rnd.randomIntInRange( 5, 10 ); i++ )
         {
             Event randomEvent = null;
             try
@@ -87,11 +83,12 @@ public class AddEventsTask
     public void execute()
         throws Exception
     {
-        List<Event> rndEvents = events != null ? events : createRandomEvents();
+        Randomizer rnd = getNextRandomizer( getName() );
+        List<Event> rndEvents = events != null ? events : createRandomEvents(rnd);
 
         EventWrapper ew = new EventWrapper( rndEvents );
 
-        response = performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).post( ew ) );
+        response = performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials( rnd ) ).post( ew ) );
     }
 
     public ApiResponse executeAndGetResponse()

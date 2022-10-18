@@ -3,20 +3,20 @@ package org.hisp.dhis.tasks;
 import com.github.myzhan.locust4j.AbstractTask;
 import com.github.myzhan.locust4j.Locust;
 import io.restassured.response.Response;
-import org.aeonbits.owner.ConfigFactory;
-import org.hisp.dhis.TestConfig;
 import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.PredictableRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-import static org.aeonbits.owner.ConfigFactory.create;
+import static org.hisp.dhis.conf.ConfigFactory.cfg;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -34,12 +34,13 @@ public abstract class DhisAbstractTask
 
     protected EntitiesCache entitiesCache;
 
-    protected TestConfig cfg = create( TestConfig.class );
+    private final Randomizer rnd;
 
-    protected DhisAbstractTask( int weight )
+    protected DhisAbstractTask( int weight, Randomizer rnd )
     {
         this.weight = weight;
         this.entitiesCache = EntitiesCache.getInstance();
+        this.rnd = rnd;
     }
 
     public int getWeight()
@@ -60,22 +61,22 @@ public abstract class DhisAbstractTask
         if ( cfg.locustMinWaitBetweenTasks() != 0 && cfg.locustMaxWaitBetweenTasks() != 0 )
         {
             Thread.currentThread()
-                .sleep( DataRandomizer.randomIntInRange( cfg.locustMinWaitBetweenTasks(), cfg.locustMaxWaitBetweenTasks() ) );
+                .sleep( rnd.randomIntInRange( cfg.locustMinWaitBetweenTasks(), cfg.locustMaxWaitBetweenTasks() ) );
         }
     }
 
-    protected UserCredentials getUserCredentials()
+    protected UserCredentials getUserCredentials(Randomizer rnd)
     {
         if ( this.userCredentials != null )
         {
             return this.userCredentials;
         }
 
-        return this.getUser().getUserCredentials();
+        return this.getUser(rnd).getUserCredentials();
 
     }
 
-    protected User getUser()
+    protected User getUser(Randomizer rnd)
     {
         if ( this.user != null )
         {
@@ -86,12 +87,11 @@ public abstract class DhisAbstractTask
         {
             if ( this.entitiesCache != null )
             {
-                user = new UserRandomizer().getRandomUser( this.entitiesCache );
+                user = new UserRandomizer(rnd).getRandomUser( this.entitiesCache );
                 return user;
             }
 
-            TestConfig conf = ConfigFactory.create( TestConfig.class );
-            return new User( new UserCredentials( conf.adminUsername(), conf.adminPassword() ) );
+            return new User( new UserCredentials( cfg.adminUsername(), cfg.adminPassword() ) );
         }
 
         return this.entitiesCache.getUsers().stream().filter( p -> p.getUserCredentials().equals( this.userCredentials ) )
@@ -227,5 +227,25 @@ public abstract class DhisAbstractTask
         if ( cfg.debug() ) {
             logger.warning( message );
         }
+    }
+
+    protected User getRandomUser( Randomizer rnd ) {
+        return new UserRandomizer(rnd).getRandomUser( entitiesCache );
+    }
+
+    public String getRandomUserOrgUnit( User user, Randomizer rnd )
+    {
+        return new UserRandomizer(rnd).getRandomUserOrgUnit( user );
+    }
+
+    public String getRandomUserOrProgramOrgUnit( User user, Program program, Randomizer rnd )
+    {
+        return new UserRandomizer(rnd).getRandomUserOrProgramOrgUnit( user, program );
+    }
+
+    protected Randomizer getNextRandomizer(String name) {
+        long seed = name.hashCode() * (cfg.locustRandomSeed() + rnd.randomInt(1000));
+        logger.info("[" +name+ "] - "+ rnd +" generated seed " + seed);
+        return new PredictableRandomizer(seed);
     }
 }

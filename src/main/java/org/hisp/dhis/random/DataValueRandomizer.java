@@ -7,28 +7,32 @@ import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dxf2.datavalue.DataValue;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSet;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static org.hisp.dhis.utils.DataRandomizer.faker;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
 public class DataValueRandomizer
 {
-    public DataValue create( String ou, EntitiesCache entitiesCache )
-    {
-        DataSet dataSet = DataRandomizer.randomElementFromList( entitiesCache.getDataSets() );
 
-        DataElement dataElement = DataRandomizer.randomElementFromList( dataSet.getDataElements().stream().filter( p ->
+    private final Randomizer rnd;
+
+    public DataValueRandomizer( Randomizer rnd ) {
+        this.rnd = rnd;
+    }
+
+    public DataValue create(String ou, EntitiesCache entitiesCache )
+    {
+        DataSet dataSet = rnd.randomElementFromList( entitiesCache.getDataSets() );
+
+        DataElement dataElement = rnd.randomElementFromList( dataSet.getDataElements().stream().filter( p ->
             p.getValueType() != ValueType.FILE_RESOURCE
         ).collect( Collectors.toList() ) );
 
@@ -39,7 +43,7 @@ public class DataValueRandomizer
 
         if ( !CollectionUtils.isEmpty( dataElement.getOptionSet() ) )
         {
-            dv.setValue( DataRandomizer.randomElementFromList( dataElement.getOptionSet() ) );
+            dv.setValue( rnd.randomElementFromList( dataElement.getOptionSet() ) );
         }
 
         else
@@ -68,7 +72,7 @@ public class DataValueRandomizer
 
     public DataValueSet create( String ou, EntitiesCache entitiesCache, int min, int max )
     {
-        int numberOfValues = DataRandomizer.randomIntInRange( min, max );
+        int numberOfValues = rnd.randomIntInRange( min, max );
 
         return create( ou, entitiesCache, numberOfValues );
     }
@@ -105,7 +109,7 @@ public class DataValueRandomizer
             return "UNSUPPORTED_PERIOD_TYPE";
         }
 
-        calendar.setTime( faker().date().past( 1825, min, TimeUnit.DAYS ) );
+        calendar.setTime( rnd.randomPastDate() );
 
         return new SimpleDateFormat( pattern ).format( calendar.getTime() );
     }
@@ -115,35 +119,35 @@ public class DataValueRandomizer
         switch ( valueType )
         {
         case TEXT:
-            return DataRandomizer.randomString( 8 );
+            return rnd.randomString( 8 );
         case LONG_TEXT:
-            return faker().lorem().sentence( 50 );
+            return rnd.randomLongText( 50 );
         case LETTER:
-            return DataRandomizer.randomString( 1 );
+            return rnd.randomString( 1 );
         case PHONE_NUMBER:
-            return faker().phoneNumber().cellPhone();
+            return rnd.randomPhoneNumber();
         case EMAIL:
-            return faker().name().username() + "@dhis2.org";
+            return rnd.randomUsername() + "@dhis2.org";
         case BOOLEAN:
-            return String.valueOf( DataRandomizer.randomBoolean() );
+            return String.valueOf( rnd.randomBoolean() );
         case TRUE_ONLY:
             return "true";
         case DATE:
         case DATETIME:
-            return DataRandomizer.randomPastDate( DateTimeFormatter.ISO_LOCAL_DATE );
+            return rnd.randomPastDate( DateTimeFormatter.ISO_LOCAL_DATE );
         case NUMBER:
         case UNIT_INTERVAL:
-            return String.valueOf( DataRandomizer.randomDoubleInRange( 100, 1000, 1 ) );
+            return String.valueOf( rnd.randomDoubleInRange( 100, 1000, 1 ) );
         case PERCENTAGE:
-            return String.valueOf( DataRandomizer.randomIntInRange( 1, 100 ) );
+            return String.valueOf( rnd.randomIntInRange( 1, 100 ) );
         case INTEGER:
         case INTEGER_POSITIVE:
         case INTEGER_ZERO_OR_POSITIVE:
-            return String.valueOf( DataRandomizer.randomIntInRange( 1, 100000 ) );
+            return String.valueOf( rnd.randomIntInRange( 1, 100000 ) );
         case TIME:
             return "05:00";
         case AGE:
-            return String.valueOf( DataRandomizer.randomIntInRange( 1, 80 ) );
+            return String.valueOf( rnd.randomIntInRange( 1, 80 ) );
         default:
             return null;
         }

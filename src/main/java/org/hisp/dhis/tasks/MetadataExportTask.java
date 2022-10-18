@@ -3,6 +3,7 @@ package org.hisp.dhis.tasks;
 import com.google.gson.JsonObject;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -14,9 +15,9 @@ public class MetadataExportTask
 
     private String endpoint = "/api/metadata";
 
-    protected MetadataExportTask()
+    protected MetadataExportTask( Randomizer randomizer )
     {
-        super( 1 );
+        super( 1, randomizer );
     }
 
     public String getName()

@@ -1,10 +1,14 @@
 package org.hisp.dhis.random;
 
-import org.hisp.dhis.cache.*;
+import org.hisp.dhis.cache.EntitiesCache;
+import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.RelationshipConstraint;
+import org.hisp.dhis.cache.RelationshipType;
+import org.hisp.dhis.cache.Tei;
 import org.hisp.dhis.dxf2.events.trackedentity.Relationship;
 import org.hisp.dhis.dxf2.events.trackedentity.RelationshipItem;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.stream.Collectors;
 
@@ -14,10 +18,14 @@ import java.util.stream.Collectors;
 public class RelationshipRandomizer
     extends AbstractTrackerEntityRandomizer<Relationship>
 {
+    public RelationshipRandomizer(Randomizer rnd) {
+        super( rnd );
+    }
+
     @Override
     public Relationship create( EntitiesCache cache, RandomizerContext randomizerContext )
     {
-        RelationshipType relationshipType = DataRandomizer.randomElementFromList( cache.getRelationshipTypes().stream().filter(
+        RelationshipType relationshipType = rnd.randomElementFromList( cache.getRelationshipTypes().stream().filter(
             p -> p.getFromConstraint().getTrackedEntityType() != null && p.getToConstraint().getTrackedEntityType() != null )
             .collect(
                 Collectors.toList() ) );
@@ -33,7 +41,7 @@ public class RelationshipRandomizer
 
     public Relationship create( EntitiesCache cache, String from, String to )
     {
-        RelationshipType relationshipType = DataRandomizer.randomElementFromList( cache.getRelationshipTypes().stream().filter(
+        RelationshipType relationshipType = rnd.randomElementFromList( cache.getRelationshipTypes().stream().filter(
             p -> p.getFromConstraint().getTrackedEntityType() != null && p.getToConstraint().getTrackedEntityType() != null )
             .collect(
                 Collectors.toList() ) );
@@ -57,16 +65,16 @@ public class RelationshipRandomizer
             Tei randomTei;
             if ( relationshipConstraint.getProgram() != null )
             {
-                randomTei = DataRandomizer
+                randomTei = rnd
                     .randomElementFromList( cache.getTeis().get( relationshipConstraint.getProgram().getId() ) );
             }
             else
             {
                 Program randomProgram = cache.getTrackerPrograms()
-                    .get( DataRandomizer.randomIntInRange( 0, cache.getTeis().size() ) );
+                    .get( rnd.randomIntInRange( 0, cache.getTeis().size() ) );
                 context.setProgram( randomProgram );
 
-                randomTei = DataRandomizer.randomElementFromList( cache.getTeis().get( randomProgram.getId() ) );
+                randomTei = rnd.randomElementFromList( cache.getTeis().get( randomProgram.getId() ) );
             }
 
             TrackedEntityInstance trackedEntityInstance = new TrackedEntityInstance();

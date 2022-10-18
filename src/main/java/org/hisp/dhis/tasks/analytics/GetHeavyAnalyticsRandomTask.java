@@ -5,12 +5,14 @@ import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.List;
 
 import static com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK;
-import static java.lang.String.*;
+import static java.lang.String.format;
+import static java.lang.String.join;
+import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 
 /**
@@ -43,9 +45,9 @@ public class GetHeavyAnalyticsRandomTask
 
     private final int apiVersion;
 
-    public GetHeavyAnalyticsRandomTask( final int weight, final int apiVersion )
+    public GetHeavyAnalyticsRandomTask( final int weight, final int apiVersion, Randomizer randomizer )
     {
-        super( weight );
+        super( weight, randomizer );
         this.apiVersion = apiVersion;
     }
 
@@ -62,9 +64,11 @@ public class GetHeavyAnalyticsRandomTask
 
     public void execute()
     {
+        Randomizer rnd = getNextRandomizer( getName() );
+
         // Given
-        final Program aRandomProgram = randomProgram();
-        final String aRandomOrgUnitUid = randomOrgUnitUid( aRandomProgram.getOrganisationUnits() );
+        final Program aRandomProgram = rnd.randomElementFromList( entitiesCache.getTrackerPrograms() );
+        final String aRandomOrgUnitUid = rnd.randomElementFromList( aRandomProgram.getOrganisationUnits() );
 
         ApiResponse response = new RestApiActions( "api/analytics" )
             .get( "", new QueryParamsBuilder()
@@ -97,15 +101,5 @@ public class GetHeavyAnalyticsRandomTask
         final List<String> params = asList( ORG_UNIT, PERIOD, DIMENSIONS, DISPLAY_PROPERTY, valueOf( SKIP_META ),
             valueOf( INCLUDE_NUM_DEN ) );
         return endpoint() + " with params: " + join( " # ", params );
-    }
-
-    private String randomOrgUnitUid( final List<String> programOrgUnits )
-    {
-        return DataRandomizer.randomElementFromList( programOrgUnits );
-    }
-
-    private Program randomProgram()
-    {
-        return DataRandomizer.randomElementFromList( entitiesCache.getPrograms() );
     }
 }

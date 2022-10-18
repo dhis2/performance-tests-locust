@@ -1,4 +1,4 @@
-package org.hisp.dhis;
+package org.hisp.dhis.conf;
 
 import java.util.List;
 
@@ -58,4 +58,7 @@ public interface TestConfig
 
     @Key( "logging.debug" )
     boolean debug();
+
+    @Key( "locust.random.seed" )
+    long locustRandomSeed();
 }
