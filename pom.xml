@@ -78,14 +78,9 @@
       <version>0.45</version>
     </dependency>
     <dependency>
-      <groupId>com.github.javafaker</groupId>
-      <artifactId>javafaker</artifactId>
-      <version>1.0.2</version>
-    </dependency>
-    <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>api-test-utils</artifactId>
-      <version>1.1.7</version>
+      <version>1.1.8</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>

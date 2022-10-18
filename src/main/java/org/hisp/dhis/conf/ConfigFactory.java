@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2021, University of Oslo
+ * Copyright (c) 2004-2022, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,59 +25,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.utils;
 
-import java.util.concurrent.ThreadLocalRandom;
+package org.hisp.dhis.conf;
 
-/**
- * @author bobj
- */
-public class UidGenerator
-{
-    public static final String letters = "abcdefghijklmnopqrstuvwxyz"
-        + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+import static org.aeonbits.owner.ConfigFactory.create;
 
-    public static final String ALLOWED_CHARS = "0123456789" + letters;
+public class ConfigFactory {
 
-    public static final int NUMBER_OF_CODEPOINTS = ALLOWED_CHARS.length();
+    public static final TestConfig cfg = create( TestConfig.class );
 
-    public static final int CODESIZE = 11;
-
-    /**
-     * Generates a UID according to the following rules:
-     * <ul>
-     * <li>Alphanumeric characters only.</li>
-     * <li>Exactly 11 characters long.</li>
-     * <li>First character is alphabetic.</li>
-     * </ul>
-     *
-     * @return a UID.
-     */
-    public static String generateUid()
-    {
-        return generateCode( CODESIZE );
-    }
-
-    /**
-     * Generates a pseudo random string with alphanumeric characters.
-     *
-     * @param codeSize the number of characters in the code.
-     * @return the code.
-     */
-    public static String generateCode( int codeSize )
-    {
-        ThreadLocalRandom r = ThreadLocalRandom.current();
-
-        char[] randomChars = new char[codeSize];
-
-        // First char should be a letter
-        randomChars[0] = letters.charAt( r.nextInt( letters.length() ) );
-
-        for ( int i = 1; i < codeSize; ++i )
-        {
-            randomChars[i] = ALLOWED_CHARS.charAt( r.nextInt( NUMBER_OF_CODEPOINTS ) );
-        }
-
-        return new String( randomChars );
+    private ConfigFactory() {
     }
 }

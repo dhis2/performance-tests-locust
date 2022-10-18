@@ -6,12 +6,19 @@ import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.Tei;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.PredictableRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static java.util.stream.Collectors.toList;
+import static org.hisp.dhis.conf.ConfigFactory.cfg;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -21,11 +28,14 @@ public class TeiCacheBuilder
 {
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
-    private EntitiesCache cache;
+    private final EntitiesCache cache;
+
+    private final Randomizer rnd;
 
     public TeiCacheBuilder( EntitiesCache cache )
     {
         this.cache = cache;
+        this.rnd = new PredictableRandomizer(this.getClass().getName().hashCode() * cfg.locustRandomSeed() );
     }
 
     @Override
@@ -60,7 +70,7 @@ public class TeiCacheBuilder
 
             userOrgUnits = userOrgUnits.stream().filter( ou -> program.getOrganisationUnits().contains( ou ) ).collect( toList() );
 
-            List<String> orgUnits = DataRandomizer.randomElementsFromList( userOrgUnits, 1000 );
+            List<String> orgUnits = this.rnd.randomElementsFromList( userOrgUnits, 1000 );
             List<List<String>> partitions = Lists.partition( orgUnits, 250 );
 
             partitions.forEach( p -> {

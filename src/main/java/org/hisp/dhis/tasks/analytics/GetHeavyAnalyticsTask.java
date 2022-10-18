@@ -4,6 +4,7 @@ import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.List;
 
@@ -42,9 +43,9 @@ public class GetHeavyAnalyticsTask
 
     private final int apiVersion;
 
-    public GetHeavyAnalyticsTask( final int weight, final int apiVersion )
+    public GetHeavyAnalyticsTask( final int weight, final int apiVersion, Randomizer randomizer )
     {
-        super( weight );
+        super( weight,randomizer);
         this.weight = weight;
         this.apiVersion = apiVersion;
     }

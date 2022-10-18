@@ -4,6 +4,7 @@ import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -17,9 +18,9 @@ public class GenerateTrackedEntityAttributeValueTask
 
     private ApiResponse response;
 
-    public GenerateTrackedEntityAttributeValueTask( int weight, String trackedEntityAttributeId, UserCredentials userCredentials )
+    public GenerateTrackedEntityAttributeValueTask( int weight, String trackedEntityAttributeId, UserCredentials userCredentials, Randomizer randomizer )
     {
-        super( weight );
+        super( weight, randomizer );
         this.teiAttributeId = trackedEntityAttributeId;
         this.userCredentials = userCredentials;
     }

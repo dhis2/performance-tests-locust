@@ -5,9 +5,9 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.CollectionSerializer;
 import de.javakaffee.kryoserializers.UnmodifiableCollectionsSerializer;
-import org.hisp.dhis.TestConfig;
 import org.hisp.dhis.cache.*;
 import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.conf.TestConfig;
 
 import java.io.*;
 import java.util.ArrayList;

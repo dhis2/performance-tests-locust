@@ -5,7 +5,7 @@ import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.cache.Visualization;
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,9 +21,9 @@ public class GetAnalyticsTask
 
     private Visualization visualization;
 
-    public GetAnalyticsTask( int weight, Visualization visualization, UserCredentials userCredentials )
+    public GetAnalyticsTask( int weight, Visualization visualization, UserCredentials userCredentials, Randomizer randomizer )
     {
-        super( weight );
+        super( weight, randomizer );
         this.visualization = visualization;
         this.userCredentials = userCredentials;
     }
@@ -43,70 +43,66 @@ public class GetAnalyticsTask
     @Override
     public void execute()
     {
-        User user = getUser();
+        Randomizer rnd = getNextRandomizer( getName() );
+        User user = getUser( rnd );
 
-        if ( visualization == null )
-        {
-            visualization = DataRandomizer.randomElementFromList( entitiesCache.getVisualizations() );
-        }
-
-        String query = getRandomAnalyticsQuery( visualization );
+        String query = getRandomAnalyticsQuery( visualization, rnd );
 
         AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
 
         record( authenticatedApiActions.get( query ).getRaw() );
     }
 
-    private String getRandomAnalyticsQuery( Visualization visualization )
+    private String getRandomAnalyticsQuery(Visualization visualization, Randomizer rnd )
     {
         return String
-            .format( "?%s&dimension=%s&dimension=%s", getFilterDimension( visualization ), getRowDimension( visualization ),
-                getColumnDimension( visualization ) );
+            .format( "?%s&dimension=%s&dimension=%s", getFilterDimension( visualization, rnd ), getRowDimension( visualization, rnd ),
+                getColumnDimension( visualization, rnd ) );
     }
 
-    private String getColumnDimension( Visualization visualization )
+    private String getColumnDimension(Visualization visualization, Randomizer rnd)
     {
         if ( visualization.getColumnDimensions() != null )
         {
-            return visualization.getColumnDimensions().stream().map( p -> getDimensionValue( p, visualization ) )
+            return visualization.getColumnDimensions().stream().map( p -> getDimensionValue( p, visualization, rnd ) )
                 .collect( Collectors.joining( "," ) );
         }
 
         return "";
     }
 
-    private String getRowDimension( Visualization visualization )
+    private String getRowDimension( Visualization visualization, Randomizer rnd )
     {
         if ( visualization.getRowDimensions() != null )
         {
-            return visualization.getRowDimensions().stream().map( p -> getDimensionValue( p, visualization ) )
+            return visualization.getRowDimensions().stream().map( p -> getDimensionValue( p, visualization, rnd ) )
                 .collect( Collectors.joining( "," ) );
         }
 
         return "";
     }
 
-    private String getFilterDimension( Visualization visualization )
+    private String getFilterDimension(Visualization visualization, Randomizer rnd )
     {
         if ( visualization.getFilterDimensions() != null )
         {
-            return visualization.getFilterDimensions().stream().map( p -> getDimensionValue( p, visualization ) )
+            return visualization.getFilterDimensions().stream().map( p -> getDimensionValue( p, visualization, rnd ) )
                 .collect( Collectors.joining( "&filter=", "filter=", "" ) );
         }
 
         return "";
     }
 
-    private String getDimensionValue( String dimension, Visualization visualization )
+    private String getDimensionValue(String dimension, Visualization visualization, Randomizer rnd)
     {
         if ( dimension.equalsIgnoreCase( "ou" ) )
         {
-            return "ou:" + getOrgUnit();
+            return "ou:" + getOrgUnit( rnd );
         }
 
         if ( dimension.equalsIgnoreCase( "pe" ) )
         {
-            return "pe:" + getPeriod( visualization.getPeriods() );
+            return "pe:" + getPeriod( visualization.getPeriods(), rnd);
         }
 
         if ( dimension.equalsIgnoreCase( "dx" ) )
@@ -121,12 +117,12 @@ public class GetAnalyticsTask
         return "";
     }
 
-    private String getOrgUnit()
+    private String getOrgUnit( Randomizer rnd )
     {
-        return DataRandomizer.randomElementFromList( Arrays.asList( "USER_ORGUNIT" ) );
+        return rnd.randomElementFromList( Arrays.asList( "USER_ORGUNIT" ) );
     }
 
-    private String getPeriod( List<String> periods )
+    private String getPeriod(List<String> periods, Randomizer rnd)
     {
         if ( periods != null && !periods.isEmpty() )
         {
@@ -136,6 +132,6 @@ public class GetAnalyticsTask
         List<String> relativePeriods = Arrays
             .asList( "THIS_YEAR", "LAST_YEAR", "LAST_MONTH", "LAST_12_MONTHS", "MONTHS_THIS_YEAR", "LAST_QUARTER" );
 
-        return DataRandomizer.randomElementFromList( relativePeriods );
+        return rnd.randomElementFromList( relativePeriods );
     }
 }

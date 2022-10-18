@@ -6,10 +6,12 @@ import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.organisationunit.FeatureType;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 import org.hisp.dhis.utils.UidGenerator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Generates a random Tracked Entity Instance graph.
@@ -29,23 +31,24 @@ public class TrackedEntityInstanceRandomizer
     extends
     AbstractTrackerEntityRandomizer<TrackedEntityInstance>
 {
-    private int maxEvent = 5;
+    private int maxEvent;
 
-    private int minEVent = 1;
+    private int minEVent;
 
-    private EnrollmentRandomizer enrollmentRandomizer;
+    private final EnrollmentRandomizer enrollmentRandomizer;
 
-    public TrackedEntityInstanceRandomizer( int maxEvent, int minEVent )
+    public TrackedEntityInstanceRandomizer( Randomizer rnd, int maxEvent, int minEVent )
     {
+        super( rnd );
         this.maxEvent = maxEvent;
         this.minEVent = minEVent;
 
-        enrollmentRandomizer = new EnrollmentRandomizer( minEVent, maxEvent );
+        enrollmentRandomizer = new EnrollmentRandomizer( rnd, minEVent, maxEvent );
     }
 
-    public TrackedEntityInstanceRandomizer()
+    public TrackedEntityInstanceRandomizer( Randomizer rnd )
     {
-        enrollmentRandomizer = new EnrollmentRandomizer( minEVent, maxEvent );
+        this(rnd, 1, 5 );
     }
 
     @Override
@@ -76,14 +79,14 @@ public class TrackedEntityInstanceRandomizer
         tei.setDeleted( false );
         tei.setFeatureType( FeatureType.NONE );
         tei.setOrgUnit( getOrgUnitFromContextOrRndFromProgram( ctx, program ) );
-        tei.setAttributes( new TrackedEntityAttributeRandomizer().create( ctx, false, ctx.isProgramAttributesInEnrollment() ) );
+        tei.setAttributes( new TrackedEntityAttributeRandomizer(rnd).create( ctx, false, ctx.isProgramAttributesInEnrollment() ) );
 
         return tei;
     }
 
     public TrackedEntityInstances create( EntitiesCache cache, RandomizerContext context, int min, int max )
     {
-        int numberToCreate = DataRandomizer.randomIntInRange( min, max );
+        int numberToCreate = rnd.randomIntInRange( min, max );
 
         return create( cache, context, numberToCreate );
     }

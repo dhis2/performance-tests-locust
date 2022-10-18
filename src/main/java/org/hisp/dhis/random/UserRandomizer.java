@@ -3,7 +3,7 @@ package org.hisp.dhis.random;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.stream.Collectors;
 
@@ -12,14 +12,21 @@ import java.util.stream.Collectors;
  */
 public class UserRandomizer
 {
-    public User getRandomUser( EntitiesCache entitiesCache )
+    private final Randomizer rnd;
+
+    public UserRandomizer( Randomizer rnd )
     {
-        return DataRandomizer.randomElementFromList( entitiesCache.getUsers() );
+        this.rnd = rnd;
+    }
+
+    public User getRandomUser(EntitiesCache entitiesCache )
+    {
+        return rnd.randomElementFromList( entitiesCache.getUsers() );
     }
 
     public User getRandomUserNotAdmin( EntitiesCache cache )
     {
-        return DataRandomizer.randomElementFromList(
+        return rnd.randomElementFromList(
             cache.getUsers().stream().filter( p -> !p.getUserCredentials().equals( cache.getDefaultUser().getUserCredentials() ) )
                 .collect(
                     Collectors.toList() ) );
@@ -27,7 +34,7 @@ public class UserRandomizer
 
     public String getRandomUserOrgUnit( User user )
     {
-        return DataRandomizer.randomElementFromList( user.getOrganisationUnits() );
+        return rnd.randomElementFromList( user.getOrganisationUnits() );
     }
 
     /**
@@ -41,7 +48,7 @@ public class UserRandomizer
     {
         if ( user.getOrganisationUnits().contains( EntitiesCache.getInstance().getRootOu().getId() ) )
         {
-            return DataRandomizer.randomElementFromList( program.getOrganisationUnits() );
+            return rnd.randomElementFromList( program.getOrganisationUnits() );
         }
 
 

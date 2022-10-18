@@ -3,6 +3,7 @@ package org.hisp.dhis.tasks;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.List;
 
@@ -16,15 +17,15 @@ public class GenerateIdTask
 
     private ApiResponse response;
 
-    public GenerateIdTask( UserCredentials userCredentials )
+    public GenerateIdTask(UserCredentials userCredentials, Randomizer randomizer)
     {
-        super(1);
+        super(1, randomizer);
         this.userCredentials = userCredentials;
     }
 
-    public GenerateIdTask( UserCredentials userCredentials, int size )
+    public GenerateIdTask( UserCredentials userCredentials, int size, Randomizer randomizer )
     {
-        this(userCredentials);
+        this(userCredentials, randomizer);
         this.size = size;
     }
 

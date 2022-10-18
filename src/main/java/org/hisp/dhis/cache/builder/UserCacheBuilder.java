@@ -1,7 +1,7 @@
 package org.hisp.dhis.cache.builder;
 
 import org.apache.logging.log4j.util.Strings;
-import org.hisp.dhis.TestConfig;
+import org.hisp.dhis.conf.TestConfig;
 import org.hisp.dhis.actions.RestApiActions;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.cache.User;

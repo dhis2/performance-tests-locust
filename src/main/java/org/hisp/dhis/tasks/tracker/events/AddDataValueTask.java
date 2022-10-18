@@ -8,6 +8,7 @@ import org.hisp.dhis.dxf2.events.event.DataValue;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.utils.JsonObjectBuilder;
 import org.hisp.dhis.utils.JsonParserUtils;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -23,18 +24,14 @@ public class AddDataValueTask
 
     private String tei;
 
-    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program, String tei )
+    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program, String tei,
+                             UserCredentials userCredentials, Randomizer randomizer )
     {
-        super( weight );
+        super( weight,randomizer );
         this.eventId = eventId;
         this.dataValue = dataValue;
         this.eventProgram = program;
         this.tei = tei;
-    }
-
-    public AddDataValueTask( int weight, String eventId, DataValue dataValue, String program, String tei, UserCredentials userCredentials )
-    {
-        this( weight, eventId, dataValue, program, tei );
         this.userCredentials = userCredentials;
     }
 
@@ -54,6 +51,7 @@ public class AddDataValueTask
     public void execute()
         throws Exception
     {
+        Randomizer rnd = getNextRandomizer( getName() );
         JsonObject payload = new JsonObjectBuilder()
             .addProperty( "program", eventProgram )
             .addProperty( "trackedEntityInstance", tei )
@@ -61,7 +59,7 @@ public class AddDataValueTask
             .addOrAppendToArray( "dataValues", JsonParserUtils.toJsonObject( dataValue ).getAsJsonObject() )
             .build();
 
-        performTaskAndRecord( () -> new AuthenticatedApiActions( "/api/events", getUserCredentials() )
+        performTaskAndRecord( () -> new AuthenticatedApiActions( "/api/events", getUserCredentials( rnd ) )
             .update( eventId + "/" + dataValue.getDataElement(), payload, ContentType.JSON.toString() ) );
 
     }

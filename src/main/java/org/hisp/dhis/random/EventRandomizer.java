@@ -33,11 +33,10 @@ import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.ProgramStage;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.event.EventStatus;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 import org.hisp.dhis.utils.UidGenerator;
 
 import java.util.Date;
-import java.util.stream.Collectors;
 
 /**
  * @author Luciano Fiandesio
@@ -46,11 +45,15 @@ public class EventRandomizer
     extends
     AbstractTrackerEntityRandomizer<Event>
 {
-    public Event createWithoutDataValues( EntitiesCache cache, RandomizerContext ctx )
+    public EventRandomizer(Randomizer rnd) {
+        super( rnd );
+    }
+
+    public Event createWithoutDataValues(EntitiesCache cache, RandomizerContext ctx )
     {
         if ( ctx.getProgram() == null )
         {
-            ctx.setProgram( DataRandomizer.randomElementFromList( cache.getProgramsWithAtLeastOneRepeatableStage() ) );
+            ctx.setProgram( rnd.randomElementFromList( cache.getProgramsWithAtLeastOneRepeatableStage() ) );
         }
 
         ProgramStage programStage = ctx.getProgramStage();
@@ -88,7 +91,7 @@ public class EventRandomizer
 
             if ( cache.getTeis().get( ctx.getProgram().getId() ) != null )
             {
-                String teiUid = DataRandomizer.randomElementFromList( cache.getTeis().get( ctx.getProgram().getId() ) )
+                String teiUid = rnd.randomElementFromList( cache.getTeis().get( ctx.getProgram().getId() ) )
                     .getUid();
                 event.setTrackedEntityInstance( teiUid );
             }
@@ -107,14 +110,14 @@ public class EventRandomizer
     {
         Event event = createWithoutDataValues( cache, ctx );
 
-        event.setDataValues( new EventDataValueRandomizer().create( cache, ctx ) );
+        event.setDataValues( new EventDataValueRandomizer(rnd).create( cache, ctx ) );
 
         return event;
     }
 
     private ProgramStage getRandomProgramStageFromProgram( Program program )
     {
-        return DataRandomizer.randomElementFromList(
+        return rnd.randomElementFromList(
             program.getProgramStages() );
     }
 }
