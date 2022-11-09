@@ -14,10 +14,10 @@ pipeline {
         string(name: 'MASTER_HOST', defaultValue: 'master', description: 'Which master to connect to?')
         string(name: 'INSTANCE', defaultValue: '2.38.1.1', description: 'Which instance to target?')
         string(name: 'TIME', defaultValue: '60m', description: 'How much time to run the tests for?')
-        string(name: 'USERS', defaultValue: '100', description: 'How much users?')
+        string(name: 'USERS', defaultValue: '250', description: 'How much users?')
         string(name: 'RATE', defaultValue: '10', description: 'At what rate to add users?')
         string(name: 'COLUMN', defaultValue: 'Average Response Time,90%', description: 'Which column to compare?\n(comma-separated list of strings)')
-        choice(name: 'REPORT', choices: ['Baseline', 'Previous', 'Both'], description: 'Which report/s to compare with?')
+        choice(name: 'REPORT', choices: ['Both', 'Baseline', 'Previous'], description: 'Which report/s to compare with?')
     }
 
     environment {
