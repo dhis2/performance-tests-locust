@@ -27,11 +27,7 @@
  */
 package org.hisp.dhis.utils;
 
-import java.security.SecureRandom;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.regex.Pattern;
-
-import org.springframework.util.Base64Utils;
 
 /**
  * @author bobj

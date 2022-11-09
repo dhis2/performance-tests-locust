@@ -8,7 +8,7 @@ import org.hisp.dhis.tests.CategoryType;
 import java.io.IOException;
 
 import static io.restassured.RestAssured.preemptive;
-import static org.aeonbits.owner.ConfigFactory.create;
+import static org.hisp.dhis.conf.ConfigFactory.cfg;
 import static org.hisp.dhis.utils.CacheUtils.initCache;
 
 /**
@@ -16,8 +16,6 @@ import static org.hisp.dhis.utils.CacheUtils.initCache;
  */
 public class Main
 {
-    private static final TestConfig cfg = create( TestConfig.class );
-
     public static void main( String[] args )
         throws IOException, InstantiationException, IllegalAccessException
     {
@@ -31,6 +29,6 @@ public class Main
 
         // locust.runTasks(  new TrackerCapture_addTeiTaskSet( 1 ) ) ;
         // categories are under /src/main/tests
-        locust.runTasks( CategoryType.ALL, CategoryType.NTI);
+        locust.runTasks( CategoryType.ALL, CategoryType.NTI );
     }
 }

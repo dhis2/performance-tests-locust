@@ -3,10 +3,12 @@ package org.hisp.dhis.tasks.tracker.enrollments;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
+import org.hisp.dhis.dxf2.events.enrollment.Enrollments;
 import org.hisp.dhis.random.EnrollmentRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -16,19 +18,14 @@ public class AddEnrollmentTask
 {
     private String endpoint = "/api/enrollments";
 
-    private RandomizerContext ctx = RandomizerContext.EMPTY_CONTEXT();
+    private Enrollments enrollments;
 
     private ApiResponse response;
 
-    public AddEnrollmentTask( int weight )
+    public AddEnrollmentTask( int weight, Enrollments enrollments, UserCredentials userCredentials, Randomizer randomizer )
     {
-        super( weight );
-    }
-
-    public AddEnrollmentTask( int weight, RandomizerContext context, UserCredentials userCredentials )
-    {
-        this( weight );
-        this.ctx = context;
+        super( weight,randomizer );
+        this.enrollments = enrollments;
         this.userCredentials = userCredentials;
     }
 
@@ -48,13 +45,9 @@ public class AddEnrollmentTask
     public void execute()
         throws Exception
     {
-        EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer();
+        AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, this.userCredentials );
 
-        Enrollment enrollment = enrollmentRandomizer.createWithoutEvents( entitiesCache, ctx );
-
-        AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, getUserCredentials() );
-
-        response = performTaskAndRecord( () -> authenticatedApiActions.post( enrollment ), 201 );
+        response = performTaskAndRecord( () -> authenticatedApiActions.post( this.enrollments ), 201 );
     }
 
     public ApiResponse executeAndGetBody()

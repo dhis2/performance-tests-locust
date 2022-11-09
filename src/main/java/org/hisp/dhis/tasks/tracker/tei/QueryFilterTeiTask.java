@@ -32,6 +32,7 @@ import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author David Katuscak (katuscak.d@gmail.com)
@@ -48,9 +49,10 @@ public class QueryFilterTeiTask
 
     private ApiResponse response;
 
-    public QueryFilterTeiTask( int weight, String query, UserCredentials userCredentials, String customIdentifier )
+    public QueryFilterTeiTask( int weight, String query, UserCredentials userCredentials,
+                               String customIdentifier, Randomizer randomizer )
     {
-        super( weight );
+        super( weight,randomizer );
         this.query = query;
         this.userCredentials = userCredentials;
         this.identifier = String.format( " ( %s )", customIdentifier );
@@ -71,7 +73,7 @@ public class QueryFilterTeiTask
     @Override
     public void execute()
     {
-        this.response = new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query );
+        this.response = new AuthenticatedApiActions( this.endpoint, this.userCredentials ).get( this.query );
 
         record( response.getRaw() );
     }

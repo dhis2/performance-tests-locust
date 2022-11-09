@@ -3,6 +3,7 @@ package org.hisp.dhis.tasks.tracker.importer;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -15,9 +16,9 @@ public class QueryTrackerEventsTask
 
     private String query;
 
-    public QueryTrackerEventsTask( String query, UserCredentials userCredentials )
+    public QueryTrackerEventsTask(String query, UserCredentials userCredentials, Randomizer randomizer)
     {
-        super( 1 );
+        super( 1, randomizer );
         this.query = query;
         this.userCredentials = userCredentials;
     }
@@ -36,7 +37,7 @@ public class QueryTrackerEventsTask
     public void execute()
         throws Exception
     {
-        performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials() ).get( this.query ) );
+        performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, this.userCredentials ).get( this.query ) );
     }
 }
 

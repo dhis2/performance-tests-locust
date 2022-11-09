@@ -4,27 +4,27 @@ import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSet;
 import org.hisp.dhis.random.DataValueRandomizer;
-import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
 public class Android_syncDataValuesTaskSet
-    extends DhisAbstractTask
+    extends DhisAbstractTaskSet
 {
-    private String endpoint = "/api/dataValueSets";
+    private static final String ENDPOINT = "/api/dataValueSets";
 
     public Android_syncDataValuesTaskSet( int weight )
     {
-        super( weight );
+        super( ENDPOINT, weight );
     }
 
     @Override
     public String getName()
     {
-        return endpoint;
+        return ENDPOINT;
     }
 
     @Override
@@ -37,16 +37,17 @@ public class Android_syncDataValuesTaskSet
     public void execute()
         throws InterruptedException
     {
-        User user = getUser();
-        AuthenticatedApiActions dataValueSetActions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
+        Randomizer rnd = getNextRandomizer( getName() );
+        User user = getUser(rnd);
+        AuthenticatedApiActions dataValueSetActions = new AuthenticatedApiActions(ENDPOINT, user.getUserCredentials() );
 
-        DataValueSet aggregateDataValues = new DataValueRandomizer()
-            .create( new UserRandomizer().getRandomUserOrgUnit( user ), entitiesCache, 10, 50 );
+        DataValueSet aggregateDataValues = new DataValueRandomizer( rnd )
+            .create( getRandomUserOrgUnit( user, rnd ), entitiesCache, 10, 50 );
 
         ApiResponse response = dataValueSetActions.post( aggregateDataValues );
 
         record( response.getRaw() );
 
-        waitBetweenTasks();
+        waitBetweenTasks( rnd );
     }
 }

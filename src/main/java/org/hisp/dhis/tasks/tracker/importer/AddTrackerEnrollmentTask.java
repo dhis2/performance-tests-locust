@@ -1,16 +1,15 @@
 package org.hisp.dhis.tasks.tracker.importer;
 
 import com.google.common.collect.Lists;
-import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.models.Enrollments;
 import org.hisp.dhis.random.EnrollmentRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
-import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tracker.domain.Enrollment;
 import org.hisp.dhis.tracker.domain.mapper.EnrollmentMapperImpl;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -20,19 +19,15 @@ public class AddTrackerEnrollmentTask
 {
     private String endpoint = "/api/tracker";
 
-    private RandomizerContext ctx = RandomizerContext.EMPTY_CONTEXT();
+    private Enrollments enrollments;
 
     private TrackerApiResponse response;
 
-    public AddTrackerEnrollmentTask( int weight )
+    public AddTrackerEnrollmentTask( int weight, Enrollments enrollments, UserCredentials userCredentials,
+                                     Randomizer randomizer)
     {
-        super( weight );
-    }
-
-    public AddTrackerEnrollmentTask( int weight, RandomizerContext context, UserCredentials userCredentials )
-    {
-        this( weight );
-        this.ctx = context;
+        super( weight, randomizer );
+        this.enrollments = enrollments;
         this.userCredentials = userCredentials;
     }
 
@@ -52,13 +47,9 @@ public class AddTrackerEnrollmentTask
     public void execute()
         throws Exception
     {
-        EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer();
+        Randomizer rnd = getNextRandomizer( getName() );
 
-        Enrollment enrollment = new EnrollmentMapperImpl().from( enrollmentRandomizer.createWithoutEvents( entitiesCache, ctx ) );
-        Enrollments enrollments = new Enrollments();
-        enrollments.setEnrollments( Lists.newArrayList( enrollment ) );
-
-        response = new AddTrackerDataTask( 1, getUserCredentials(), enrollments, "enrollment"  ).executeAndGetBody();
+        response = new AddTrackerDataTask( 1, this.userCredentials, this.enrollments, "enrollment", rnd  ).executeAndGetBody();
     }
 
     public TrackerApiResponse executeAndGetBody()

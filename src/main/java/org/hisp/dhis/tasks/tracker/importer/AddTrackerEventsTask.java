@@ -6,12 +6,11 @@ import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.models.Events;
 import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
-import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tracker.domain.Event;
 import org.hisp.dhis.tracker.domain.mapper.EventMapperImpl;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,23 +26,17 @@ public class AddTrackerEventsTask
 
     private String endpoint = "/api/tracker";
 
-    private List<String> blackListedTeis = new ArrayList<>();
-
     private Events events;
 
     private TrackerApiResponse response;
 
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
-    public AddTrackerEventsTask( int weight )
+    public AddTrackerEventsTask( int weight, Events events, UserCredentials userCredentials,
+                                 Randomizer randomizer )
     {
-        super( weight );
-        eventRandomizer = new EventRandomizer();
-    }
-
-    public AddTrackerEventsTask( int weight, Events events, UserCredentials userCredentials )
-    {
-        this( weight );
+        super( weight, randomizer );
+        eventRandomizer = new EventRandomizer(randomizer);
         this.events = events;
         this.userCredentials = userCredentials;
     }
@@ -60,42 +53,13 @@ public class AddTrackerEventsTask
         return "POST";
     }
 
-    private Events createRandomEvents()
-    {
-
-        List<Event> rndEvents = new ArrayList<>();
-        for ( int i = 0; i < DataRandomizer.randomIntInRange( 5, 10 ); i++ )
-        {
-            Event randomEvent = null;
-            try
-            {
-                randomEvent = new EventMapperImpl()
-                    .from( eventRandomizer.create( entitiesCache, RandomizerContext.EMPTY_CONTEXT() ) );
-
-            }
-            catch ( Exception e )
-            {
-                logger.warning( "An error occurred while creating a random event: " + e.getMessage() );
-            }
-
-            if ( randomEvent != null && !blackListedTeis.contains( randomEvent.getTrackedEntity() ) )
-            {
-                rndEvents.add( randomEvent );
-            }
-        }
-
-        return Events.builder().events( rndEvents ).build();
-    }
-
     @Override
     public void execute()
         throws Exception
     {
-        Events rndEvents = events != null ? events : createRandomEvents();
+        Randomizer rnd = getNextRandomizer( getName() );
 
-        RestApiActions apiActions = new AuthenticatedApiActions( this.endpoint, getUserCredentials() );
-
-        response = new AddTrackerDataTask( 1, getUserCredentials(), rndEvents, "events" ).executeAndGetBody();
+        response = new AddTrackerDataTask( 1, this.userCredentials, events, "events", rnd ).executeAndGetBody();
     }
 
     public TrackerApiResponse executeAndGetResponse()

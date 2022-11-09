@@ -7,14 +7,14 @@ import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
+import org.hisp.dhis.models.ReserveAttributeValuesException;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
-import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
+import org.hisp.dhis.utils.Randomizer;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
 public class Android_syncTeisTaskSet
-    extends DhisAbstractTask
+    extends DhisAbstractTaskSet
 {
     private int minPayload = 10;
 
@@ -30,7 +30,7 @@ public class Android_syncTeisTaskSet
 
     public Android_syncTeisTaskSet( int weight )
     {
-        super( weight );
+        super( "Android: sync teis", weight );
     }
 
     public Android_syncTeisTaskSet( int weight, int payloadSize )
@@ -56,18 +56,24 @@ public class Android_syncTeisTaskSet
     public void execute()
         throws Exception
     {
-        User user = new UserRandomizer().getRandomUser( entitiesCache );
-        Program program = DataRandomizer.randomElementFromList( entitiesCache.getTrackerPrograms() );
-        String ou = new UserRandomizer().getRandomUserOrProgramOrgUnit( user, program );
+        Randomizer rnd = getNextRandomizer( getName() );
+        User user = getRandomUser( rnd );
+        Program program = rnd.randomElementFromList( entitiesCache.getTrackerPrograms() );
+        String ou = getRandomUserOrProgramOrgUnit( user, program, rnd );
 
         RandomizerContext context = new RandomizerContext();
         context.setProgram( program );
         context.setOrgUnitUid( ou );
 
-        TrackedEntityInstances teis = new TrackedEntityInstanceRandomizer()
+        TrackedEntityInstances teis = new TrackedEntityInstanceRandomizer(rnd)
             .create( this.entitiesCache, context, minPayload, maxPayload );
 
-        generateAttributes( program, teis.getTrackedEntityInstances(), user.getUserCredentials() );
+        try
+        {
+            generateAttributes( program, teis.getTrackedEntityInstances(), user.getUserCredentials(), rnd );
+        } catch ( ReserveAttributeValuesException e ) {
+            return;
+        }
 
         performTaskAndRecord( () -> {
             ApiResponse response = new AuthenticatedApiActions( "/api/trackedEntityInstances", user.getUserCredentials() )
@@ -76,16 +82,16 @@ public class Android_syncTeisTaskSet
             return response;
         }, response -> response.extractString( "status" ).equalsIgnoreCase( "ERROR" ) ? false : true );
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 
-    private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials )
+    private void generateAttributes(Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials, Randomizer rnd)
         throws Exception
     {
         for ( TrackedEntityAttribute att : program.getGeneratedAttributes() )
         {
             new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
-                userCredentials, teis.size() ).executeAndAddAttributes( teis );
+                userCredentials, teis.size(), rnd ).executeAndAddAttributes( teis );
         }
     }
 

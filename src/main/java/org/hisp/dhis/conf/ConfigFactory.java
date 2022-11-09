@@ -1,7 +1,5 @@
-package org.hisp.dhis.random;
-
 /*
- * Copyright (c) 2004-2020, University of Oslo
+ * Copyright (c) 2004-2022, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,53 +26,14 @@ package org.hisp.dhis.random;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import lombok.Getter;
-import lombok.Setter;
-import org.hisp.dhis.cache.Program;
-import org.hisp.dhis.cache.ProgramStage;
+package org.hisp.dhis.conf;
 
-/**
- * @author Luciano Fiandesio
- */
-@Getter
-@Setter
-public class RandomizerContext
-{
-    private Program program;
+import static org.aeonbits.owner.ConfigFactory.create;
 
-    private ProgramStage programStage;
+public class ConfigFactory {
 
-    private String orgUnitUid;
+    public static final TestConfig cfg = create( TestConfig.class );
 
-    private String teiId;
-
-    private String enrollmentId;
-
-    private String teiType;
-
-    /**
-     * If true, tracked entity attributes assigned to program will be created in enrollment.
-     * Can be used when importing TEIs with NTI.
-     */
-    private boolean programAttributesInEnrollment;
-
-    /**
-     * If true, TrackedEntityInstances, Enrollments and Events will have generated ids.
-     */
-    private boolean generateIds;
-    /**
-     * If true, a TEI is generated without attributes that would be assigned by program rule engine.
-     * Events are generated without data elements assigned by program rules
-     */
-    private boolean skipGenerationWhenAssignedByProgramRules;
-
-    /**
-     * if true, a TEI is not generated when creating a new random event
-     */
-    private boolean skipTeiInEvent;
-
-    /**
-     * if true, a TEI reference is not used when creating a new ranndom enrollment
-     */
-    private boolean skipTeiInEnrollment;
+    private ConfigFactory() {
+    }
 }

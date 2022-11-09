@@ -1,31 +1,31 @@
-package org.hisp.dhis.tasks.aggregate;
+package org.hisp.dhis.tasksets.aggregate;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.dxf2.datavalue.DataValue;
 import org.hisp.dhis.random.DataValueRandomizer;
-import org.hisp.dhis.random.UserRandomizer;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.tasks.DhisAbstractTask;
+import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
+import org.hisp.dhis.utils.Randomizer;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class AddDataValueTask
-    extends DhisAbstractTask
+public class TrackerCapture_addDataValueTask
+    extends DhisAbstractTaskSet
 {
-    private String endpoint = "/api/dataValues";
+    private static final String NAME = "/api/dataValues";
 
-    public AddDataValueTask( final int weight )
+    public TrackerCapture_addDataValueTask(final int weight )
     {
-        super( weight );
+        super( NAME, weight );
     }
 
     @Override
     public String getName()
     {
-        return endpoint;
+        return NAME;
     }
 
     @Override
@@ -38,11 +38,12 @@ public class AddDataValueTask
     public void execute()
         throws InterruptedException
     {
-        User user = getUser();
-        AuthenticatedApiActions dataValueActions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
+        Randomizer rnd = getNextRandomizer( getName() );
+        User user = getUser(rnd);
+        AuthenticatedApiActions dataValueActions = new AuthenticatedApiActions( NAME, user.getUserCredentials() );
 
-        DataValue aggregateDataValue = new DataValueRandomizer()
-            .create( new UserRandomizer().getRandomUserOrgUnit( user ), entitiesCache );
+        DataValue aggregateDataValue = new DataValueRandomizer(rnd)
+            .create( getRandomUserOrgUnit( user, rnd ), entitiesCache );
 
         ApiResponse response = dataValueActions.post( aggregateDataValue, new QueryParamsBuilder()
             .add( "de", aggregateDataValue.getDataElement() )
@@ -52,6 +53,6 @@ public class AddDataValueTask
             .add( "ou=", aggregateDataValue.getOrgUnit() ) );
 
         record( response.getRaw(), 201 );
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 }

@@ -1,10 +1,11 @@
 package org.hisp.dhis.random;
 
+import com.google.api.client.util.Lists;
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.dxf2.events.event.DataValue;
-import org.hisp.dhis.utils.DataRandomizer;
+import org.hisp.dhis.utils.Randomizer;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -15,8 +16,16 @@ import java.util.List;
 public class EventDataValueRandomizer
     implements DhisEntityRandomizer<ListOrderedSet>
 {
+    private final Randomizer rnd;
 
-    private DataValue withRandomValue( DataElement dataElement )
+    private final DataValueRandomizer dataValueRandomizer;
+
+    public EventDataValueRandomizer(Randomizer rnd) {
+        this.rnd = rnd;
+        this.dataValueRandomizer = new DataValueRandomizer(this.rnd);
+    }
+
+    private DataValue withRandomValue(DataElement dataElement )
     {
         DataValue dataValue = new DataValue();
         dataValue.setDataElement( dataElement.getUid() );
@@ -24,11 +33,11 @@ public class EventDataValueRandomizer
         String val;
         if ( !CollectionUtils.isEmpty( dataElement.getOptionSet() ) )
         {
-            val = DataRandomizer.randomElementFromList( dataElement.getOptionSet() );
+            val = rnd.randomElementFromList( dataElement.getOptionSet() );
         }
         else
         {
-            val = new DataValueRandomizer().rndValueFrom( dataElement.getValueType() );
+            val = dataValueRandomizer.rndValueFrom( dataElement.getValueType() );
         }
 
         dataValue.setValue( val );
@@ -38,7 +47,7 @@ public class EventDataValueRandomizer
     @Override
     public ListOrderedSet create( EntitiesCache cache, RandomizerContext randomizerContext )
     {
-        List<DataElement> dataElements = randomizerContext.getProgramStage().getProgramStageDataElements();
+        List<DataElement> dataElements = Lists.newArrayList( randomizerContext.getProgramStage().getProgramStageDataElements() );
 
         ListOrderedSet dataValues = new ListOrderedSet();
         if ( randomizerContext.isSkipGenerationWhenAssignedByProgramRules() )
