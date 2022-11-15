@@ -1,0 +1,32 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  publish:
+    env:
+      IMAGE_TAG: ${{ github.ref_name }}
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build images
+      run: docker compose build
+
+    - name: Test images
+      timeout-minutes: 3
+      run: |
+        TARGET=https://example.org MASTER_HOST=master docker compose up -d
+
+        sleep 5
+
+        bash -c 'while [[ "$(curl -sS -o /dev/null -w %{http_code} localhost:8089)" != "200" ]]; do sleep 5; done'
+
+        worker_logs=$(docker compose logs worker)
+        [[ "$worker_logs" =~ 'Hold on while a new cache is created.' ]]
+
+    - name: Publish images
+      run: docker compose push
