@@ -52,8 +52,6 @@ pipeline {
                         containers = containers + " " + params.MASTER_HOST
                     }
                     sh "mkdir -p $LOCUST_REPORT_DIR"
-                    sh "docker-compose build $containers"
-                    //sh "docker-compose pull $containers"
                     sh "$COMPOSE_ARGS docker-compose up --abort-on-container-exit $containers"
                 }
             }
