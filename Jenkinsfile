@@ -11,6 +11,7 @@ pipeline {
     }
 
     parameters {
+        string(name: 'LOCUST_IMAGES_TAG', defaultValue: '0.0.1', description: 'Which version of the Locust master and worker to use?')
         string(name: 'MASTER_HOST', defaultValue: 'master', description: 'Which master to connect to?')
         string(name: 'INSTANCE', defaultValue: '2.38.1.1', description: 'Which instance to target?')
         string(name: 'TIME', defaultValue: '60m', description: 'How much time to run the tests for?')
@@ -22,6 +23,7 @@ pipeline {
 
     environment {
         //AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
+        IMAGE_TAG = "${params.LOCUST_IMAGES_TAG}"
         LOCUST_REPORT_DIR = "reports"
         HTML_REPORT_FILE = "test_report.html"
         CSV_REPORT_FILE = "dhis_stats.csv"
@@ -52,6 +54,7 @@ pipeline {
                         containers = containers + " " + params.MASTER_HOST
                     }
                     sh "mkdir -p $LOCUST_REPORT_DIR"
+                    sh "docker-compose pull $containers"
                     sh "$COMPOSE_ARGS docker-compose up --abort-on-container-exit $containers"
                 }
             }
