@@ -11,7 +11,7 @@ pipeline {
     }
 
     parameters {
-        string(name: 'LOCUST_IMAGES_TAG', defaultValue: '0.0.1', description: 'Which version of the Locust master and worker to use?')
+        string(name: 'LOCUST_IMAGES_TAG', defaultValue: '0.1.0', description: 'Which version of the Locust master and worker to use?')
         string(name: 'MASTER_HOST', defaultValue: 'master', description: 'Which master to connect to?')
         string(name: 'INSTANCE', defaultValue: '2.38.1.1', description: 'Which instance to target?')
         string(name: 'TIME', defaultValue: '60m', description: 'How much time to run the tests for?')
