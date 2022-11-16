@@ -74,7 +74,7 @@ public class TrackedEntityInstanceRandomizer
             tei.setTrackedEntityInstance( UidGenerator.generateUid() );
         }
         tei.setStoredBy( "performance-test" );
-        tei.setTrackedEntityType( program.getTrackedEntityType() );
+        tei.setTrackedEntityType( ctx.getTeiType() == null ? program.getTrackedEntityType() : ctx.getTeiType() );
         tei.setInactive( false );
         tei.setDeleted( false );
         tei.setFeatureType( FeatureType.NONE );

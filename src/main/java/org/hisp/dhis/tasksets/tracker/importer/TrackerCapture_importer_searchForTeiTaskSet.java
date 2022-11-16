@@ -7,6 +7,7 @@ import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.tracker.events.QueryEventsTask;
 import org.hisp.dhis.tasks.tracker.importer.GetTrackerTeiTask;
+import org.hisp.dhis.tasks.tracker.importer.QueryTrackerEventsTask;
 import org.hisp.dhis.tasks.tracker.importer.QueryTrackerTeisTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
@@ -67,17 +68,18 @@ public class TrackerCapture_importer_searchForTeiTaskSet
             String teiId = row.get( "trackedEntity" ).toString();
 
             rows.stream().filter( p ->  !p.get(
-                "trackedEntity" ).toString().isEmpty()
+                    "trackedEntity" ).toString().isEmpty()
             ).forEach(  p-> {
                 String tei = p.get( "trackedEntity" ).toString();
                 new QueryEventsTask( String.format( "?program=%s&programStage=%s&orgUnit=%s&ouMode=DESCENDANTS&trackedEntityInstance=%s&fields=created,eventDate,dataValues[dataElement,value]",
                         program.getId(), program.getProgramStages().get( 0 ).getId(), entitiesCache.getRootOu().getId(), tei),
                         entitiesCache.getDefaultUser().getUserCredentials(), rnd ).execute();
             } );
+
             new GetTrackerTeiTask( teiId, user.getUserCredentials(), rnd ).execute();
         }
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
 
     }
 
@@ -106,8 +108,7 @@ public class TrackerCapture_importer_searchForTeiTaskSet
 
     private void preloadAttributes()
     {
-        for ( Program program : this.entitiesCache.getTrackerPrograms()
-        )
+        for ( Program program : this.entitiesCache.getTrackerPrograms())
         {
             List<TrackedEntityAttribute> searchableAttributes = program
                 .getAttributes().stream().parallel().filter( a -> a.isSearchable() && a.getValueType().equals( ValueType.TEXT ) )

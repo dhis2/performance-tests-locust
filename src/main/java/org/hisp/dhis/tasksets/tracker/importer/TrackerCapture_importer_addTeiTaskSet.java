@@ -6,8 +6,10 @@ import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.event.DataValue;
+import org.hisp.dhis.models.Enrollments;
 import org.hisp.dhis.models.Events;
 import org.hisp.dhis.models.TrackedEntities;
+import org.hisp.dhis.random.EnrollmentRandomizer;
 import org.hisp.dhis.random.EventDataValueRandomizer;
 import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
@@ -23,9 +25,11 @@ import org.hisp.dhis.tasks.tracker.importer.AddTrackerTeiTask;
 import org.hisp.dhis.tasks.tracker.importer.QueryTrackerTeisTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.tracker.domain.Attribute;
+import org.hisp.dhis.tracker.domain.Enrollment;
 import org.hisp.dhis.tracker.domain.Event;
 import org.hisp.dhis.tracker.domain.TrackedEntity;
 import org.hisp.dhis.tracker.domain.mapper.DataValueMapperImpl;
+import org.hisp.dhis.tracker.domain.mapper.EnrollmentMapperImpl;
 import org.hisp.dhis.tracker.domain.mapper.EventMapperImpl;
 import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
 import org.hisp.dhis.utils.Randomizer;
@@ -77,8 +81,6 @@ public class TrackerCapture_importer_addTeiTaskSet
 
         TrackedEntities trackedEntityInstances = TrackedEntities.builder().trackedEntities( Lists.newArrayList( tei ) ).build();
 
-        long time = System.currentTimeMillis();
-
         new QueryTrackerTeisTask( 1,
             String.format( "?program=%s&orgUnit=%s&ouMode=SELECTED&pageSize=50&page=1&totalPages=false", program.getId(), ou ),
             user.getUserCredentials(), rnd ).execute();
@@ -88,18 +90,22 @@ public class TrackerCapture_importer_addTeiTaskSet
 
         if ( body.extractString( "status" ).equalsIgnoreCase( "ERROR" ) || body.extractImportedTeis().isEmpty() )
         {
-            recordFailure( System.currentTimeMillis() - time, "TEI wasn't created" );
+            logWarningIfDebugEnabled( "TEI wasn't created" );
             return;
         }
 
         context.setTeiId( body.extractImportedTeis().get( 0 ) );
 
-        TrackerApiResponse response = new AddTrackerEnrollmentTask( 1, context, user.getUserCredentials(), rnd )
+        Enrollment enrollment = new EnrollmentMapperImpl().from(
+                new EnrollmentRandomizer(rnd).createWithoutEvents( entitiesCache, context ) );
+        Enrollments enrollments = Enrollments.builder().enrollments(Lists.newArrayList( enrollment )).build();
+
+        TrackerApiResponse response = new AddTrackerEnrollmentTask( 1, enrollments, user.getUserCredentials(), rnd )
             .executeAndGetBody();
 
         if ( response.extractImportedEnrollments() == null || response.extractImportedEnrollments().isEmpty() )
         {
-            recordFailure( System.currentTimeMillis() - time, "Enrollment wasn't created" );
+            logWarningIfDebugEnabled( "Enrollment wasn't created" );
             return;
         }
 
@@ -109,12 +115,12 @@ public class TrackerCapture_importer_addTeiTaskSet
         context.setSkipGenerationWhenAssignedByProgramRules( true );
 
         Event event = new EventMapperImpl().from( new EventRandomizer(rnd).createWithoutDataValues( entitiesCache, context ) );
-        response = new AddTrackerEventsTask( 1, Events.builder().build().addEvent( event ),
-            user.getUserCredentials(), rnd ).executeAndGetResponse();
+        Events events = Events.builder().events(Lists.newArrayList(event)).build();
+        response = new AddTrackerEventsTask( 1, events, user.getUserCredentials(), rnd ).executeAndGetResponse();
 
         if ( response.extractImportedEvents() == null || response.extractImportedEvents().isEmpty() )
         {
-            recordFailure( System.currentTimeMillis() - time, "Event wasn't created" );
+            logWarningIfDebugEnabled( "Event wasn't created" );
             return;
         }
 
@@ -132,7 +138,7 @@ public class TrackerCapture_importer_addTeiTaskSet
         taskSet.execute();
         //recordSuccess( System.currentTimeMillis() - time, 0 );
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 
     private void generateAttributes( Program program, TrackedEntity tei, UserCredentials userCredentials, Randomizer rnd )

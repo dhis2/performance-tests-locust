@@ -8,6 +8,7 @@ import org.hisp.dhis.dxf2.events.trackedentity.Relationship;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
 import org.hisp.dhis.models.TrackedEntities;
+import org.hisp.dhis.models.ReserveAttributeValuesException;
 import org.hisp.dhis.models.TrackerPayload;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.RelationshipRandomizer;
@@ -54,7 +55,7 @@ public class Android_importer_syncTeisTaskSet
     @Override
     public String getName()
     {
-        return NAME;
+        return NAME + "?skipRuleEngine=" + this.skipRuleEngine;
     }
 
     @Override
@@ -79,7 +80,11 @@ public class Android_importer_syncTeisTaskSet
         context.setProgramAttributesInEnrollment( true );
         TrackedEntityInstances instances = new TrackedEntityInstanceRandomizer(rnd).create( entitiesCache, context, 20, 20 );
 
-        generateAttributes( context.getProgram(), instances.getTrackedEntityInstances(), user.getUserCredentials(), rnd );
+        try {
+            generateAttributes( context.getProgram(), instances.getTrackedEntityInstances(), user.getUserCredentials(), rnd );
+        } catch ( ReserveAttributeValuesException e ){
+            return;
+        }
 
         TrackedEntities trackedEntities = TrackedEntities.builder()
             .trackedEntities( instances.getTrackedEntityInstances().stream().
@@ -99,7 +104,7 @@ public class Android_importer_syncTeisTaskSet
 
         new AddTrackerDataTask( 1, user.getUserCredentials(), payload, "FULL", rnd, "skipRuleEngine=" + this.skipRuleEngine, "skipSideEffects=" + this.skipRuleEngine ).execute();
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 
     private void generateAttributes( Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials, Randomizer rnd )

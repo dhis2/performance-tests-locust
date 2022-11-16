@@ -19,15 +19,15 @@ public class AddTrackerEnrollmentTask
 {
     private String endpoint = "/api/tracker";
 
-    private RandomizerContext ctx;
+    private Enrollments enrollments;
 
     private TrackerApiResponse response;
 
-    public AddTrackerEnrollmentTask( int weight, RandomizerContext context, UserCredentials userCredentials,
+    public AddTrackerEnrollmentTask( int weight, Enrollments enrollments, UserCredentials userCredentials,
                                      Randomizer randomizer)
     {
         super( weight, randomizer );
-        this.ctx = context;
+        this.enrollments = enrollments;
         this.userCredentials = userCredentials;
     }
 
@@ -48,13 +48,8 @@ public class AddTrackerEnrollmentTask
         throws Exception
     {
         Randomizer rnd = getNextRandomizer( getName() );
-        EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer(rnd);
 
-        Enrollment enrollment = new EnrollmentMapperImpl().from( enrollmentRandomizer.createWithoutEvents( entitiesCache, ctx ) );
-        Enrollments enrollments = new Enrollments();
-        enrollments.setEnrollments( Lists.newArrayList( enrollment ) );
-
-        response = new AddTrackerDataTask( 1, getUserCredentials( rnd ), enrollments, "enrollment", rnd  ).executeAndGetBody();
+        response = new AddTrackerDataTask( 1, this.userCredentials, this.enrollments, "enrollment", rnd  ).executeAndGetBody();
     }
 
     public TrackerApiResponse executeAndGetBody()

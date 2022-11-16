@@ -38,7 +38,6 @@ public class LoadDashboardTask
         throws Exception
     {
         Randomizer rnd = getNextRandomizer( getName() );
-        User user = getUser( rnd );
 
         Dashboard dashboard = rnd.randomElementFromList( entitiesCache.getDashboards() );
 
@@ -52,9 +51,9 @@ public class LoadDashboardTask
                 Visualization vi = dashboard.getDashboardItems().get( o ).getVisualization();
                 if ( vi != null )
                 {
-                    new GetAnalyticsTask( 1, vi, user.getUserCredentials(), rnd ).execute();
+                    new GetAnalyticsTask( 1, vi, this.userCredentials, rnd ).execute();
                 }
             } );
-        waitBetweenTasks();
+        waitBetweenTasks( rnd );
     }
 }

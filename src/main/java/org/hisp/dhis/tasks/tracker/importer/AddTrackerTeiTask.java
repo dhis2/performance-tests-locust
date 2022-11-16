@@ -43,11 +43,8 @@ public class AddTrackerTeiTask
         throws Exception
     {
         Randomizer rnd = getNextRandomizer( getName() );
-        User user = getUser( rnd );
-        RandomizerContext context = new RandomizerContext();
-        context.setOrgUnitUid( getRandomUserOrgUnit( user, rnd ) );
 
-        response = new AddTrackerDataTask( 1, user.getUserCredentials(), trackedEntityInstanceBody, "teis", rnd ).executeAndGetBody();
+        response = new AddTrackerDataTask( 1, this.userCredentials, trackedEntityInstanceBody, "teis", rnd ).executeAndGetBody();
     }
 
     public TrackerApiResponse executeAndGetResponse()

@@ -56,11 +56,9 @@ public class EventRandomizer
             ctx.setProgram( rnd.randomElementFromList( cache.getProgramsWithAtLeastOneRepeatableStage() ) );
         }
 
-        ProgramStage programStage = ctx.getProgramStage();
-        if ( programStage == null )
+        if ( ctx.getProgramStage() == null )
         {
-            programStage = getRandomProgramStageFromProgram( ctx.getProgram() );
-            ctx.setProgramStage( programStage );
+            ctx.setProgramStage( getRandomProgramStageFromProgram( ctx.getProgram() ) );
         }
 
         String orgUnitUid = getOrgUnitFromContextOrRndFromProgram( ctx, ctx.getProgram() );
@@ -73,7 +71,7 @@ public class EventRandomizer
         event.setEnrollment( ctx.getEnrollmentId() );
         event.setDueDate( simpleDateFormat.format( new Date() ) );
         event.setProgram( ctx.getProgram().getId() );
-        event.setProgramStage( programStage.getId() );
+        event.setProgramStage( ctx.getProgramStage().getId() );
         event.setOrgUnit( orgUnitUid );
         event.setStatus( EventStatus.ACTIVE );
         event.setEventDate( simpleDateFormat.format( new Date() ) );

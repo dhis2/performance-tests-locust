@@ -40,10 +40,8 @@ public class AddTeiTask
     public void execute()
         throws Exception
     {
-        Randomizer rnd = getNextRandomizer( getName() );
-
         this.response = performTaskAndRecord(
-            () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials( rnd ) ).post( trackedEntityInstanceBody ) );
+            () -> new AuthenticatedApiActions( this.endpoint, this.userCredentials ).post( trackedEntityInstanceBody ) );
     }
 
     public ApiResponse executeAndGetResponse()

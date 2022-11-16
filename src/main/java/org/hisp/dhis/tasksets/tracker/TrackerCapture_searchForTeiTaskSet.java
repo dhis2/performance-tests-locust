@@ -68,7 +68,7 @@ public class TrackerCapture_searchForTeiTaskSet
             new GetTeiTask( teiId, user.getUserCredentials(), rnd ).execute();
         }
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
 
     }
 

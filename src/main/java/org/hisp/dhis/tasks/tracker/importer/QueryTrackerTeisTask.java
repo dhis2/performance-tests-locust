@@ -43,8 +43,7 @@ public class QueryTrackerTeisTask
     @Override
     public void execute()
     {
-        Randomizer rnd = getNextRandomizer( getName() );
-        ApiResponse response = new AuthenticatedApiActions( this.endpoint, getUserCredentials( rnd ) ).get( this.query );
+        ApiResponse response = new AuthenticatedApiActions( this.endpoint, this.userCredentials ).get( this.query );
 
         if ( savePayload )
         {

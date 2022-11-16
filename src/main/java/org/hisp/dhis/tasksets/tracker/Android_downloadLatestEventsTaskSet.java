@@ -57,6 +57,6 @@ public class Android_downloadLatestEventsTaskSet
         performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, user.getUserCredentials() )
             .get( "", queryParamsBuilder ), response -> response.extractList( "events" ) != null );
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 }

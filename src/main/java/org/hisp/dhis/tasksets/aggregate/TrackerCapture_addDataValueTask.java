@@ -53,6 +53,6 @@ public class TrackerCapture_addDataValueTask
             .add( "ou=", aggregateDataValue.getOrgUnit() ) );
 
         record( response.getRaw(), 201 );
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 }

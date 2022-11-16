@@ -53,6 +53,6 @@ public class Android_downloadTeisTaskSet
         performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, user.getUserCredentials() )
             .get( "", queryParamsBuilder ), response -> response.extractList( "trackedEntityInstances" ) != null );
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 }

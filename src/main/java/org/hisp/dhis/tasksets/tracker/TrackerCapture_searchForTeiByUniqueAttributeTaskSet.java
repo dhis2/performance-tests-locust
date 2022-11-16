@@ -71,7 +71,7 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
             new GetTrackerTeiTask( teiId, user.getUserCredentials(), rnd ).execute();
         }
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
 
     }
 

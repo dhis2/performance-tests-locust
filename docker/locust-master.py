@@ -24,7 +24,6 @@ class MyTaskSet(locust.TaskSet):
 class MyUser(locust.User):
     tasks = [MyTaskSet]
 
-
 def generate_report():
     print('Generating html report')
     loader = FileSystemLoader('/templates')
@@ -102,4 +101,3 @@ def failures_csv():
             er['occurences'],
         ))
     return "\n".join(rows)
-

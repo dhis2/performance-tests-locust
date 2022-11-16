@@ -4,6 +4,7 @@ import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.models.ReserveAttributeValuesException;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
@@ -63,7 +64,7 @@ public class GenerateAndReserveTrackedEntityAttributeValuesTask
             if ( apiResponse.statusCode() != 200 || values == null || values.isEmpty()) {
 
                 logWarningIfDebugEnabled( apiResponse.prettyPrint());
-                throw new Exception("Failed to generate attributes. Attributes weren't added to TEI.");
+                throw new ReserveAttributeValuesException("Failed to generate attributes. Attributes weren't added to TEI.");
             }
 
             for ( int i = 0; i < teis.size(); i++ )

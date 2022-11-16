@@ -1,11 +1,15 @@
 package org.hisp.dhis.tasksets.tracker;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.Program;
+import org.hisp.dhis.cache.RelationshipType;
+import org.hisp.dhis.cache.TeiType;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
+import org.hisp.dhis.models.ReserveAttributeValuesException;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.RelationshipRandomizer;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
@@ -16,6 +20,7 @@ import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
@@ -25,8 +30,6 @@ public class TrackerCapture_postRelationshipTask
 {
 
     private static final String NAME = "/api/relationships";
-
-    private RelationshipRandomizer relationshipRandomizer;
 
     public TrackerCapture_postRelationshipTask( int weight )
     {
@@ -50,7 +53,6 @@ public class TrackerCapture_postRelationshipTask
         throws Exception
     {
         Randomizer rnd = getNextRandomizer( getName() );
-        // todo this test won't work on SL because the TEIs passed there might not have a TET that matches relationship types.
         User user = getUser(rnd);
 
         RandomizerContext context = new RandomizerContext();
@@ -58,25 +60,34 @@ public class TrackerCapture_postRelationshipTask
         context.setProgram( rnd.randomElementFromList( entitiesCache.getTrackerPrograms() ) );
 
         AuthenticatedApiActions actions = new AuthenticatedApiActions( NAME, user.getUserCredentials() );
-        List<String> uids = createTeis( context, rnd);
 
-        if ( uids == null )
+        RelationshipRandomizer relationshipRandomizer = new RelationshipRandomizer(rnd);
+        RelationshipType relationshipType = relationshipRandomizer.randomTeitoTeiRelationshipType(entitiesCache);
+
+        List<String> uids;
+        try {
+            uids = createTeis( context, relationshipType.getFromConstraint().getTrackedEntityType(), rnd );
+        } catch ( ReserveAttributeValuesException e ){
+            return;
+        }
+
+        if ( CollectionUtils.isEmpty(uids) || uids.stream().anyMatch(Objects::isNull))
         {
             return;
         }
 
         org.hisp.dhis.dxf2.events.trackedentity.Relationship relationship = relationshipRandomizer
-            .create( entitiesCache, uids.get( 0 ), uids.get( 1 ) );
+            .create( uids.get( 0 ), uids.get( 1 ), relationshipType );
 
         performTaskAndRecord( () -> actions.post( relationship ) );
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 
-    private List<String> createTeis(RandomizerContext context, Randomizer rnd)
+    private List<String> createTeis(RandomizerContext context, TeiType trackedEntityType, Randomizer rnd)
         throws Exception
     {
-
+        context.setTeiType(trackedEntityType.getId());
         TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstanceRandomizer(rnd).create(
             entitiesCache, context, 2
         );

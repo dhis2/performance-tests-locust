@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.event.Event;
+import org.hisp.dhis.dxf2.events.event.Events;
 import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.response.dto.ApiResponse;
@@ -26,13 +27,11 @@ public class AddEventsTask
 
     private String endpoint = "/api/events";
 
-    private List<String> blackListedTeis = new ArrayList<>();
-
-    private List<Event> events;
+    private Events events;
 
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
-    public AddEventsTask( int weight, List<Event> events, UserCredentials userCredentials,
+    public AddEventsTask( int weight, Events events, UserCredentials userCredentials,
                           Randomizer randomizer )
     {
         super( weight,randomizer );
@@ -53,42 +52,11 @@ public class AddEventsTask
         return "POST";
     }
 
-    private List<Event> createRandomEvents(Randomizer rnd)
-    {
-
-        List<Event> rndEvents = new ArrayList<>();
-        for ( int i = 0; i < rnd.randomIntInRange( 5, 10 ); i++ )
-        {
-            Event randomEvent = null;
-            try
-            {
-                randomEvent = eventRandomizer.create( entitiesCache, RandomizerContext.EMPTY_CONTEXT() );
-
-            }
-            catch ( Exception e )
-            {
-                logger.warning( "An error occurred while creating a random event: " + e.getMessage() );
-            }
-
-            if ( randomEvent != null && !blackListedTeis.contains( randomEvent.getTrackedEntityInstance() ) )
-            {
-                rndEvents.add( randomEvent );
-            }
-        }
-
-        return rndEvents;
-    }
-
     @Override
     public void execute()
         throws Exception
     {
-        Randomizer rnd = getNextRandomizer( getName() );
-        List<Event> rndEvents = events != null ? events : createRandomEvents(rnd);
-
-        EventWrapper ew = new EventWrapper( rndEvents );
-
-        response = performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials( rnd ) ).post( ew ) );
+        response = performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, this.userCredentials ).post( this.events ) );
     }
 
     public ApiResponse executeAndGetResponse()

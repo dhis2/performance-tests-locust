@@ -41,8 +41,7 @@ public class GetTrackerTeiTask
     public void execute()
         throws Exception
     {
-        Randomizer rnd = getNextRandomizer( getName() );
-        this.response = performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, getUserCredentials(rnd) ).get( tei ) );
+        this.response = performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, this.userCredentials ).get( tei ) );
     }
 
     public ApiResponse executeAndGetResponse()

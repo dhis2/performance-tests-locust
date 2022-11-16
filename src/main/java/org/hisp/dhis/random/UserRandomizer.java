@@ -5,6 +5,8 @@ import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.utils.Randomizer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -44,13 +46,19 @@ public class UserRandomizer
      * @param program
      * @return
      */
-    public String getRandomUserOrProgramOrgUnit( User user, Program program )
+    public String getRandomOrgUnitFromUser(User user, Program program )
     {
-        if ( user.getOrganisationUnits().contains( EntitiesCache.getInstance().getRootOu().getId() ) )
-        {
+        if ( user.getOrganisationUnits().contains( EntitiesCache.getInstance().getRootOu().getId() ) ) {
             return rnd.randomElementFromList( program.getOrganisationUnits() );
         }
 
+        List<String> commonOrgUnits = new ArrayList<>(program.getOrganisationUnits());
+        commonOrgUnits.retainAll(user.getOrganisationUnits());
+
+        if ( !commonOrgUnits.isEmpty() )
+        {
+            return rnd.randomElementFromList( commonOrgUnits );
+        }
 
         return getRandomUserOrgUnit( user );
     }

@@ -48,6 +48,6 @@ public class Android_syncDataValuesTaskSet
 
         record( response.getRaw() );
 
-        waitBetweenTasks();
+        waitBetweenTasks( rnd );
     }
 }

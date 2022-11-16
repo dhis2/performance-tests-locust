@@ -73,8 +73,7 @@ public class QueryFilterTeiTask
     @Override
     public void execute()
     {
-        Randomizer rnd = getNextRandomizer( getName() );
-        this.response = new AuthenticatedApiActions( this.endpoint, getUserCredentials( rnd ) ).get( this.query );
+        this.response = new AuthenticatedApiActions( this.endpoint, this.userCredentials ).get( this.query );
 
         record( response.getRaw() );
     }

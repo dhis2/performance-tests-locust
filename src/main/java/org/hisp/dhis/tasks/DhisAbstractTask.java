@@ -28,8 +28,6 @@ public abstract class DhisAbstractTask
 
     protected UserCredentials userCredentials;
 
-    protected User user;
-
     private Logger logger = Logger.getLogger( this.getClass().getName() );
 
     protected EntitiesCache entitiesCache;
@@ -55,7 +53,7 @@ public abstract class DhisAbstractTask
     public abstract void execute()
         throws Exception;
 
-    protected void waitBetweenTasks()
+    protected void waitBetweenTasks( Randomizer rnd )
         throws InterruptedException
     {
         if ( cfg.locustMinWaitBetweenTasks() != 0 && cfg.locustMaxWaitBetweenTasks() != 0 )
@@ -63,40 +61,6 @@ public abstract class DhisAbstractTask
             Thread.currentThread()
                 .sleep( rnd.randomIntInRange( cfg.locustMinWaitBetweenTasks(), cfg.locustMaxWaitBetweenTasks() ) );
         }
-    }
-
-    protected UserCredentials getUserCredentials(Randomizer rnd)
-    {
-        if ( this.userCredentials != null )
-        {
-            return this.userCredentials;
-        }
-
-        return this.getUser(rnd).getUserCredentials();
-
-    }
-
-    protected User getUser(Randomizer rnd)
-    {
-        if ( this.user != null )
-        {
-            return this.user;
-        }
-
-        if ( this.userCredentials == null )
-        {
-            if ( this.entitiesCache != null )
-            {
-                user = new UserRandomizer(rnd).getRandomUser( this.entitiesCache );
-                return user;
-            }
-
-            return new User( new UserCredentials( cfg.adminUsername(), cfg.adminPassword() ) );
-        }
-
-        return this.entitiesCache.getUsers().stream().filter( p -> p.getUserCredentials().equals( this.userCredentials ) )
-            .findFirst()
-            .orElse( null );
     }
 
     public void recordSuccess( Response response )
@@ -240,12 +204,17 @@ public abstract class DhisAbstractTask
 
     public String getRandomUserOrProgramOrgUnit( User user, Program program, Randomizer rnd )
     {
-        return new UserRandomizer(rnd).getRandomUserOrProgramOrgUnit( user, program );
+        return new UserRandomizer(rnd).getRandomOrgUnitFromUser( user, program );
     }
 
     protected Randomizer getNextRandomizer(String name) {
-        long seed = name.hashCode() * (cfg.locustRandomSeed() + rnd.randomInt(1000));
-        logger.info("[" +name+ "] - "+ rnd +" generated seed " + seed);
+        int hashCode = name.hashCode();
+        long randomSeed = cfg.locustRandomSeed();
+        int randomInt = rnd.randomInt( 1_000_000 );
+
+        long seed = hashCode * (randomSeed + randomInt);
+        logger.info("[" +name+ "] - "+ rnd +" generated seed " + seed +
+                " using hashcode("+hashCode+"), randomSeed("+randomSeed+") and randomInt("+randomInt+")");
         return new PredictableRandomizer(seed);
     }
 }

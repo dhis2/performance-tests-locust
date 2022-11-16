@@ -44,11 +44,10 @@ public class GetAnalyticsTask
     public void execute()
     {
         Randomizer rnd = getNextRandomizer( getName() );
-        User user = getUser( rnd );
 
         String query = getRandomAnalyticsQuery( visualization, rnd );
 
-        AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, user.getUserCredentials() );
+        AuthenticatedApiActions authenticatedApiActions = new AuthenticatedApiActions( endpoint, this.userCredentials );
 
         record( authenticatedApiActions.get( query ).getRaw() );
     }

@@ -1,5 +1,6 @@
 package org.hisp.dhis.random;
 
+import com.google.api.client.util.Lists;
 import org.apache.commons.collections.set.ListOrderedSet;
 import org.hisp.dhis.cache.DataElement;
 import org.hisp.dhis.cache.EntitiesCache;
@@ -46,7 +47,7 @@ public class EventDataValueRandomizer
     @Override
     public ListOrderedSet create( EntitiesCache cache, RandomizerContext randomizerContext )
     {
-        List<DataElement> dataElements = randomizerContext.getProgramStage().getProgramStageDataElements();
+        List<DataElement> dataElements = Lists.newArrayList( randomizerContext.getProgramStage().getProgramStageDataElements() );
 
         ListOrderedSet dataValues = new ListOrderedSet();
         if ( randomizerContext.isSkipGenerationWhenAssignedByProgramRules() )

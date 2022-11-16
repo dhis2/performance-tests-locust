@@ -54,6 +54,6 @@ public class Android_downloadLatestTeisTaskSet extends DhisAbstractTaskSet
         performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, user.getUserCredentials() )
             .get( "", queryParamsBuilder ), response -> response.extractList( "trackedEntityInstances" ) != null );
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 }

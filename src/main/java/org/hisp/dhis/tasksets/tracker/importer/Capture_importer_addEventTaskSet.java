@@ -1,5 +1,6 @@
 package org.hisp.dhis.tasksets.tracker.importer;
 
+import com.google.common.collect.Lists;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.models.Events;
@@ -58,9 +59,9 @@ public class Capture_importer_addEventTaskSet
 
         Event event = new EventMapperImpl().from( new EventRandomizer(rnd).create( entitiesCache, context ) );
 
-        new AddTrackerDataTask( 1, user.getUserCredentials(), Events.builder().build().addEvent( event ),
+        new AddTrackerDataTask( 1, user.getUserCredentials(), Events.builder().events(Lists.newArrayList(event)).build(),
             "events", rnd ).execute();
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 }

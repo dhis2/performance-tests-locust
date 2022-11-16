@@ -7,6 +7,7 @@ import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
+import org.hisp.dhis.models.ReserveAttributeValuesException;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.request.QueryParamsBuilder;
@@ -67,7 +68,12 @@ public class Android_syncTeisTaskSet
         TrackedEntityInstances teis = new TrackedEntityInstanceRandomizer(rnd)
             .create( this.entitiesCache, context, minPayload, maxPayload );
 
-        generateAttributes( program, teis.getTrackedEntityInstances(), user.getUserCredentials(), rnd );
+        try
+        {
+            generateAttributes( program, teis.getTrackedEntityInstances(), user.getUserCredentials(), rnd );
+        } catch ( ReserveAttributeValuesException e ) {
+            return;
+        }
 
         performTaskAndRecord( () -> {
             ApiResponse response = new AuthenticatedApiActions( "/api/trackedEntityInstances", user.getUserCredentials() )
@@ -76,7 +82,7 @@ public class Android_syncTeisTaskSet
             return response;
         }, response -> response.extractString( "status" ).equalsIgnoreCase( "ERROR" ) ? false : true );
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 
     private void generateAttributes(Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials, Randomizer rnd)

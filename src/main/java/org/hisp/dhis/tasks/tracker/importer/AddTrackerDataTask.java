@@ -78,22 +78,7 @@ public class AddTrackerDataTask
         throws Exception
     {
         Randomizer rnd = getNextRandomizer( getName() );
-        User user = getUser( rnd );
-        AuthenticatedApiActions trackerActions = new AuthenticatedApiActions( endpoint, getUserCredentials( rnd ) );
-
-        if ( payload == null )
-        {
-            RandomizerContext context = new RandomizerContext();
-            context.setOrgUnitUid( rnd.randomElementFromList( user.getOrganisationUnits() ) );
-            TrackedEntityInstances instances = new TrackedEntityInstanceRandomizer(rnd).create( entitiesCache, context, 2, 3 );
-
-            generateAttributes( context.getProgram(), instances.getTrackedEntityInstances(), user.getUserCredentials(), rnd);
-
-            payload = TrackedEntities.builder()
-                .trackedEntities( instances.getTrackedEntityInstances().stream().
-                    map( p -> new TrackedEntityMapperImpl().from( p ) ).collect( Collectors.toList() ) )
-                .build();
-        }
+        AuthenticatedApiActions trackerActions = new AuthenticatedApiActions( endpoint, this.userCredentials );
 
         builder.addAll( "async=" + this.async, "identifier=" + identifier );
         response = (TrackerApiResponse) performTaskAndRecord( () -> {
@@ -104,7 +89,7 @@ public class AddTrackerDataTask
             {
                 String jobId = response.extractString( "response.id" );
 
-                this.waitUntilJobIsCompleted( jobId, user.getUserCredentials(), rnd);
+                this.waitUntilJobIsCompleted( jobId, this.userCredentials, rnd);
 
                 response = trackerActions.get( String.format( "/jobs/%s/report?reportMode=%s", jobId, "FULL" ) );
             }
@@ -123,17 +108,6 @@ public class AddTrackerDataTask
     {
         this.execute();
         return response;
-    }
-
-    private void generateAttributes(Program program, List<TrackedEntityInstance> teis, UserCredentials userCredentials, Randomizer rnd)
-        throws Exception
-    {
-        for ( TrackedEntityAttribute att : program.getGeneratedAttributes() )
-        {
-            new GenerateAndReserveTrackedEntityAttributeValuesTask( 1, att.getTrackedEntityAttribute(),
-                userCredentials, teis.size(), rnd ).executeAndAddAttributes( teis );
-
-        }
     }
 
     public ApiResponse waitUntilJobIsCompleted(String jobId, UserCredentials credentials, Randomizer rnd)

@@ -50,6 +50,8 @@ public class RandomizerContext
 
     private String enrollmentId;
 
+    private String teiType;
+
     /**
      * If true, tracked entity attributes assigned to program will be created in enrollment.
      * Can be used when importing TEIs with NTI.
@@ -75,9 +77,4 @@ public class RandomizerContext
      * if true, a TEI reference is not used when creating a new ranndom enrollment
      */
     private boolean skipTeiInEnrollment;
-
-    public static RandomizerContext EMPTY_CONTEXT()
-    {
-        return new RandomizerContext();
-    }
 }

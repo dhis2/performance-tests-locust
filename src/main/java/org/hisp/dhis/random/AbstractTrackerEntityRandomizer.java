@@ -53,26 +53,23 @@ public abstract class AbstractTrackerEntityRandomizer<T>
 
     protected Program getProgramFromContextOrRnd(RandomizerContext ctx, EntitiesCache cache )
     {
-        Program program;
         if ( ctx.getProgram() == null )
         {
-            program = getRandomProgram( cache );
+            Program program = getRandomProgram( cache );
             ctx.setProgram( program );
+            return program;
         }
-        else
-        {
-            program = ctx.getProgram();
-        }
-        return program;
+        return ctx.getProgram();
     }
 
     protected String getOrgUnitFromContextOrRndFromProgram(RandomizerContext ctx, Program program )
     {
         if ( ctx.getOrgUnitUid() == null )
         {
-            return getRandomOrgUnitFromProgram( program );
+            String uid = getRandomOrgUnitFromProgram( program );
+            ctx.setOrgUnitUid( uid );
+            return uid;
         }
-
         return ctx.getOrgUnitUid();
     }
 

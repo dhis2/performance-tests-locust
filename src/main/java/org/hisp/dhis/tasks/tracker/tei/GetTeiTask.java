@@ -40,8 +40,7 @@ public class GetTeiTask
     @Override
     public void execute()
     {
-        Randomizer rnd = getNextRandomizer( getName() );
-        this.response = new AuthenticatedApiActions( endpoint, getUserCredentials(rnd) ).get( tei );
+        this.response = new AuthenticatedApiActions( endpoint, this.userCredentials ).get( tei );
 
         record( response.getRaw() );
     }

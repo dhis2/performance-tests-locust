@@ -10,6 +10,7 @@ import org.hisp.dhis.dxf2.events.trackedentity.RelationshipItem;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.utils.Randomizer;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -39,12 +40,8 @@ public class RelationshipRandomizer
         return relationship;
     }
 
-    public Relationship create( EntitiesCache cache, String from, String to )
+    public Relationship create( String from, String to, RelationshipType relationshipType )
     {
-        RelationshipType relationshipType = rnd.randomElementFromList( cache.getRelationshipTypes().stream().filter(
-            p -> p.getFromConstraint().getTrackedEntityType() != null && p.getToConstraint().getTrackedEntityType() != null )
-            .collect(
-                Collectors.toList() ) );
 
         Relationship relationship = new Relationship();
         relationship.setRelationshipType( relationshipType.getId() );
@@ -52,6 +49,28 @@ public class RelationshipRandomizer
         relationship.setFrom( getConstraint( from ) );
 
         return relationship;
+    }
+
+    public Relationship create(EntitiesCache cache, String from, String to )
+    {
+        Relationship relationship = new Relationship();
+        relationship.setRelationshipType( randomTeitoTeiRelationshipType(cache).getId() );
+        relationship.setTo( getConstraint( to ) );
+        relationship.setFrom( getConstraint( from ) );
+
+        return relationship;
+    }
+
+    public RelationshipType randomTeitoTeiRelationshipType( EntitiesCache cache ){
+
+        return rnd.randomElementFromList( cache.getRelationshipTypes().stream().filter(
+                        p -> p.getFromConstraint().getTrackedEntityType() != null &&
+                                p.getToConstraint().getTrackedEntityType() != null
+                                && Objects.equals(p.getFromConstraint().getTrackedEntityType(), p.getToConstraint().getTrackedEntityType()))
+                .collect(
+                        Collectors.toList() ) );
+
+
     }
 
     private RelationshipItem getConstraint( EntitiesCache cache, RandomizerContext context,

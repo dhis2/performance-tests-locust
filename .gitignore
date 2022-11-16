@@ -5,6 +5,7 @@
 target/
 tmp/
 locust/
+reports/
 venv/
 .settings
 .project

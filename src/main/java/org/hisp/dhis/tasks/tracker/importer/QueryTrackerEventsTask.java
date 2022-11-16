@@ -37,8 +37,7 @@ public class QueryTrackerEventsTask
     public void execute()
         throws Exception
     {
-        Randomizer rnd = getNextRandomizer( getName() );
-        performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, getUserCredentials(rnd) ).get( this.query ) );
+        performTaskAndRecord( () -> new AuthenticatedApiActions( this.endpoint, this.userCredentials ).get( this.query ) );
     }
 }
 

@@ -4,10 +4,12 @@ import com.google.common.collect.Lists;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.dxf2.events.event.Event;
+import org.hisp.dhis.dxf2.events.event.Events;
 import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.tasks.tracker.events.AddEventsTask;
 import org.hisp.dhis.tasks.tracker.events.QueryEventsTask;
+import org.hisp.dhis.tasks.tracker.importer.QueryTrackerEventsTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
 
@@ -56,8 +58,10 @@ public class Capture_addEventTaskSet
 
         Event event = new EventRandomizer(rnd).create( entitiesCache, context );
 
-        new AddEventsTask( 1, Lists.newArrayList( event ), user.getUserCredentials(), rnd ).execute();
+        Events events = new Events();
+        events.setEvents(Lists.newArrayList( event ));
+        new AddEventsTask( 1, events, user.getUserCredentials(), rnd ).execute();
 
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
     }
 }

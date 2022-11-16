@@ -1,55 +1,148 @@
 @Library('pipeline-library') _
-pipeline {
-    agent any
 
-    environment {
-        GIT_URL = "https://github.com/dhis2/performance-tests-locust"
-        AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
-        GITHUB_CREDS = credentials('github_bot')
-        GITHUB_USERNAME = "${GITHUB_CREDS_USR}"
-        GITHUB_TOKEN = credentials('github-token')
-        IMAGE_NAME = "dhis2/locustio"
-        IMAGE_TAG = "latest"
-        COMPOSE_ARGS = "NO_WEB=true TIME=30m HATCH_RATE=5 USERS=30"
-        LOCUST_REPORT_DIR = "locust"
-        LOCAL_REPORT_DIR = "reports"
-        REPORT_FILE = "html_report.html"
-        INSTANCE_HOST = "test.performance.dhis2.org"
-        INSTANCE_NAME = "dev"
+pipeline {
+    agent {
+        label 'ec2-jdk11'
     }
 
-    triggers {
-        cron('H 3 * * *')
+    options {
+        ansiColor('xterm')
+        copyArtifactPermission("$JOB_BASE_NAME")
+    }
+
+    parameters {
+        string(name: 'LOCUST_IMAGES_TAG', defaultValue: '0.0.1', description: 'Which version of the Locust master and worker to use?')
+        string(name: 'MASTER_HOST', defaultValue: 'master', description: 'Which master to connect to?')
+        string(name: 'INSTANCE', defaultValue: '2.38.1.1', description: 'Which instance to target?')
+        string(name: 'TIME', defaultValue: '60m', description: 'How much time to run the tests for?')
+        string(name: 'USERS', defaultValue: '250', description: 'How much users?')
+        string(name: 'RATE', defaultValue: '10', description: 'At what rate to add users?')
+        string(name: 'COLUMN', defaultValue: 'Average Response Time,90%', description: 'Which column to compare?\n(comma-separated list of strings)')
+        choice(name: 'REPORT', choices: ['Both', 'Baseline', 'Previous'], description: 'Which report/s to compare with?')
+    }
+
+    environment {
+        //AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
+        IMAGE_TAG = "${params.LOCUST_IMAGES_TAG}"
+        LOCUST_REPORT_DIR = "reports"
+        HTML_REPORT_FILE = "test_report.html"
+        CSV_REPORT_FILE = "dhis_stats.csv"
+        COMPARISON_FILE = "comparison_results.html"
+        CURRENT_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
+        PREVIOUS_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/previous_$CSV_REPORT_FILE"
+        BASELINE_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/baseline_$CSV_REPORT_FILE"
+        INSTANCE_HOST = "https://test.performance.dhis2.org"
+        COMPOSE_ARGS = "NO_WEB=true TIME=${params.TIME} HATCH_RATE=${params.RATE} USERS=${params.USERS} TARGET=$INSTANCE_HOST/${params.INSTANCE} MASTER_HOST=${params.MASTER_HOST}"
+        S3_BUCKET = "s3://dhis2-performance-tests-results"
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git url: "${GIT_URL}"
-            }
-        }
+//        stage('Update performance test instance') {
+//            steps {
+//                echo 'Updating performance test instance ...'
+//                 script {
+//                     awx.resetWar("$AWX_BOT_CREDENTIALS", "${INSTANCE_HOST}", "${params.INSTANCE}")
+//                 }
+//            }
+//        }
 
-        stage('Update performance test instance') {
+        stage('Run Locust tests') {
             steps {
                 script {
-                    awx.resetWar("$AWX_BOT_CREDENTIALS", "${INSTANCE_HOST}", "${INSTANCE_NAME}")
+                    containers = "worker"
+                    if (params.MASTER_HOST == "master") {
+                        containers = containers + " " + params.MASTER_HOST
+                    }
+                    sh "mkdir -p $LOCUST_REPORT_DIR"
+                    sh "docker-compose pull $containers"
+                    sh "$COMPOSE_ARGS docker-compose up --abort-on-container-exit $containers"
                 }
             }
         }
 
-        stage('Start locust') {
+        stage('Copy previous reports') {
+            when {
+                expression { currentBuild.previousSuccessfulBuild != null }
+                anyOf {
+                    expression { params.REPORT == "Previous" }
+                    expression { params.REPORT == "Both" }
+                }
+            }
+
             steps {
-                script {
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                    sh "${COMPOSE_ARGS} docker-compose up -d"
+                copyArtifacts(
+                    projectName: "$JOB_NAME",
+                    selector: specific("${currentBuild.previousSuccessfulBuild.number}"),
+                    filter: "$LOCUST_REPORT_DIR/$CSV_REPORT_FILE",
+                    flatten: true,
+                    target: "previous_$LOCUST_REPORT_DIR"
+                )
+                sh "mv previous_$LOCUST_REPORT_DIR/$CSV_REPORT_FILE $PREVIOUS_REPORT"
+            }
+        }
+
+        stage('Copy baseline reports') {
+            when {
+                anyOf {
+                    expression { params.REPORT == "Baseline" }
+                    expression { params.REPORT == "Both" }
+                }
+            }
+
+            steps {
+                sh "aws s3 cp $S3_BUCKET/baseline_$CSV_REPORT_FILE $BASELINE_REPORT"
+            }
+        }
+
+        stage('Checkout csvcomparer') {
+            steps {
+                dir('csvcomparer') {
+                    git url: 'https://github.com/dhis2-sre/csvcomparer'
+                    sh 'pip3 install .'
                 }
             }
         }
 
-        stage('Run tests') {
+        stage('Compare reports') {
             steps {
-                script {
-                    sh "mvn -s settings.xml clean compile exec:java -Dtarget.baseuri=https://$INSTANCE_HOST/$INSTANCE_NAME"
+                dir('csvcomparer') {
+                    script {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            switch(params.REPORT) {
+                                case 'Previous':
+                                    if (currentBuild.previousSuccessfulBuild != null) {
+                                        COMPARISON_FILE = "previous_$COMPARISON_FILE"
+                                        sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $PREVIOUS_REPORT --column-name \"${params.COLUMN}\" --output $WORKSPACE/$COMPARISON_FILE"
+                                    }
+                                    break
+                                case 'Baseline':
+                                    COMPARISON_FILE = "baseline_$COMPARISON_FILE"
+                                    sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $BASELINE_REPORT --column-name \"${params.COLUMN}\" --output $WORKSPACE/$COMPARISON_FILE"
+                                    break
+                                case 'Both':
+                                    if (currentBuild.previousSuccessfulBuild != null) {
+                                        sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $BASELINE_REPORT $PREVIOUS_REPORT --column-name \"${params.COLUMN}\" --output $WORKSPACE/$COMPARISON_FILE"
+                                    }
+                                    break
+                            }
+                        }
+                    }
+                }
+            }
+
+            post {
+                always {
+                    archiveArtifacts artifacts: "$COMPARISON_FILE"
+                }
+
+                failure {
+                    script {
+                        slackSend(
+                            color: '#ff0000',
+                            message: "<${BUILD_URL}|${JOB_NAME} (#${BUILD_NUMBER})>: performance is getting worse!\nCheck <${BUILD_URL}artifact/${COMPARISON_FILE}|the comparison results>.",
+                            channel: '@U01RSD1LPB3'
+                        )
+                    }
                 }
             }
         }
@@ -57,19 +150,16 @@ pipeline {
 
     post {
         always {
-            script {
-                sh "mkdir -p ${LOCAL_REPORT_DIR} && cp ./${LOCUST_REPORT_DIR}/${REPORT_FILE} ./${LOCAL_REPORT_DIR}/${REPORT_FILE}"
-                publishHTML target: [
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: false,
-                        keepAll: true,
-                        reportDir: "${LOCAL_REPORT_DIR}",
-                        reportFiles: "${REPORT_FILE}",
-                        reportName: 'Load test report'
-                ]
+            archiveArtifacts artifacts: "$LOCUST_REPORT_DIR/*.csv"
 
-                sh "docker-compose down -v"
-            }
+            publishHTML target: [
+                allowMissing: false,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: "$LOCUST_REPORT_DIR",
+                reportFiles: "$HTML_REPORT_FILE",
+                reportName: 'Load test report'
+            ]
         }
     }
 }

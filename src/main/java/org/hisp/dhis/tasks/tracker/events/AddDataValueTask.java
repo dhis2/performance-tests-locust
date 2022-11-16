@@ -51,7 +51,6 @@ public class AddDataValueTask
     public void execute()
         throws Exception
     {
-        Randomizer rnd = getNextRandomizer( getName() );
         JsonObject payload = new JsonObjectBuilder()
             .addProperty( "program", eventProgram )
             .addProperty( "trackedEntityInstance", tei )
@@ -59,7 +58,7 @@ public class AddDataValueTask
             .addOrAppendToArray( "dataValues", JsonParserUtils.toJsonObject( dataValue ).getAsJsonObject() )
             .build();
 
-        performTaskAndRecord( () -> new AuthenticatedApiActions( "/api/events", getUserCredentials( rnd ) )
+        performTaskAndRecord( () -> new AuthenticatedApiActions( "/api/events", this.userCredentials )
             .update( eventId + "/" + dataValue.getDataElement(), payload, ContentType.JSON.toString() ) );
 
     }

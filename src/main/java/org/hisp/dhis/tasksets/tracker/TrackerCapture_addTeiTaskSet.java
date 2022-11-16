@@ -5,10 +5,14 @@ import org.apache.commons.collections.set.ListOrderedSet;
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
+import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
+import org.hisp.dhis.dxf2.events.enrollment.Enrollments;
 import org.hisp.dhis.dxf2.events.event.DataValue;
 import org.hisp.dhis.dxf2.events.event.Event;
+import org.hisp.dhis.dxf2.events.event.Events;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
+import org.hisp.dhis.random.EnrollmentRandomizer;
 import org.hisp.dhis.random.EventDataValueRandomizer;
 import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
@@ -71,8 +75,6 @@ public class TrackerCapture_addTeiTaskSet
         TrackedEntityInstances trackedEntityInstances = new TrackedEntityInstances();
         trackedEntityInstances.setTrackedEntityInstances( Lists.newArrayList( tei ) );
 
-        long time = System.currentTimeMillis();
-
         new QueryFilterTeiTask( 1,
             String.format( "?program=%s&ou=%s&ouMode=SELECTED&pageSize=50&page=1&totalPages=false", program.getId(), ou ),
             user.getUserCredentials(), "TC load", rnd ).execute();
@@ -84,17 +86,22 @@ public class TrackerCapture_addTeiTaskSet
 
         if ( context.getTeiId() == null )
         {
-            recordFailure( System.currentTimeMillis() - time, "TEI wasn't created" );
+            logWarningIfDebugEnabled( "TEI wasn't created" );
             return;
         }
 
-        ApiResponse response = new AddEnrollmentTask( 1, context, user.getUserCredentials(), rnd ).executeAndGetBody();
+        EnrollmentRandomizer enrollmentRandomizer = new EnrollmentRandomizer( rnd );
+
+        Enrollment enrollment = enrollmentRandomizer.createWithoutEvents( entitiesCache, context );
+        Enrollments enrollments = new Enrollments();
+        enrollments.setEnrollments(Lists.newArrayList(enrollment));
+        ApiResponse response = new AddEnrollmentTask( 1, enrollments, user.getUserCredentials(), rnd ).executeAndGetBody();
 
         context.setEnrollmentId( response.extractUid() );
 
         if ( context.getEnrollmentId() == null )
         {
-            recordFailure( System.currentTimeMillis() - time, "Enrollment wasn't created" );
+            logWarningIfDebugEnabled( "Enrollment wasn't created" );
             return;
         }
 
@@ -103,14 +110,16 @@ public class TrackerCapture_addTeiTaskSet
 
         Event event = new EventRandomizer(rnd).createWithoutDataValues( entitiesCache, context );
 
-        response = new AddEventsTask( 1, Lists.newArrayList( event ), user.getUserCredentials(), rnd )
+        Events events = new Events();
+        events.setEvents(Lists.newArrayList( event ));
+        response = new AddEventsTask( 1, events, user.getUserCredentials(), rnd )
             .executeAndGetResponse();
 
         String eventId = response.extractUid();
 
         if ( eventId == null )
         {
-            recordFailure( System.currentTimeMillis() - time, "Event wasn't created" );
+            logWarningIfDebugEnabled( "Event wasn't created" );
             return;
         }
 
@@ -126,7 +135,7 @@ public class TrackerCapture_addTeiTaskSet
         } );
 
         taskSet.execute();
-        waitBetweenTasks();
+        waitBetweenTasks(rnd);
 
     }
 
