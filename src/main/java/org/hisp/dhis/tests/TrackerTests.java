@@ -4,6 +4,7 @@ import org.hisp.dhis.tasks.DhisAbstractTask;
 import org.hisp.dhis.tasksets.tracker.Android_syncTeisTaskSet;
 import org.hisp.dhis.tasksets.tracker.Capture_addEventTaskSet;
 import org.hisp.dhis.tasksets.tracker.TrackerCapture_addTeiTaskSet;
+import org.hisp.dhis.tasksets.tracker.TrackerCapture_getEntitiesOrderedByEnrolledAt;
 import org.hisp.dhis.tasksets.tracker.TrackerCapture_postRelationshipTask;
 import org.hisp.dhis.tasksets.tracker.TrackerCapture_searchForTeiByUniqueAttributeTaskSet;
 import org.hisp.dhis.tasksets.tracker.TrackerCapture_searchForTeiTaskSet;
@@ -27,6 +28,7 @@ public class TrackerTests
             new TrackerCapture_searchForTeiTaskSet( 1 ),
             new Capture_addEventTaskSet( 1 ),
             new Android_syncTeisTaskSet( 1 ),
-            new TrackerCapture_postRelationshipTask( 1 ) );
+            new TrackerCapture_postRelationshipTask( 1 ),
+            new TrackerCapture_getEntitiesOrderedByEnrolledAt(1));
     }
 }

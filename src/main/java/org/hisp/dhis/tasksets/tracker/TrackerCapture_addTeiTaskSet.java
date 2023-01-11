@@ -23,8 +23,8 @@ import org.hisp.dhis.tasks.tracker.GenerateTrackedEntityAttributeValueTask;
 import org.hisp.dhis.tasks.tracker.enrollments.AddEnrollmentTask;
 import org.hisp.dhis.tasks.tracker.events.AddDataValueTask;
 import org.hisp.dhis.tasks.tracker.events.AddEventsTask;
-import org.hisp.dhis.tasks.tracker.tei.AddTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
+import org.hisp.dhis.tasks.tracker.tei.oldapi.AddTeiTask;
+import org.hisp.dhis.tasks.tracker.tei.oldapi.QueryFilterTeiTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
 

@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks.tracker.tei;
+package org.hisp.dhis.tasks.tracker.tei.oldapi;
 
 /*
  * Copyright (c) 2004-2019, University of Oslo

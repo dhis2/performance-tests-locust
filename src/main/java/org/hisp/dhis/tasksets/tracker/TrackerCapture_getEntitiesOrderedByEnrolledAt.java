@@ -5,8 +5,8 @@ import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.response.dto.ApiResponse;
+import org.hisp.dhis.tasks.tracker.tei.GetEntitiesTask;
 import org.hisp.dhis.tasks.tracker.tei.oldapi.GetTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.oldapi.QueryFilterTeiTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
 
@@ -17,16 +17,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
- * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
+ * @author Marc Pratllusa <marc@dhis2.org>
  */
-public class TrackerCapture_searchForTeiTaskSet
+public class TrackerCapture_getEntitiesOrderedByEnrolledAt
     extends DhisAbstractTaskSet
 {
-    private static final String NAME = "TrackerCapture: search for tei";
+    private static final String NAME = "TrackerCapture: get entities ordered by enrolment date";
 
     HashMap<String, List<TrackedEntityAttribute>> attributes = new HashMap<>();
 
-    public TrackerCapture_searchForTeiTaskSet( int weight )
+    public TrackerCapture_getEntitiesOrderedByEnrolledAt(int weight )
     {
         super( NAME, weight );
     }
@@ -52,9 +52,9 @@ public class TrackerCapture_searchForTeiTaskSet
         User user = getUser(rnd);
         String ou = rnd.randomElementFromList( user.getOrganisationUnits() );
 
-        ApiResponse response = new QueryFilterTeiTask( 1, String
-            .format( "?ou=%s&ouMode=ACCESSIBLE&program=%s%s", ou, program.getId(),
-                getAttributesQuery( program, rnd) ), user.getUserCredentials(), "search by attributes", rnd )
+        String url = String
+                .format( "?orgUnit=%s&program=%s&order=enrolledAt", ou, program.getId());
+        ApiResponse response = new GetEntitiesTask( 1, url, user.getUserCredentials(), "get entities, order by enrolment date", rnd )
             .executeAndGetResponse();
 
         List<ArrayList> rows = response.extractList( "rows" );

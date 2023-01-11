@@ -6,7 +6,7 @@ import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.tracker.importer.GetTrackerTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
+import org.hisp.dhis.tasks.tracker.tei.oldapi.QueryFilterTeiTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.textpattern.TextPattern;
 import org.hisp.dhis.textpattern.TextPatternParser;
