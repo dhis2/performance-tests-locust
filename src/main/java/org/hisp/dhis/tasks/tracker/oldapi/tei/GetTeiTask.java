@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks.tracker;
+package org.hisp.dhis.tasks.tracker.oldapi.tei;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
@@ -9,48 +9,45 @@ import org.hisp.dhis.utils.Randomizer;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class GenerateTrackedEntityAttributeValueTask
+public class GetTeiTask
     extends DhisAbstractTask
 {
-    private String teiAttributeId;
-
-    private String endpoint = "/api/trackedEntityAttributes/id/generate";
+    private String endpoint = "/api/trackedEntityInstances";
 
     private ApiResponse response;
 
-    public GenerateTrackedEntityAttributeValueTask( int weight, String trackedEntityAttributeId, UserCredentials userCredentials, Randomizer randomizer )
+    private String tei;
+
+    public GetTeiTask( String teiId, UserCredentials userCredentials, Randomizer randomizer )
     {
-        super( weight, randomizer );
-        this.teiAttributeId = trackedEntityAttributeId;
+        super( 1,randomizer);
+        this.tei = teiId;
         this.userCredentials = userCredentials;
     }
 
     @Override
     public String getName()
     {
-        return endpoint;
+        return endpoint + "/id";
     }
 
     @Override
     public String getType()
     {
-        return "POST";
+        return "GET";
     }
 
     @Override
     public void execute()
     {
-        AuthenticatedApiActions apiActions = new AuthenticatedApiActions( "", userCredentials );
-
-        response = apiActions.get( endpoint.replace( "id", teiAttributeId ) );
+        this.response = new AuthenticatedApiActions( endpoint, this.userCredentials ).get( tei );
 
         record( response.getRaw() );
-
     }
 
     public ApiResponse executeAndGetResponse()
     {
         this.execute();
-        return this.response;
+        return response;
     }
 }

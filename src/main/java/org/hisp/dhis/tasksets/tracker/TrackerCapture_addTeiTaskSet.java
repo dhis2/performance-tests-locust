@@ -19,12 +19,12 @@ import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.tasks.DhisDelayedTaskSet;
-import org.hisp.dhis.tasks.tracker.GenerateTrackedEntityAttributeValueTask;
-import org.hisp.dhis.tasks.tracker.enrollments.AddEnrollmentTask;
-import org.hisp.dhis.tasks.tracker.events.AddDataValueTask;
-import org.hisp.dhis.tasks.tracker.events.AddEventsTask;
-import org.hisp.dhis.tasks.tracker.tei.oldapi.AddTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.oldapi.QueryFilterTeiTask;
+import org.hisp.dhis.tasks.tracker.oldapi.GenerateTrackedEntityAttributeValueTask;
+import org.hisp.dhis.tasks.tracker.oldapi.enrollments.AddEnrollmentTask;
+import org.hisp.dhis.tasks.tracker.oldapi.events.AddDataValueTask;
+import org.hisp.dhis.tasks.tracker.oldapi.events.AddEventsTask;
+import org.hisp.dhis.tasks.tracker.oldapi.tei.AddTeiTask;
+import org.hisp.dhis.tasks.tracker.oldapi.tei.QueryFilterTeiTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
 

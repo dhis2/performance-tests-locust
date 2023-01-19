@@ -5,8 +5,8 @@ import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.tasks.tracker.tei.oldapi.GetTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.oldapi.QueryFilterTeiTask;
+import org.hisp.dhis.tasks.tracker.oldapi.tei.GetTeiTask;
+import org.hisp.dhis.tasks.tracker.oldapi.tei.QueryFilterTeiTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
 

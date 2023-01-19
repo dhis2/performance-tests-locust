@@ -1,27 +1,15 @@
-package org.hisp.dhis.tasks.tracker.importer;
+package org.hisp.dhis.tasks.tracker;
 
 import com.google.gson.GsonBuilder;
 import org.hisp.dhis.actions.AuthenticatedApiActions;
-import org.hisp.dhis.cache.Program;
-import org.hisp.dhis.cache.TrackedEntityAttribute;
-import org.hisp.dhis.cache.User;
 import org.hisp.dhis.cache.UserCredentials;
-import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
-import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstances;
-import org.hisp.dhis.models.TrackedEntities;
-import org.hisp.dhis.random.RandomizerContext;
-import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.request.QueryParamsBuilder;
 import org.hisp.dhis.response.dto.ApiResponse;
 import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
-import org.hisp.dhis.tracker.domain.mapper.TrackedEntityMapperImpl;
 import org.hisp.dhis.utils.Randomizer;
 
-import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static org.hisp.dhis.conf.ConfigFactory.cfg;
 

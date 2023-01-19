@@ -5,10 +5,9 @@ import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.tasks.tracker.events.QueryEventsTask;
-import org.hisp.dhis.tasks.tracker.importer.GetTrackerTeiTask;
-import org.hisp.dhis.tasks.tracker.importer.QueryTrackerEventsTask;
-import org.hisp.dhis.tasks.tracker.importer.QueryTrackerTeisTask;
+import org.hisp.dhis.tasks.tracker.oldapi.events.QueryEventsTask;
+import org.hisp.dhis.tasks.tracker.GetTeiByIdTask;
+import org.hisp.dhis.tasks.tracker.QueryTrackerTeisTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
 import org.springframework.util.CollectionUtils;
@@ -76,7 +75,7 @@ public class TrackerCapture_importer_searchForTeiTaskSet
                         entitiesCache.getDefaultUser().getUserCredentials(), rnd ).execute();
             } );
 
-            new GetTrackerTeiTask( teiId, user.getUserCredentials(), rnd ).execute();
+            new GetTeiByIdTask( teiId, user.getUserCredentials(), rnd ).execute();
         }
 
         waitBetweenTasks(rnd);

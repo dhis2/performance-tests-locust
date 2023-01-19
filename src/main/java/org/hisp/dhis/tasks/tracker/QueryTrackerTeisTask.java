@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks.tracker.importer;
+package org.hisp.dhis.tasks.tracker;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
@@ -9,26 +9,29 @@ import org.hisp.dhis.utils.Randomizer;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class GetTrackerTeiTask
+public class QueryTrackerTeisTask
     extends DhisAbstractTask
 {
     private String endpoint = "/api/tracker/trackedEntities";
 
+    private String query = "?ou=DiszpKrYNg8&attribute=TfdH5KvFmMy&filter=TfdH5KvFmMy:GE:Karoline";
+
     private ApiResponse response;
 
-    private String tei;
+    private boolean savePayload = false;
 
-    public GetTrackerTeiTask(String teiId, UserCredentials userCredentials, Randomizer randomizer)
+    public QueryTrackerTeisTask(int weight, String query, UserCredentials userCredentials,
+                                Randomizer randomizer )
     {
-        super( 1, randomizer );
-        this.tei = teiId;
+        super( weight, randomizer );
+        this.query = query;
         this.userCredentials = userCredentials;
     }
 
     @Override
     public String getName()
     {
-        return endpoint + "/id";
+        return endpoint;
     }
 
     @Override
@@ -39,16 +42,21 @@ public class GetTrackerTeiTask
 
     @Override
     public void execute()
-        throws Exception
     {
-        this.response = performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, this.userCredentials ).get( tei ) );
+        ApiResponse response = new AuthenticatedApiActions( this.endpoint, this.userCredentials ).get( this.query );
+
+        if ( savePayload )
+        {
+            this.response = response;
+        }
+
+        record( response.getRaw() );
     }
 
     public ApiResponse executeAndGetResponse()
-        throws Exception
     {
+        savePayload = true;
         this.execute();
-        return response;
+        return this.response;
     }
 }
-

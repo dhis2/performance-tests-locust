@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks.tracker.tei;
+package org.hisp.dhis.tasks.tracker;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
@@ -9,7 +9,7 @@ import org.hisp.dhis.utils.Randomizer;
 /**
  * @author Marc Pratllusa <marc@dhis2.org>
  */
-public class GetTeiTask
+public class GetTeisTask
         extends
         DhisAbstractTask
 {
@@ -21,8 +21,8 @@ public class GetTeiTask
 
     private ApiResponse response;
 
-    public GetTeiTask(int weight, String query, UserCredentials userCredentials,
-                      String customIdentifier, Randomizer randomizer )
+    public GetTeisTask(int weight, String query, UserCredentials userCredentials,
+                       String customIdentifier, Randomizer randomizer )
     {
         super( weight,randomizer );
         this.query = query;

@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks.tracker.tei.oldapi;
+package org.hisp.dhis.tasks.tracker;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
@@ -9,18 +9,18 @@ import org.hisp.dhis.utils.Randomizer;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class GetTeiTask
+public class GetTeiByIdTask
     extends DhisAbstractTask
 {
-    private String endpoint = "/api/trackedEntityInstances";
+    private String endpoint = "/api/tracker/trackedEntities";
 
     private ApiResponse response;
 
     private String tei;
 
-    public GetTeiTask( String teiId, UserCredentials userCredentials, Randomizer randomizer )
+    public GetTeiByIdTask(String teiId, UserCredentials userCredentials, Randomizer randomizer)
     {
-        super( 1,randomizer);
+        super( 1, randomizer );
         this.tei = teiId;
         this.userCredentials = userCredentials;
     }
@@ -39,15 +39,16 @@ public class GetTeiTask
 
     @Override
     public void execute()
+        throws Exception
     {
-        this.response = new AuthenticatedApiActions( endpoint, this.userCredentials ).get( tei );
-
-        record( response.getRaw() );
+        this.response = performTaskAndRecord( () -> new AuthenticatedApiActions( endpoint, this.userCredentials ).get( tei ) );
     }
 
     public ApiResponse executeAndGetResponse()
+        throws Exception
     {
         this.execute();
         return response;
     }
 }
+

@@ -2,13 +2,9 @@ package org.hisp.dhis.tasksets.tracker;
 
 import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.User;
-import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.tasks.tracker.tei.GetTeiTask;
+import org.hisp.dhis.tasks.tracker.GetTeisTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Marc Pratllusa <marc@dhis2.org>
@@ -47,7 +43,7 @@ public class TrackerCapture_getEntitiesOrderedByEnrolledAt
         String url = String
                 .format( "?orgUnit=%s&program=%s&order=enrolledAt", ou, program.getId());
 
-        new GetTeiTask( 1, url, user.getUserCredentials(), "get entities, order by enrolment date", rnd )
+        new GetTeisTask( 1, url, user.getUserCredentials(), "get entities, order by enrolment date", rnd )
             .execute();
 
         waitBetweenTasks(rnd);

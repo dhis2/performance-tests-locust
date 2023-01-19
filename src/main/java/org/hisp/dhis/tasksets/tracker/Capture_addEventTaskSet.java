@@ -7,9 +7,8 @@ import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.dxf2.events.event.Events;
 import org.hisp.dhis.random.EventRandomizer;
 import org.hisp.dhis.random.RandomizerContext;
-import org.hisp.dhis.tasks.tracker.events.AddEventsTask;
-import org.hisp.dhis.tasks.tracker.events.QueryEventsTask;
-import org.hisp.dhis.tasks.tracker.importer.QueryTrackerEventsTask;
+import org.hisp.dhis.tasks.tracker.oldapi.events.AddEventsTask;
+import org.hisp.dhis.tasks.tracker.oldapi.events.QueryEventsTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
 
