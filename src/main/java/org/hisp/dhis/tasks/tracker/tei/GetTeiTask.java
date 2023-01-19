@@ -9,7 +9,7 @@ import org.hisp.dhis.utils.Randomizer;
 /**
  * @author Marc Pratllusa <marc@dhis2.org>
  */
-public class GetEntitiesTask
+public class GetTeiTask
         extends
         DhisAbstractTask
 {
@@ -21,8 +21,8 @@ public class GetEntitiesTask
 
     private ApiResponse response;
 
-    public GetEntitiesTask(int weight, String query, UserCredentials userCredentials,
-                           String customIdentifier, Randomizer randomizer )
+    public GetTeiTask(int weight, String query, UserCredentials userCredentials,
+                      String customIdentifier, Randomizer randomizer )
     {
         super( weight,randomizer );
         this.query = query;
@@ -45,7 +45,7 @@ public class GetEntitiesTask
     @Override
     public void execute()
     {
-        this.response = new AuthenticatedApiActions( this.ENDPOINT, this.userCredentials ).get( this.query );
+        this.response = new AuthenticatedApiActions( ENDPOINT, this.userCredentials ).get( this.query );
 
         record( response.getRaw() );
     }

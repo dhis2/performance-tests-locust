@@ -1,20 +1,14 @@
 package org.hisp.dhis.tasksets.tracker;
 
 import org.hisp.dhis.cache.Program;
-import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
-import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.tasks.tracker.tei.GetEntitiesTask;
-import org.hisp.dhis.tasks.tracker.tei.oldapi.GetTeiTask;
+import org.hisp.dhis.tasks.tracker.tei.GetTeiTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 /**
  * @author Marc Pratllusa <marc@dhis2.org>
@@ -23,8 +17,6 @@ public class TrackerCapture_getEntitiesOrderedByEnrolledAt
     extends DhisAbstractTaskSet
 {
     private static final String NAME = "TrackerCapture: get entities ordered by enrolment date";
-
-    HashMap<String, List<TrackedEntityAttribute>> attributes = new HashMap<>();
 
     public TrackerCapture_getEntitiesOrderedByEnrolledAt(int weight )
     {
@@ -54,63 +46,10 @@ public class TrackerCapture_getEntitiesOrderedByEnrolledAt
 
         String url = String
                 .format( "?orgUnit=%s&program=%s&order=enrolledAt", ou, program.getId());
-        ApiResponse response = new GetEntitiesTask( 1, url, user.getUserCredentials(), "get entities, order by enrolment date", rnd )
-            .executeAndGetResponse();
 
-        List<ArrayList> rows = response.extractList( "rows" );
-
-        if ( rows != null && !rows.isEmpty() )
-        {
-            ArrayList row =rnd.randomElementFromList( rows );
-
-            String teiId = row.get( 0 ).toString();
-
-            new GetTeiTask( teiId, user.getUserCredentials(), rnd ).execute();
-        }
+        new GetTeiTask( 1, url, user.getUserCredentials(), "get entities, order by enrolment date", rnd )
+            .execute();
 
         waitBetweenTasks(rnd);
-
-    }
-
-    private String getAttributesQuery(Program program, Randomizer rnd)
-    {
-        AtomicReference<String> query = new AtomicReference<>( "" );
-
-        getRandomAttributes( program.getId(), program.getMinAttributesRequiredToSearch(), rnd )
-            .forEach( p -> {
-                query.set( query +
-                    String.format( "&attribute=%s:EQ:%s", p.getTrackedEntityAttribute(), rnd.randomString( 2 ) ) );
-            } );
-
-        return query.get();
-    }
-
-    private List<TrackedEntityAttribute> getRandomAttributes( String programId, int size, Randomizer rnd )
-    {
-        if ( attributes.isEmpty() )
-        {
-            preloadAttributes();
-        }
-
-        return rnd.randomElementsFromList( attributes.get( programId ), size );
-    }
-
-    private void preloadAttributes()
-    {
-        for ( Program program : this.entitiesCache.getTrackerPrograms()
-        )
-        {
-            List<TrackedEntityAttribute> searchableAttributes = program
-                .getAttributes().stream().filter( a -> a.isSearchable() && a.getValueType().equals( ValueType.TEXT ) )
-                .collect( Collectors.toList() );
-
-            if ( searchableAttributes.isEmpty() )
-            {
-                return;
-            }
-
-            attributes.put( program.getId(), searchableAttributes );
-        }
-
     }
 }
