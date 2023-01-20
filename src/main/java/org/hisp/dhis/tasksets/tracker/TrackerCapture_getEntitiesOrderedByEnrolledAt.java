@@ -12,7 +12,7 @@ import org.hisp.dhis.utils.Randomizer;
 public class TrackerCapture_getEntitiesOrderedByEnrolledAt
     extends DhisAbstractTaskSet
 {
-    private static final String NAME = "TrackerCapture: get entities ordered by enrolment date";
+    private static final String NAME = "TrackerCapture: get entities ordered by enrollment date";
 
     public TrackerCapture_getEntitiesOrderedByEnrolledAt(int weight )
     {
@@ -43,7 +43,7 @@ public class TrackerCapture_getEntitiesOrderedByEnrolledAt
         String url = String
                 .format( "?orgUnit=%s&program=%s&order=enrolledAt", ou, program.getId());
 
-        new GetTeisTask( 1, url, user.getUserCredentials(), "get entities, order by enrolment date", rnd )
+        new GetTeisTask( 1, url, user.getUserCredentials(), "get entities, order by enrollment date", rnd )
             .execute();
 
         waitBetweenTasks(rnd);
