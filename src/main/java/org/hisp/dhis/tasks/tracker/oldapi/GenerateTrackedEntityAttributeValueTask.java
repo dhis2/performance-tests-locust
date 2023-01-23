@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks.tracker.importer;
+package org.hisp.dhis.tasks.tracker.oldapi;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
@@ -9,22 +9,19 @@ import org.hisp.dhis.utils.Randomizer;
 /**
  * @author Gintare Vilkelyte <vilkelyte.gintare@gmail.com>
  */
-public class QueryTrackerTeisTask
+public class GenerateTrackedEntityAttributeValueTask
     extends DhisAbstractTask
 {
-    private String endpoint = "/api/tracker/trackedEntities";
+    private String teiAttributeId;
 
-    private String query = "?ou=DiszpKrYNg8&attribute=TfdH5KvFmMy&filter=TfdH5KvFmMy:GE:Karoline";
+    private String endpoint = "/api/trackedEntityAttributes/id/generate";
 
     private ApiResponse response;
 
-    private boolean savePayload = false;
-
-    public QueryTrackerTeisTask(int weight, String query, UserCredentials userCredentials,
-                                Randomizer randomizer )
+    public GenerateTrackedEntityAttributeValueTask( int weight, String trackedEntityAttributeId, UserCredentials userCredentials, Randomizer randomizer )
     {
         super( weight, randomizer );
-        this.query = query;
+        this.teiAttributeId = trackedEntityAttributeId;
         this.userCredentials = userCredentials;
     }
 
@@ -37,25 +34,22 @@ public class QueryTrackerTeisTask
     @Override
     public String getType()
     {
-        return "GET";
+        return "POST";
     }
 
     @Override
     public void execute()
     {
-        ApiResponse response = new AuthenticatedApiActions( this.endpoint, this.userCredentials ).get( this.query );
+        AuthenticatedApiActions apiActions = new AuthenticatedApiActions( "", userCredentials );
 
-        if ( savePayload )
-        {
-            this.response = response;
-        }
+        response = apiActions.get( endpoint.replace( "id", teiAttributeId ) );
 
         record( response.getRaw() );
+
     }
 
     public ApiResponse executeAndGetResponse()
     {
-        savePayload = true;
         this.execute();
         return this.response;
     }

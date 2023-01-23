@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks.tracker.importer;
+package org.hisp.dhis.tasks.tracker;
 
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;

@@ -5,8 +5,8 @@ import org.hisp.dhis.cache.Program;
 import org.hisp.dhis.cache.TrackedEntityAttribute;
 import org.hisp.dhis.cache.User;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.tasks.tracker.importer.GetTrackerTeiTask;
-import org.hisp.dhis.tasks.tracker.tei.QueryFilterTeiTask;
+import org.hisp.dhis.tasks.tracker.GetTeiByIdTask;
+import org.hisp.dhis.tasks.tracker.oldapi.tei.QueryFilterTeiTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.textpattern.TextPattern;
 import org.hisp.dhis.textpattern.TextPatternParser;
@@ -68,7 +68,7 @@ public class TrackerCapture_searchForTeiByUniqueAttributeTaskSet
             HashMap row = rnd.randomElementFromList( rows );
 
             String teiId = row.get( "trackedEntity" ).toString();
-            new GetTrackerTeiTask( teiId, user.getUserCredentials(), rnd ).execute();
+            new GetTeiByIdTask( teiId, user.getUserCredentials(), rnd ).execute();
         }
 
         waitBetweenTasks(rnd);

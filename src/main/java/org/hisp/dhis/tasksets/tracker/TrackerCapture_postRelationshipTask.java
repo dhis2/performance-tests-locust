@@ -14,8 +14,8 @@ import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.random.RelationshipRandomizer;
 import org.hisp.dhis.random.TrackedEntityInstanceRandomizer;
 import org.hisp.dhis.response.dto.ApiResponse;
-import org.hisp.dhis.tasks.tracker.GenerateAndReserveTrackedEntityAttributeValuesTask;
-import org.hisp.dhis.tasks.tracker.tei.AddTeiTask;
+import org.hisp.dhis.tasks.tracker.oldapi.GenerateAndReserveTrackedEntityAttributeValuesTask;
+import org.hisp.dhis.tasks.tracker.oldapi.tei.AddTeiTask;
 import org.hisp.dhis.tasksets.DhisAbstractTaskSet;
 import org.hisp.dhis.utils.Randomizer;
 

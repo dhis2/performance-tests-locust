@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks.tracker.events;
+package org.hisp.dhis.tasks.tracker.oldapi.events;
 
 import com.google.gson.JsonObject;
 import io.restassured.http.ContentType;

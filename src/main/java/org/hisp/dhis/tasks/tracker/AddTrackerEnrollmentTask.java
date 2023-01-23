@@ -1,14 +1,9 @@
-package org.hisp.dhis.tasks.tracker.importer;
+package org.hisp.dhis.tasks.tracker;
 
-import com.google.common.collect.Lists;
 import org.hisp.dhis.cache.UserCredentials;
 import org.hisp.dhis.models.Enrollments;
-import org.hisp.dhis.random.EnrollmentRandomizer;
-import org.hisp.dhis.random.RandomizerContext;
 import org.hisp.dhis.response.dto.TrackerApiResponse;
 import org.hisp.dhis.tasks.DhisAbstractTask;
-import org.hisp.dhis.tracker.domain.Enrollment;
-import org.hisp.dhis.tracker.domain.mapper.EnrollmentMapperImpl;
 import org.hisp.dhis.utils.Randomizer;
 
 /**

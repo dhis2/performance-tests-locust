@@ -1,4 +1,4 @@
-package org.hisp.dhis.tasks.tracker.importer;
+package org.hisp.dhis.tasks.tracker;
 
 import org.hisp.dhis.actions.AuthenticatedApiActions;
 import org.hisp.dhis.cache.UserCredentials;
