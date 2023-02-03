@@ -1,4 +1,4 @@
-@Library('pipeline-library') _
+@Library('pipeline-library@add-helpers') _
 
 pipeline {
     agent {
@@ -13,7 +13,7 @@ pipeline {
     parameters {
         string(name: 'LOCUST_IMAGES_TAG', defaultValue: '0.1.0', description: 'Which version of the Locust master and worker to use?')
         string(name: 'MASTER_HOST', defaultValue: 'master', description: 'Which master to connect to?')
-        string(name: 'INSTANCE_NAME', defaultValue: '2.38.1.1', description: 'Which instance to target?')
+        string(name: 'INSTANCE_NAME', defaultValue: 'dev', description: 'Which instance to target?')
         string(name: 'TIME', defaultValue: '60m', description: 'How much time to run the tests for?')
         string(name: 'USERS', defaultValue: '250', description: 'How much users?')
         string(name: 'RATE', defaultValue: '10', description: 'At what rate to add users?')
@@ -22,36 +22,46 @@ pipeline {
     }
 
     environment {
-        //AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
+        AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
+        DHIS2_CREDENTIALS = credentials('dhis2-default')
+        AWX_TEMPLATE_ID = '70'
         IMAGE_TAG = "${params.LOCUST_IMAGES_TAG}"
-        LOCUST_REPORT_DIR = "reports"
-        HTML_REPORT_FILE = "test_report.html"
-        CSV_REPORT_FILE = "dhis_stats.csv"
-        COMPARISON_FILE = "comparison_results.html"
+        LOCUST_REPORT_DIR = 'reports'
+        HTML_REPORT_FILE = 'test_report.html'
+        CSV_REPORT_FILE = 'dhis_stats.csv'
+        COMPARISON_FILE = 'comparison_results.html'
         CURRENT_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
         PREVIOUS_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/previous_$CSV_REPORT_FILE"
         BASELINE_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/baseline_$CSV_REPORT_FILE"
-        INSTANCE_HOST = "https://test.performance.dhis2.org"
-        COMPOSE_ARGS = "NO_WEB=true TIME=${params.TIME} HATCH_RATE=${params.RATE} USERS=${params.USERS} TARGET=$INSTANCE_HOST/${params.INSTANCE_NAME} MASTER_HOST=${params.MASTER_HOST}"
-        S3_BUCKET = "s3://dhis2-performance-tests-results"
+        INSTANCE_HOST = 'test.performance.dhis2.org'
+        COMPOSE_ARGS = "NO_WEB=true TIME=${params.TIME} HATCH_RATE=${params.RATE} USERS=${params.USERS} TARGET=https://${env.INSTANCE_HOST}/${params.INSTANCE_NAME} MASTER_HOST=${params.MASTER_HOST}"
+        S3_BUCKET = 's3://dhis2-performance-tests-results'
+        HTTP = 'https --check-status'
     }
 
     stages {
-//        stage('Update performance test instance') {
-//            steps {
-//                echo 'Updating performance test instance ...'
-//                 script {
-//                     awx.resetWar("$AWX_BOT_CREDENTIALS", "${INSTANCE_HOST}", "${params.INSTANCE}")
-//                 }
-//            }
-//        }
+        stage('Reset WAR and DB') {
+            environment {
+                INSTANCE_READINESS_THRESHOLD_ENV = '120'
+            }
+
+            steps {
+                echo 'Resetting performance test instance DB ...'
+                 script {
+                     awx.launchJob("${env.AWX_BOT_CREDENTIALS}", "${env.INSTANCE_HOST}", "${params.INSTANCE_NAME}", 'reset_war_and_db', "${env.AWX_TEMPLATE_ID}")
+                     sh 'curl "https://raw.githubusercontent.com/dhis2/e2e-tests/master/scripts/generate-analytics.sh" -O'
+                     sh 'chmod +x generate-analytics.sh'
+                     sh "./generate-analytics.sh \$DHIS2_CREDENTIALS https://${env.INSTANCE_HOST}/${params.INSTANCE_NAME}"
+                 }
+            }
+        }
 
         stage('Run Locust tests') {
             steps {
                 script {
-                    containers = "worker"
-                    if (params.MASTER_HOST == "master") {
-                        containers = containers + " " + params.MASTER_HOST
+                    containers = 'worker'
+                    if (params.MASTER_HOST == 'master') {
+                        containers = containers + ' ' + params.MASTER_HOST
                     }
                     sh "mkdir -p $LOCUST_REPORT_DIR"
                     sh "docker-compose pull $containers"
@@ -64,8 +74,8 @@ pipeline {
             when {
                 expression { currentBuild.previousSuccessfulBuild != null }
                 anyOf {
-                    expression { params.REPORT == "Previous" }
-                    expression { params.REPORT == "Both" }
+                    expression { params.REPORT == 'Previous' }
+                    expression { params.REPORT == 'Both' }
                 }
             }
 
@@ -84,8 +94,8 @@ pipeline {
         stage('Copy baseline reports') {
             when {
                 anyOf {
-                    expression { params.REPORT == "Baseline" }
-                    expression { params.REPORT == "Both" }
+                    expression { params.REPORT == 'Baseline' }
+                    expression { params.REPORT == 'Both' }
                 }
             }
 
