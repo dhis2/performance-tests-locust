@@ -13,11 +13,11 @@ pipeline {
     parameters {
         string(name: 'LOCUST_IMAGES_TAG', defaultValue: '0.1.0', description: 'Which version of the Locust master and worker to use?')
         string(name: 'MASTER_HOST', defaultValue: 'master', description: 'Which master to connect to?')
-        string(name: 'INSTANCE', defaultValue: '2.38.1.1', description: 'Which instance to target?')
+        string(name: 'INSTANCE_NAME', defaultValue: '2.38.1.1', description: 'Which instance to target?')
         string(name: 'TIME', defaultValue: '60m', description: 'How much time to run the tests for?')
         string(name: 'USERS', defaultValue: '250', description: 'How much users?')
         string(name: 'RATE', defaultValue: '10', description: 'At what rate to add users?')
-        string(name: 'COLUMN', defaultValue: 'Average Response Time,90%', description: 'Which column to compare?\n(comma-separated list of strings)')
+        string(name: 'METRICS', defaultValue: 'Average Response Time,90%', description: 'Which report metric columns to compare?\n(comma-separated list of strings)')
         choice(name: 'REPORT', choices: ['Both', 'Baseline', 'Previous'], description: 'Which report/s to compare with?')
     }
 
@@ -32,7 +32,7 @@ pipeline {
         PREVIOUS_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/previous_$CSV_REPORT_FILE"
         BASELINE_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/baseline_$CSV_REPORT_FILE"
         INSTANCE_HOST = "https://test.performance.dhis2.org"
-        COMPOSE_ARGS = "NO_WEB=true TIME=${params.TIME} HATCH_RATE=${params.RATE} USERS=${params.USERS} TARGET=$INSTANCE_HOST/${params.INSTANCE} MASTER_HOST=${params.MASTER_HOST}"
+        COMPOSE_ARGS = "NO_WEB=true TIME=${params.TIME} HATCH_RATE=${params.RATE} USERS=${params.USERS} TARGET=$INSTANCE_HOST/${params.INSTANCE_NAME} MASTER_HOST=${params.MASTER_HOST}"
         S3_BUCKET = "s3://dhis2-performance-tests-results"
     }
 
@@ -112,16 +112,16 @@ pipeline {
                                 case 'Previous':
                                     if (currentBuild.previousSuccessfulBuild != null) {
                                         COMPARISON_FILE = "previous_$COMPARISON_FILE"
-                                        sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $PREVIOUS_REPORT --column-name \"${params.COLUMN}\" --output $WORKSPACE/$COMPARISON_FILE"
+                                        sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $PREVIOUS_REPORT --column-name \"${params.METRICS}\" --output $WORKSPACE/$COMPARISON_FILE"
                                     }
                                     break
                                 case 'Baseline':
                                     COMPARISON_FILE = "baseline_$COMPARISON_FILE"
-                                    sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $BASELINE_REPORT --column-name \"${params.COLUMN}\" --output $WORKSPACE/$COMPARISON_FILE"
+                                    sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $BASELINE_REPORT --column-name \"${params.METRICS}\" --output $WORKSPACE/$COMPARISON_FILE"
                                     break
                                 case 'Both':
                                     if (currentBuild.previousSuccessfulBuild != null) {
-                                        sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $BASELINE_REPORT $PREVIOUS_REPORT --column-name \"${params.COLUMN}\" --output $WORKSPACE/$COMPARISON_FILE"
+                                        sh "csvcomparer --loglevel info --current $CURRENT_REPORT --previous $BASELINE_REPORT $PREVIOUS_REPORT --column-name \"${params.METRICS}\" --output $WORKSPACE/$COMPARISON_FILE"
                                     }
                                     break
                             }
