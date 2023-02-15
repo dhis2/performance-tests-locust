@@ -5,6 +5,10 @@ pipeline {
         label 'ec2-jdk11'
     }
 
+    triggers {
+        upstream(upstreamProjects: 'dhis2-core-canary/master', threshold: hudson.model.Result.SUCCESS)
+    }
+
     options {
         ansiColor('xterm')
         copyArtifactPermission("$JOB_BASE_NAME")
