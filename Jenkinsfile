@@ -1,4 +1,4 @@
-@Library('pipeline-library@add-helpers') _
+@Library('pipeline-library') _
 
 pipeline {
     agent {
@@ -6,7 +6,7 @@ pipeline {
     }
 
     triggers {
-        upstream(upstreamProjects: 'dhis2-core-canary/master', threshold: hudson.model.Result.SUCCESS)
+        upstream(upstreamProjects: "dhis2-core-canary/${env.BRANCH_NAME.replaceAll('DEVOPS-30', 'master')}", threshold: hudson.model.Result.SUCCESS)
     }
 
     options {
@@ -15,9 +15,8 @@ pipeline {
     }
 
     parameters {
-        string(name: 'LOCUST_IMAGES_TAG', defaultValue: '0.1.0', description: 'Which version of the Locust master and worker to use?')
-        string(name: 'MASTER_HOST', defaultValue: 'master', description: 'Which master to connect to?')
-        string(name: 'INSTANCE_NAME', defaultValue: 'dev', description: 'Which instance to target?')
+        string(name: 'LOCUST_IMAGES_TAG', defaultValue: '', description: 'Which version of the Locust master and worker to use?')
+        string(name: 'TARGET_INSTANCE', defaultValue: '', description: 'Which instance to target?')
         string(name: 'TIME', defaultValue: '60m', description: 'How much time to run the tests for?')
         string(name: 'USERS', defaultValue: '250', description: 'How much users?')
         string(name: 'RATE', defaultValue: '10', description: 'At what rate to add users?')
@@ -29,7 +28,7 @@ pipeline {
         AWX_BOT_CREDENTIALS = credentials('awx-bot-user-credentials')
         DHIS2_CREDENTIALS = credentials('dhis2-default')
         AWX_TEMPLATE_ID = '70'
-        IMAGE_TAG = "${params.LOCUST_IMAGES_TAG}"
+        IMAGE_TAG = "${params.LOCUST_IMAGES_TAG != '' ? params.LOCUST_IMAGES_TAG : '0.1.0' }"
         LOCUST_REPORT_DIR = 'reports'
         HTML_REPORT_FILE = 'test_report.html'
         CSV_REPORT_FILE = 'dhis_stats.csv'
@@ -37,25 +36,26 @@ pipeline {
         CURRENT_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/$CSV_REPORT_FILE"
         PREVIOUS_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/previous_$CSV_REPORT_FILE"
         BASELINE_REPORT = "$WORKSPACE/$LOCUST_REPORT_DIR/baseline_$CSV_REPORT_FILE"
+        REF_BASED_NAME = "${env.TAG_NAME ? env.TAG_NAME : env.GIT_BRANCH.replaceAll('DEVOPS-30', 'dev')}"
         INSTANCE_HOST = 'test.performance.dhis2.org'
-        COMPOSE_ARGS = "NO_WEB=true TIME=${params.TIME} HATCH_RATE=${params.RATE} USERS=${params.USERS} TARGET=https://${env.INSTANCE_HOST}/${params.INSTANCE_NAME} MASTER_HOST=${params.MASTER_HOST}"
+        INSTANCE_NAME = "${params.TARGET_INSTANCE != '' ? params.TARGET_INSTANCE : env.REF_BASED_NAME}"
+        INSTANCE_URL = "https://${env.INSTANCE_HOST}/${env.INSTANCE_NAME}"
+        COMPOSE_ARGS = "NO_WEB=true TIME=${params.TIME} HATCH_RATE=${params.RATE} USERS=${params.USERS} TARGET=${env.INSTANCE_URL} MASTER_HOST=master"
         S3_BUCKET = 's3://dhis2-performance-tests-results'
         HTTP = 'https --check-status'
     }
 
     stages {
         stage('Reset WAR and DB') {
-            environment {
-                INSTANCE_READINESS_THRESHOLD_ENV = '120'
-            }
-
             steps {
-                echo 'Resetting performance test instance DB ...'
+                echo 'Resetting performance tests instance DB ...'
                  script {
-                     awx.launchJob("${env.AWX_BOT_CREDENTIALS}", "${env.INSTANCE_HOST}", "${params.INSTANCE_NAME}", 'reset_war_and_db', "${env.AWX_TEMPLATE_ID}")
-                     sh 'curl "https://raw.githubusercontent.com/dhis2/e2e-tests/master/scripts/generate-analytics.sh" -O'
-                     sh 'chmod +x generate-analytics.sh'
-                     sh "./generate-analytics.sh \$DHIS2_CREDENTIALS https://${env.INSTANCE_HOST}/${params.INSTANCE_NAME}"
+                     awx.launchJob("$AWX_BOT_CREDENTIALS", "$INSTANCE_HOST", "$INSTANCE_NAME", 'reset_war_and_db', "$AWX_TEMPLATE_ID")
+
+                     NOTIFIER_ENDPOINT = dhis2.generateAnalytics("$INSTANCE_URL", '$DHIS2_CREDENTIALS')
+                     timeout(120) {
+                         waitFor.analyticsCompleted("${INSTANCE_URL}${NOTIFIER_ENDPOINT}", '$DHIS2_CREDENTIALS')
+                     }
                  }
             }
         }
@@ -63,13 +63,9 @@ pipeline {
         stage('Run Locust tests') {
             steps {
                 script {
-                    containers = 'worker'
-                    if (params.MASTER_HOST == 'master') {
-                        containers = containers + ' ' + params.MASTER_HOST
-                    }
                     sh "mkdir -p $LOCUST_REPORT_DIR"
-                    sh "docker-compose pull $containers"
-                    sh "$COMPOSE_ARGS docker-compose up --abort-on-container-exit $containers"
+                    sh "docker-compose pull"
+                    sh "$COMPOSE_ARGS docker-compose up --abort-on-container-exit"
                 }
             }
         }
@@ -104,22 +100,16 @@ pipeline {
             }
 
             steps {
-                sh "aws s3 cp $S3_BUCKET/baseline_$CSV_REPORT_FILE $BASELINE_REPORT"
-            }
-        }
-
-        stage('Checkout csvcomparer') {
-            steps {
-                dir('csvcomparer') {
-                    git url: 'https://github.com/dhis2-sre/csvcomparer'
-                    sh 'pip3 install .'
-                }
+                sh "aws s3 cp ${S3_BUCKET}/${REF_BASED_NAME}_baseline_${CSV_REPORT_FILE} $BASELINE_REPORT"
             }
         }
 
         stage('Compare reports') {
             steps {
                 dir('csvcomparer') {
+                    git url: 'https://github.com/dhis2-sre/csvcomparer'
+                    sh 'pip3 install .'
+
                     script {
                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                             switch(params.REPORT) {
