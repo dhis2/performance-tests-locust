@@ -2,66 +2,46 @@
 
 DHIS2 performance tests using locust.io
 
-## Requirements
+## Run the tests locally
 
-Running locust locally will require the following instalations:
+There are two options to run the tests locally - with and without Docker.
 
-1. docker engine
-2. docker-compose
+### Run with Docker
 
-## Getting started
+**Requirements**
 
-1. Build performance-tests project by executing the following command: `mvn -s settings.xml compile`
-   Please note, that repository uses GitHub packages and the following environment variables should be configured on
-   your machine:
+- [Docker](https://docs.docker.com/get-docker)
+- [Docker Compose](https://docs.docker.com/compose/install)
+- Working DHIS2 server
 
-- GITHUB_USERNAME - your GitHub username.
-- GITHUB_TOKEN - personal access
-  token [created on GitHub.](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line)
+**Steps**
 
-To configure the environment variables, run:   
-`export GITHUB_USERNAME=$yourUsername`  
-`export GITHUB_TOKEN=$yourToken`
-
-2. Locust performance tests expect the DHIS2 instance to be available on `http://localhost:8080/dhis`. This can be
-   changed by changing the value of `target.base_uri` in [locust.properties](src/main/resources/locust.properties)
-   file. DHIS2 does not have to run on the localhost. A remote instance can be used as well.
-
-   For more configuration options, see [configuration section](#test-configuration)
-
-3. Start locust master. From the root directory execute the following commands:
-
+1. Pull the existing Docker images with `docker compose pull` or build them with `docker compose build`.
+2. Make sure the DHIS2 server is running. It doesn't have to be a DHIS2 server running locally, it can be a remote one, as well.
+3. Start the Locust master and worker with the following example command (you can change the `TIME`, `HATCH_RATE` and `USERS` according to your needs):
+```shell
+NO_WEB=true TIME=30m HATCH_RATE=10 USERS=100 TARGET=http://localhost:8080 MASTER_HOST=master docker compose up --abort-on-container-exit
 ```
-$ docker pull dhis2/locustio:latest
-$ docker-compose up
-```
-Note: you can also run locust without docker. [Read more](#Running-tests-without-docker)
 
-4. Run [main() method](src/main/java/org/hisp/dhis/Main.java).
-    - You can run it directly via your IDE -> open `Main` class and click on a green arrow next to the `main()` method
-    - or by using the following maven command: `mvn clean compile exec:java`
+_Note that you can also omit the `NO_WEB=true` environment variable, which will start the Locust master with a web UI, where you'll be able to configure the Time, Hatch Rate and Users for the tests._
 
-5. Visit localhost:8089
+### Run without Docker
 
-6. Enter user count and hatch rate and start swarming.
+**Requirements**
 
+- [Python 3](https://www.python.org/downloads)
+- [Locust.io](https://docs.locust.io/en/stable/installation.html)
+- Working DHIS2 server
 
-### Running tests without Docker
+**Steps**
 
-#### Requirements
-1. Python 3
-2. Locust 1.2+
-3. Working DHIS2 server
-
-#### Running
-1. Install Locust (will upgrade if already exists): `pip3 install locust --upgrade`
-2. Start Locust master node: `locust -f locust-master.py --master --master-bind-host 127.0.0.1 --master-bind-port 5557 --web-host=127.0.0.1`
-3. Start the DHIS2 server now if you have not already
-3. Make sure `locust.properties` are pointing to your local DHIS2 server
-4. Compile and run this project from the command line: `mvn clean compile exec:java` (you can also start it from IntelliJ via Main.class file)
-5. Open your browser and go to `http://localhost:8089` enter you desired number of workers and spawn rate, point `Host` to: `127.0.0.1` "Locust master"
-6. Watch the tests and listen to your machine heating up
-
+1. Install Locust (or upgrade if it's already installed): `pip3 install locust --upgrade`.
+2. Start Locust master node: `locust -f locust-master.py --master --master-bind-host 127.0.0.1 --master-bind-port 5557 --web-host=127.0.0.1`.
+3. Make sure the DHIS2 server is running. It doesn't have to be a DHIS2 server running locally, it can be a remote one, as well.
+4. Make sure that `target.base_uri` in [locust.properties](src/main/resources/locust.properties) is pointing to the DHIS2 server of choice.
+5. Compile and run this project from the command line: `mvn clean compile exec:java` (you can also start it from IntelliJ via the [main() method](src/main/java/org/hisp/dhis/Main.java)).
+6. Open your browser and go to `http://localhost:8089` enter you desired number of workers and spawn rate, point `Host` to: `127.0.0.1` "Locust master".
+7. Watch the tests and listen to your machine heating up.
 
 ## Test configuration
 
@@ -93,8 +73,3 @@ Tests will generate data based on the database configuration, but the following 
    - all users should have access to all metadata. There are no sharing checks performed in tests. 
    - all users should have capture access to programs
    - Required user authorities: `F_VIEW_EVENT_ANALYTICS`, `F_DATAVALUE_ADD`, `F_TRACKER_IMPORTER_EXPERIMENTAL` (if NTI category is included)
-   
-   
-
-
-
