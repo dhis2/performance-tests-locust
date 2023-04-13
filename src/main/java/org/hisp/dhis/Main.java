@@ -3,6 +3,7 @@ package org.hisp.dhis;
 import io.restassured.RestAssured;
 import org.hisp.dhis.cache.EntitiesCache;
 import org.hisp.dhis.locust.LocustSlave;
+import org.hisp.dhis.tasksets.tracker.TrackerCapture_addTeiTaskSet;
 import org.hisp.dhis.tests.CategoryType;
 
 import java.io.IOException;
@@ -27,8 +28,8 @@ public class Main
 
         LocustSlave locust = LocustSlave.newInstance();
 
-        // locust.runTasks(  new TrackerCapture_addTeiTaskSet( 1 ) ) ;
+        locust.runTasks(  new TrackerCapture_addTeiTaskSet( 1 ) ) ;
         // categories are under /src/main/tests
-        locust.runTasks( CategoryType.ALL, CategoryType.NTI );
+        //locust.runTasks( CategoryType.ALL, CategoryType.NTI );
     }
 }
