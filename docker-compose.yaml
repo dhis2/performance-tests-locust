@@ -27,4 +27,4 @@ services:
       dockerfile: Dockerfile.worker
     image: "dhis2/locust-worker:${IMAGE_TAG:-latest}"
     environment:
-      JAVA_OPTS: "-Dtarget.base_uri=${TARGET} -Dlocust.master.host=${MASTER_HOST}"
+      JAVA_OPTS: "-Dtarget.base_uri=${TARGET} -Dlocust.master.host=${MASTER_HOST} -Duser.admin.password=${ADMIN_PASSWORD} -Dcache.users.identifier='' -Dcache.users.use_admin_user=true"
